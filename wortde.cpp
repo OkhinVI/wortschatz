@@ -1,19 +1,77 @@
 #include "wortde.h"
 #include <string>
+#include <fstream>
+#include <limits>
+#include <stdexcept>
+#include "SerializeString.h"
+#include "utility.h"
 
-typedef std::string::size_type size_type;
+static inline SerializeWrapperEnum<WortDe::TypeWort> SerializeWrapper(WortDe::TypeWort &en) { return SerializeWrapperEnum<WortDe::TypeWort>(en); }
+static inline SerializeWrapperEnum<WortDe::TypeArtikel> SerializeWrapper(WortDe::TypeArtikel &en) { return SerializeWrapperEnum<WortDe::TypeArtikel>(en); }
+static inline SerializeWrapperEnum<WortDe::TypePerfect> SerializeWrapper(WortDe::TypePerfect &en) { return SerializeWrapperEnum<WortDe::TypePerfect>(en); }
+static inline SerializeWrapperString SerializeWrapper(std::string &_str) { return SerializeWrapperString(_str); }
+static inline SerializeWrapperNum<int> SerializeWrapper(int &_num) { return SerializeWrapperNum<int>(_num); }
+// static inline SerializeWrapperNum<unsigned int> SerializeWrapper(unsigned int &_num) { return SerializeWrapperNum<unsigned int>(_num); }
+static inline SerializeWrapperNum<bool> SerializeWrapper(bool &_num) { return SerializeWrapperNum<bool>(_num); }
 
-static std::string substrWithoutSideSpaces(const std::string &str, size_type posBegin = 0, size_type n = std::string::npos);
-static std::string getPrefix(const std::string &str, char &findedDelimiter);
+//        getline(is, inStr);
 
-static inline
-bool isWort(const char ch)
+static inline void saveLines(std::ostream &) {}
+
+template<typename T, typename ... Types>
+void saveLines(std::ostream &os, T value, const Types&... args)
 {
-    const unsigned char chU = ch;
-    return (chU > 127 || chU == '-' || ::isalpha(chU));
+    os << value.serialize() << '\n';
+    saveLines(os, args...);
+}
+
+template<typename ... Types>
+void saveBlockLines(std::ostream &os, const Types&... args)
+{
+    const size_t number = sizeof...(args);
+    os << number << '\n';
+    saveLines(os, args...);
+}
+
+// Serialize options for s_wort (without s_wort)
+#define WortDeOptionsSerialize \
+                   SerializeWrapper(w_type),\
+                   SerializeWrapper(w_block),\
+                   SerializeWrapper(w_accent),\
+                   SerializeWrapper(s_raw),\
+                   SerializeWrapper(s_translation),\
+                   SerializeWrapper(s_example),\
+                   SerializeWrapper(n_wortPl),\
+                   SerializeWrapper(n_artikel),\
+                   SerializeWrapper(v_sich),\
+                   SerializeWrapper(v_prasens3f),\
+                   SerializeWrapper(v_perfect),\
+                   SerializeWrapper(v_prateritum),\
+                   SerializeWrapper(v_trennbar),\
+                   SerializeWrapper(v_Pretexts),\
+                   SerializeWrapper(v_Cases),\
+                   SerializeWrapper(v_TypePerfect)
+
+bool WortDe::save(std::ostream &os)
+{
+    os << '@' << s_wort << '\n'; // start block
+    saveBlockLines(os, WortDeOptionsSerialize);
+
+    return true;
+}
+
+bool WortDe::load(std::istream &is)
+{
+    (void) is; // TODO: implementation
+    return true;
 }
 
 WortDe::WortDe()
+{
+
+}
+
+WortDe::~WortDe()
 {
 
 }
@@ -38,56 +96,36 @@ void WortDe::parseRaw()
     std::string prfx = getPrefix(s_raw, delimiter);
     if (delimiter == ' ')
     {
-        TypeArtikel artikel = tpA_None;
+        TypeArtikel artikel = TypeArtikel::None;
         if (prfx == "der")
-            artikel = tpA_Der;
+        {
+            artikel = TypeArtikel::Der;
+        }
         else if (prfx == "das")
-            artikel = tpA_Das;
+        {
+            artikel = TypeArtikel::Das;
+        }
         else if (prfx == "die")
-            artikel = tpA_Die;
+        {
+            artikel = TypeArtikel::Die;
+        }
         else if (prfx == "sich")
-            w_type = tpW_Verb; // TODO: test Combination
+        {
+            w_type = TypeWort::Verb; // TODO: test Combination
+            v_sich = true;
+        }
+        else
+            prfx.clear();
 
-        if (artikel)
+        if (artikel != TypeArtikel::None)
         {
             // TODO: test Combination
-            w_type = tpW_Noun;
+            w_type = TypeWort::Noun;
             n_artikel = artikel;
+        }
+        if (!prfx.empty())
             s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
-        }
+        else
+            s_wort = s_raw;
     }
-}
-
-static std::string substrWithoutSideSpaces(const std::string &str, size_type posBegin, size_type n)
-{
-    size_type posEnd = (n == std::string::npos || posBegin + n > str.size()) ?
-        str.size() : posBegin + n;
-    if (posBegin >= posEnd)
-        return std::string();
-    for (; posBegin < posEnd; ++posBegin)
-    {
-        if (!::isspace(str[posBegin]))
-            break;
-    }
-    for (; posBegin < posEnd; --posEnd)
-    {
-        if (!::isspace(str[posEnd - 1]))
-            break;
-    }
-    return str.substr(posBegin, posEnd - posBegin);
-}
-
-static std::string getPrefix(const std::string &str, char &findedDelimiter)
-{
-    for (size_type idx = 0; idx < str.size(); ++idx)
-    {
-        if (!isWort(str[idx]))
-        {
-            if (idx < 1)
-                break;
-            findedDelimiter = str[idx];
-            return str.substr(0, idx);
-        }
-    }
-    return std::string();
 }

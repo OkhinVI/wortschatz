@@ -11,10 +11,13 @@ CONFIG += c++11
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    utility.cpp \
     wortde.cpp
 
 HEADERS += \
+    SerializeString.h \
     mainwindow.h \
+    utility.h \
     wortde.h
 
 FORMS += \
