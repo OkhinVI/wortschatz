@@ -8,6 +8,10 @@
 class LearningWort
 {
 public:
+    std::string serialize() const;
+    void deserialize(const std::string &_str);
+
+public:
     unsigned int startLearning = 0; // Начало изучения слова
     unsigned int lastCorrectAnswer = 0; // Время в секундах последнего правильного ответа
     unsigned int lastWrongtAnswer = 0; // Время в секундах последнего неправильного ответа

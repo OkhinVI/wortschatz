@@ -13,6 +13,7 @@ static inline SerializeWrapperString SerializeWrapper(std::string &_str) { retur
 static inline SerializeWrapperNum<int> SerializeWrapper(int &_num) { return SerializeWrapperNum<int>(_num); }
 // static inline SerializeWrapperNum<unsigned int> SerializeWrapper(unsigned int &_num) { return SerializeWrapperNum<unsigned int>(_num); }
 static inline SerializeWrapperNum<bool> SerializeWrapper(bool &_num) { return SerializeWrapperNum<bool>(_num); }
+static inline SerializeWrapperAny<LearningWort> SerializeWrapper(LearningWort &_val) { return SerializeWrapperAny<LearningWort>(_val); }
 
 //        getline(is, inStr);
 
@@ -50,7 +51,8 @@ void saveBlockLines(std::ostream &os, const Types&... args)
                    SerializeWrapper(v_trennbar),\
                    SerializeWrapper(v_Pretexts),\
                    SerializeWrapper(v_Cases),\
-                   SerializeWrapper(v_TypePerfect)
+                   SerializeWrapper(v_TypePerfect),\
+                   SerializeWrapper(l_statistic)
 
 bool WortDe::save(std::ostream &os)
 {
@@ -128,4 +130,22 @@ void WortDe::parseRaw()
         else
             s_wort = s_raw;
     }
+}
+
+// Serialize LearningWort
+#define LearningWortSerialize \
+                   startLearning,\
+                   lastCorrectAnswer,\
+                   lastWrongtAnswer,\
+                   numberCorrectAnswers,\
+                   numberWrongtAnswers,\
+                   maskCorrectAndWrongtAnswers
+
+std::string LearningWort::serialize() const
+{
+    return multiPrintIntoString(" ", LearningWortSerialize);
+}
+void LearningWort::deserialize(const std::string &_str)
+{
+
 }

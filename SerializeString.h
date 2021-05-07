@@ -5,28 +5,67 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <sstream>
 #include "utility.h"
 
-// serialize and deserialize
-
-class SerializeWrapperInterfase
+//--------------------------- serialize -----------------------------------
+template<typename T, typename ... Types>
+std::ostream& multiPrintIntoStream(std::ostream &os, const char *, T value)
 {
-public:
-    virtual std::string serialize() = 0;
-    virtual void deserialize(std::string &_str) = 0;
-    virtual ~SerializeWrapperInterfase() {}
-};
+    return os << value;
+}
 
-class SerializeWrapperString: public SerializeWrapperInterfase
+template<typename T, typename ... Types>
+std::ostream& multiPrintIntoStream(std::ostream &os, const char *delimiter, T value, const Types&... args)
+{
+    os << value << delimiter;
+    return multiPrintIntoStream(os, delimiter, args...);
+}
+
+template<typename ... Types>
+std::string multiPrintIntoString(const char *delimiter, const Types&... args)
+{
+    std::stringstream ss;
+    multiPrintIntoStream(ss, delimiter, args...);
+    return ss.str();
+}
+
+//--------------------------- deserialize ---------------------------------
+
+template<typename T>
+size_t multiScanFromStream(std::istream &is, T &value)
+{
+    is >> value;
+    return 1;
+}
+
+template<typename T, typename ... Types>
+size_t multiScanFromStream(std::istream &is, T &value, Types&... args)
+{
+    is >> value;
+    if (is.eof())
+        return 1;
+    return multiScanFromStream(is, args...) + 1;
+}
+
+template<typename ... Types>
+size_t multiScanFromString(const std::string &str, Types&... args)
+{
+    std::stringstream ss(str);
+    return multiScanFromStream(ss, args...);
+}
+
+//--------------------------- SerializeWrapper ---------------------------------
+
+class SerializeWrapperString
 {
 public:
     SerializeWrapperString(std::string& _str): str(_str) {}
-    virtual ~SerializeWrapperString() override {}
-    virtual std::string serialize() override
+    std::string serialize()
     {
         return str;
     }
-    virtual void deserialize(std::string &_str) override
+    void deserialize(std::string &_str)
     {
         str = substrWithoutSideSpaces(_str);
     }
@@ -72,16 +111,15 @@ static inline void StdStringToNum(const std::string &str, unsigned long long &nu
 
 
 template<class T>
-class SerializeWrapperNum: public SerializeWrapperInterfase
+class SerializeWrapperNum
 {
 public:
     SerializeWrapperNum(T &_num): num(_num) {}
-    virtual ~SerializeWrapperNum() override {}
-    virtual std::string serialize() override
+    std::string serialize()
     {
         return std::to_string(num);
     }
-    virtual void deserialize(std::string &_str) override
+    void deserialize(std::string &_str)
     {
         try {
             StdStringToNum(_str, num);
@@ -98,11 +136,10 @@ private:
 };
 
 template<class T>
-class SerializeWrapperEnum: public SerializeWrapperInterfase
+class SerializeWrapperEnum
 {
 public:
     explicit SerializeWrapperEnum(T &_en): en(_en) {}
-    virtual ~SerializeWrapperEnum() override {}
     void fromInt(const int val) {
         if (val < static_cast<int>(T::None))
             throw std::out_of_range ("argument less the range");
@@ -111,11 +148,11 @@ public:
         else
             en = static_cast<T>(val);
     }
-    virtual std::string serialize() override
+    std::string serialize()
     {
         return std::to_string(static_cast<int>(en));
     }
-    virtual void deserialize(std::string &_str) override
+    void deserialize(std::string &_str)
     {
         try {
             fromInt(std::stoi(_str)); // TODO: check error
@@ -131,7 +168,22 @@ private:
     T &en;
 };
 
-
+template<class T>
+class SerializeWrapperAny
+{
+public:
+    SerializeWrapperAny(T &_val): val(_val) {}
+    std::string serialize()
+    {
+        return val.serialize();
+    }
+    void deserialize(std::string &_str)
+    {
+        val.deserialize(_str);
+    }
+private:
+    T &val;
+};
 
 
 #endif // SERIALIZESTRING_H
