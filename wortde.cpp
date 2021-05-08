@@ -1,10 +1,12 @@
 #include "wortde.h"
 #include <string>
+#include <vector>
 #include <fstream>
 #include <limits>
 #include <stdexcept>
 #include "SerializeString.h"
 #include "utility.h"
+#include "linesramstream.h"
 
 static inline SerializeWrapperEnum<WortDe::TypeWort> SerializeWrapper(WortDe::TypeWort &en) { return SerializeWrapperEnum<WortDe::TypeWort>(en); }
 static inline SerializeWrapperEnum<WortDe::TypeArtikel> SerializeWrapper(WortDe::TypeArtikel &en) { return SerializeWrapperEnum<WortDe::TypeArtikel>(en); }
@@ -20,14 +22,14 @@ static inline SerializeWrapperAny<LearningWort> SerializeWrapper(LearningWort &_
 static inline void saveLines(std::ostream &) {}
 
 template<typename T, typename ... Types>
-void saveLines(std::ostream &os, T value, const Types&... args)
+static inline void saveLines(std::ostream &os, T value, const Types&... args)
 {
     os << value.serialize() << '\n';
     saveLines(os, args...);
 }
 
 template<typename ... Types>
-void saveBlockLines(std::ostream &os, const Types&... args)
+static inline void saveBlockLines(std::ostream &os, const Types&... args)
 {
     const size_t number = sizeof...(args);
     os << number << '\n';
@@ -62,9 +64,56 @@ bool WortDe::save(std::ostream &os)
     return true;
 }
 
-bool WortDe::load(std::istream &is)
+// load
+
+static inline void loadLines(LinesRamIStream &, size_t) {}
+
+template<typename T, typename ... Types>
+static inline void loadLines(LinesRamIStream &ils, size_t countLines, T value, Types... args)
 {
-    (void) is; // TODO: implementation
+    if (ils.eof() || countLines == 0)
+        return;
+    const std::string &str = ils.get();
+    value.deserialize(str);
+    return loadLines(ils, countLines - 1, args...);
+}
+
+
+bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
+{
+    while(1)
+    {
+        if (ils.eof())
+            return false;
+        const std::string &str = ils.get();
+        if (str.empty() || str[0] != '@')
+        {
+            osErr << ils.tellg() << " skiped line: " << str << std::endl;
+            continue;
+        }
+        s_wort = str;
+        break;
+    }
+
+    if (ils.eof())
+        return false;
+    const std::string &str = ils.get();
+    const size_t countLines = std::stoul(str);
+    const size_t neadCountLines = NumberOfFunctionArguments(WortDeOptionsSerialize);
+    const size_t parseCount = std::min(countLines, neadCountLines);
+    const size_t startPos = ils.tellg();
+
+    try {
+        loadLines(ils, parseCount, WortDeOptionsSerialize);
+    }  catch (...) {
+        if (ils.tellg() < startPos + parseCount)
+        {
+            osErr << ils.tellg() << " skiped " << startPos + parseCount - ils.tellg() << " lines (throw)" << str << std::endl;
+            ils.seekg(startPos + parseCount);
+        }
+        throw;
+    }
+
     return true;
 }
 
@@ -78,7 +127,7 @@ WortDe::~WortDe()
 
 }
 
-WortDe::WortDe(const std::string &rawStr)
+void WortDe::parseRawLine(const std::string &rawStr, int _block)
 {
     size_type posTab = rawStr.find('\t');
     if (posTab != std::string::npos)
@@ -89,10 +138,11 @@ WortDe::WortDe(const std::string &rawStr)
     {
         s_raw = substrWithoutSideSpaces(rawStr, 0);
     }
-    parseRaw();
+    parseRawDe();
+    w_block = _block;
 }
 
-void WortDe::parseRaw()
+void WortDe::parseRawDe()
 {
     char delimiter = 0;
     std::string prfx = getPrefix(s_raw, delimiter);
@@ -132,6 +182,63 @@ void WortDe::parseRaw()
     }
 }
 
+static const char *DerDieDasStr[] =
+{
+    "None",
+    "Der",
+    "Das",
+    "Die",
+    "Pl",
+    "ProperNoun",
+    "Der_Das",
+    "Der_Die"
+};
+
+static const char *WTypeStr[] =
+{
+    "None",
+    "Combination",
+    "Noun",
+    "Verb",
+    "Adjective",
+    "Pronoun",
+    "Numeral",
+    "Pretext",
+    "Conjunction",
+    "Particle",
+    "Artikel",
+    "Interjection"
+};
+
+static const char *WKursStr[] =
+{
+    "None",
+    "A1",
+    "A2",
+    "B1",
+    "B2",
+    "C1",
+    "C2"
+};
+
+
+void WortDe::debugPrint(std::ostream &os)
+{
+    os << WKursStr[w_block >> 24] << "." << ((w_block >> 16) & 0xff) << ".k" << ((w_block >> 8) & 0xff) << ".t" << (w_block & 0xff) << "; ";
+    if (n_artikel != TypeArtikel::None)
+        os << DerDieDasStr[static_cast<int>(n_artikel)] << ";\t";
+    if (v_sich)
+        os << "sich" << ";\t";
+    os << s_wort << "; ";
+    if (w_type != TypeWort::None)
+       os << WTypeStr[static_cast<int>(w_type)] << "; ";
+
+    os << "RAW: " << s_raw << " = " << s_translation;
+    os << std::endl;
+}
+
+// class LearningWort
+
 // Serialize LearningWort
 #define LearningWortSerialize \
                    startLearning,\
@@ -147,5 +254,5 @@ std::string LearningWort::serialize() const
 }
 void LearningWort::deserialize(const std::string &_str)
 {
-
+    multiScanFromString(_str, LearningWortSerialize);
 }

@@ -65,7 +65,7 @@ public:
     {
         return str;
     }
-    void deserialize(std::string &_str)
+    void deserialize(const std::string &_str)
     {
         str = substrWithoutSideSpaces(_str);
     }
@@ -73,6 +73,7 @@ private:
     std::string &str;
 };
 
+// can throw exceptions: std::invalid_argument and std::out_of_range
 template<class unsignedT>
 static inline void StdStringToUnsignedNum(const std::string &str, unsignedT &num)
 {
@@ -84,6 +85,7 @@ static inline void StdStringToUnsignedNum(const std::string &str, unsignedT &num
 
 }
 
+// can throw exceptions: std::invalid_argument and std::out_of_range
 template<class signedT>
 static inline void StdStringToSignedNum(const std::string &str, signedT &num)
 {
@@ -110,6 +112,7 @@ static inline void StdStringToNum(const std::string &str, unsigned long &num) { 
 static inline void StdStringToNum(const std::string &str, unsigned long long &num) { StdStringToUnsignedNum(str, num); }
 
 
+// can throw exceptions: std::invalid_argument and std::out_of_range
 template<class T>
 class SerializeWrapperNum
 {
@@ -119,22 +122,15 @@ public:
     {
         return std::to_string(num);
     }
-    void deserialize(std::string &_str)
+    void deserialize(const std::string &_str)
     {
-        try {
-            StdStringToNum(_str, num);
-        }
-        catch(std::invalid_argument &) {
-             // TODO: check error
-        }
-        catch(std::out_of_range &) {
-             // TODO: check error
-        }
+        StdStringToNum(_str, num);
     }
 private:
     T &num;
 };
 
+// can throw exceptions: std::invalid_argument and std::out_of_range
 template<class T>
 class SerializeWrapperEnum
 {
@@ -152,17 +148,9 @@ public:
     {
         return std::to_string(static_cast<int>(en));
     }
-    void deserialize(std::string &_str)
+    void deserialize(const std::string &_str)
     {
-        try {
-            fromInt(std::stoi(_str)); // TODO: check error
-        }
-        catch(std::invalid_argument &) {
-             // TODO: check error
-        }
-        catch(std::out_of_range &) {
-             // TODO: check error
-        }
+        fromInt(std::stoi(_str));
     }
 private:
     T &en;
@@ -177,7 +165,7 @@ public:
     {
         return val.serialize();
     }
-    void deserialize(std::string &_str)
+    void deserialize(const std::string &_str)
     {
         val.deserialize(_str);
     }

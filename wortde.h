@@ -2,8 +2,9 @@
 #define WORTDE_H
 
 #include <string>
-#include <vector>
 #include <iostream>
+
+class LinesRamIStream;
 
 class LearningWort
 {
@@ -64,7 +65,6 @@ public:
 
 public:
     WortDe();
-    explicit WortDe(const std::string &rawStr);
     ~WortDe();
 
     const std::string& raw() { return s_raw; }
@@ -74,10 +74,13 @@ public:
     TypeWort type() { return w_type; }
 
     bool save(std::ostream &os);
-    bool load(std::istream &is);
+    bool load(LinesRamIStream &ils, std::ostream &osErr);
+
+    void parseRawLine(const std::string &rawStr, int _block); // Example rawStr: "das Wort \t a translation of a word"
+    void debugPrint(std::ostream &os);
 
 private:
-    void parseRaw();
+    void parseRawDe();
 
 private:
     std::string s_wort; // только само слово в словарной форме (для TypeWort::None должно быть то же что и s_raw)

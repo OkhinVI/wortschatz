@@ -1,0 +1,44 @@
+#ifndef LINESRAMSTREAM_H
+#define LINESRAMSTREAM_H
+
+#include <string>
+#include <vector>
+#include <limits>
+
+class LinesRamIStream
+{
+public:
+    typedef std::vector<std::string> VectorStrings;
+
+public:
+    void load(std::istream &is, size_t maxLines = std::numeric_limits<size_t>::max());
+    bool loadFromFile(const std::string &fileName, size_t maxLines = std::numeric_limits<size_t>::max());
+    const std::string &get();
+    size_t remainderOfLines() const { return vs.size() - gPos; }
+    bool eof() const { return gPos >= vs.size(); }
+    size_t tellg() const { return gPos; }
+    void seekg(size_t pos);
+
+protected:
+    void clear() { vs.clear(); gPos = 0; }
+
+protected:
+    VectorStrings vs;
+    size_t gPos = 0;
+};
+
+
+
+class LinesRamStream: public LinesRamIStream
+{
+public:
+    LinesRamStream();
+
+protected:
+    void clear() { LinesRamIStream::clear(); pPos = 0; }
+
+protected:
+    size_t pPos = 0;
+};
+
+#endif // LINESRAMSTREAM_H

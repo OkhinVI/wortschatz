@@ -19,7 +19,7 @@ bool isWort(const char ch)
 // templates with a variable number of arguments
 
 template<typename ... Types>
-size_t NumberOfFunctionArguments(Types&... args)
+size_t NumberOfFunctionArguments(Types... args)
 {
     return  sizeof...(args);
 }
