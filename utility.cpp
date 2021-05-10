@@ -1,36 +1,24 @@
 #include "utility.h"
 
-
-std::string substrWithoutSideSpaces(const std::string &str, size_type posBegin, size_type n)
+void util::VectorFromString(VectorString &vec, const std::string &str)
 {
-    size_type posEnd = (n == std::string::npos || posBegin + n > str.size()) ?
-        str.size() : posBegin + n;
-    if (posBegin >= posEnd)
-        return std::string();
-    for (; posBegin < posEnd; ++posBegin)
+    vec.clear();
+    for (size_t pos = 0; pos < str.size();)
     {
-        if (!::isspace(str[posBegin]))
-            break;
-    }
-    for (; posBegin < posEnd; --posEnd)
-    {
-        if (!::isspace(str[posEnd - 1]))
-            break;
-    }
-    return str.substr(posBegin, posEnd - posBegin);
-}
-
-std::string getPrefix(const std::string &str, char &findedDelimiter)
-{
-    for (size_type idx = 0; idx < str.size(); ++idx)
-    {
-        if (!isWort(str[idx]))
+        std::string line;
+        const size_t newPos = str.find('\n', pos);
+        if (newPos == std::string::npos)
         {
-            if (idx < 1)
+            if (pos < str.size())
+                line = str.substr(pos);
+            else
                 break;
-            findedDelimiter = str[idx];
-            return str.substr(0, idx);
+            pos = str.size();
+        } else
+        {
+            line = str.substr(pos, newPos - pos);
+            pos = newPos + 1;
         }
+        vec.push_back(line);
     }
-    return std::string();
 }

@@ -24,20 +24,20 @@ public:
 class WortDe
 {
 public:
-    enum class TypeWort : int
+    enum class TypeWort : int // Wortarten
     {
         None = 0,
-        Combination, // сочитание слов
-        Noun, // существительное
-        Verb, // глагол
-        Adjective, // прилагательное
-        Pronoun, // местоимение
-        Numeral, // числительное
-        Pretext, // предлог
-        Conjunction, // союз
-        Particle, // частица
-        Artikel, // артикль
-        Interjection, // междометие
+        Combination,  // сочитание слов  // Wortverbindung
+        Noun,         // существительное // das Nomen
+        Verb,         // глагол          // das Verb
+        Adjective,    // прилагательное  // das Adjektiv
+        Pronoun,      // местоимение     // das Pronomen
+        Numeral,      // числительное    // das Numerale
+        Pretext,      // предлог         // die Präposition
+        Conjunction,  // союз            // die Konjunktion
+        Particle,     // частица         // die Partikel
+        Artikel,      // артикль         // der Artikel
+        Interjection, // междометие      // die Interjektion
         _last_one
     };
 
@@ -67,25 +67,38 @@ public:
     WortDe();
     ~WortDe();
 
-    const std::string& raw() { return s_raw; }
-    const std::string& translation() { return s_translation; }
-    const std::string& wort() { return s_wort; }
-    TypeArtikel artikel() { return n_artikel; }
-    TypeWort type() { return w_type; }
+    const std::string& raw() const { return s_raw; }
+    const std::string& translation() const { return s_translation; }
+    const std::string& wort() const { return s_wort; }
+    const std::string& wortPl() const { return n_wortPl; }
+    const std::string& vPrasens3f() const { return v_prasens3f; }
+    const std::string& vPrateritum() const { return v_prateritum; }
+    const std::string& vPerfect() const { return v_perfect; }
+    TypeArtikel artikel() const { return n_artikel; }
+    TypeWort type() const { return w_type; }
+    const std::string prefix() const;
 
     bool save(std::ostream &os);
     bool load(LinesRamIStream &ils, std::ostream &osErr);
+    size_t countSaveLines();
 
-    void parseRawLine(const std::string &rawStr, int _block); // Example rawStr: "das Wort \t a translation of a word"
+    static std::string TypeWortToString(TypeWort tw, const char *local = "de");
+    static std::string TypeArtikeltToString(TypeArtikel ta, const bool forLabel = false);
+
+    void parseRawLineTab(const std::string &rawStr, unsigned int _block); // Example rawStr: "das Wort \t a translation of a word"
+    void parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw = TypeWort::None);
     void debugPrint(std::ostream &os);
 
+    bool setNewTypeWort(const TypeWort tw);
+
 private:
-    void parseRawDe();
+    void parseRawDe(TypeWort tw = TypeWort::None);
 
 private:
     std::string s_wort; // только само слово в словарной форме (для TypeWort::None должно быть то же что и s_raw)
     TypeWort w_type = TypeWort::None;
-    int w_block = 0; // Указание на уровень слова: (A1, A2, B1, D2, C1, C2):8bit - (номер учебника):8bit - (номер главы):8bit - (номер раздела в главе):8bit
+    unsigned int w_block = 0; // Указание на уровень слова: (A1, A2, B1, D2, C1, C2):8bit - (номер учебника):8bit - (номер главы):8bit - (номер раздела в главе):8bit
+    unsigned int w_frequency = 0; // Как часто слово встречается в текстах.
     int w_accent = -1; // Позиция ударной буквы
     std::string s_raw; // как есть, но без перевода (он в s_translation)
     std::string s_translation; // перевод как есть

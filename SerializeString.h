@@ -6,6 +6,7 @@
 #include <limits>
 #include <stdexcept>
 #include <sstream>
+#include "string_utf8.h"
 #include "utility.h"
 
 //--------------------------- serialize -----------------------------------

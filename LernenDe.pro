@@ -9,22 +9,32 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    dialograwedit.cpp \
+    dialogtypewort.cpp \
     glossaryde.cpp \
     linesramstream.cpp \
     main.cpp \
     mainwindow.cpp \
+    qlistviewglossarydemodel.cpp \
+    string_utf8.cpp \
     utility.cpp \
     wortde.cpp
 
 HEADERS += \
     SerializeString.h \
+    dialograwedit.h \
+    dialogtypewort.h \
     glossaryde.h \
     linesramstream.h \
     mainwindow.h \
+    qlistviewglossarydemodel.h \
+    string_utf8.h \
     utility.h \
     wortde.h
 
 FORMS += \
+    dialograwedit.ui \
+    dialogtypewort.ui \
     mainwindow.ui
 
 TRANSLATIONS += \

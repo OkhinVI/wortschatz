@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "SerializeString.h"
 #include "utility.h"
+#include "string_utf8.h"
 #include "linesramstream.h"
 
 static inline SerializeWrapperEnum<WortDe::TypeWort> SerializeWrapper(WortDe::TypeWort &en) { return SerializeWrapperEnum<WortDe::TypeWort>(en); }
@@ -13,11 +14,10 @@ static inline SerializeWrapperEnum<WortDe::TypeArtikel> SerializeWrapper(WortDe:
 static inline SerializeWrapperEnum<WortDe::TypePerfect> SerializeWrapper(WortDe::TypePerfect &en) { return SerializeWrapperEnum<WortDe::TypePerfect>(en); }
 static inline SerializeWrapperString SerializeWrapper(std::string &_str) { return SerializeWrapperString(_str); }
 static inline SerializeWrapperNum<int> SerializeWrapper(int &_num) { return SerializeWrapperNum<int>(_num); }
-// static inline SerializeWrapperNum<unsigned int> SerializeWrapper(unsigned int &_num) { return SerializeWrapperNum<unsigned int>(_num); }
+static inline SerializeWrapperNum<unsigned int> SerializeWrapper(unsigned int &_num) { return SerializeWrapperNum<unsigned int>(_num); }
 static inline SerializeWrapperNum<bool> SerializeWrapper(bool &_num) { return SerializeWrapperNum<bool>(_num); }
 static inline SerializeWrapperAny<LearningWort> SerializeWrapper(LearningWort &_val) { return SerializeWrapperAny<LearningWort>(_val); }
 
-//        getline(is, inStr);
 
 static inline void saveLines(std::ostream &) {}
 
@@ -40,6 +40,7 @@ static inline void saveBlockLines(std::ostream &os, const Types&... args)
 #define WortDeOptionsSerialize \
                    SerializeWrapper(w_type),\
                    SerializeWrapper(w_block),\
+                   SerializeWrapper(w_frequency),\
                    SerializeWrapper(w_accent),\
                    SerializeWrapper(s_raw),\
                    SerializeWrapper(s_translation),\
@@ -60,8 +61,12 @@ bool WortDe::save(std::ostream &os)
 {
     os << '@' << s_wort << '\n'; // start block
     saveBlockLines(os, WortDeOptionsSerialize);
-
     return true;
+}
+
+size_t WortDe::countSaveLines()
+{
+    return 1 + util::NumberOfFunctionArguments(WortDeOptionsSerialize);
 }
 
 // load
@@ -91,7 +96,7 @@ bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
             osErr << ils.tellg() << " skiped line: " << str << std::endl;
             continue;
         }
-        s_wort = str;
+        s_wort = str.substr(1); // removing the key '@'
         break;
     }
 
@@ -99,7 +104,7 @@ bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
         return false;
     const std::string &str = ils.get();
     const size_t countLines = std::stoul(str);
-    const size_t neadCountLines = NumberOfFunctionArguments(WortDeOptionsSerialize);
+    const size_t neadCountLines = util::NumberOfFunctionArguments(WortDeOptionsSerialize);
     const size_t parseCount = std::min(countLines, neadCountLines);
     const size_t startPos = ils.tellg();
 
@@ -114,6 +119,9 @@ bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
         throw;
     }
 
+    if (s_wort.empty()) // s_wort must not empty
+        s_wort = s_raw;
+
     return true;
 }
 
@@ -127,7 +135,7 @@ WortDe::~WortDe()
 
 }
 
-void WortDe::parseRawLine(const std::string &rawStr, int _block)
+void WortDe::parseRawLineTab(const std::string &rawStr, unsigned int _block)
 {
     size_type posTab = rawStr.find('\t');
     if (posTab != std::string::npos)
@@ -142,8 +150,69 @@ void WortDe::parseRawLine(const std::string &rawStr, int _block)
     w_block = _block;
 }
 
-void WortDe::parseRawDe()
+void WortDe::parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw)
 {
+    s_raw = substrWithoutSideSpaces(rawDeStr);
+    s_translation = substrWithoutSideSpaces(rawTrStr);
+    parseRawDe(tw);
+    w_block = _block;
+}
+
+bool WortDe::setNewTypeWort(const TypeWort tw)
+{
+    if (tw == w_type)
+        return false;
+    s_wort.clear();
+
+    char delimiter = 0;
+    std::string prfx = getPrefix(s_raw, delimiter);
+    w_type = tw;
+    if (tw == TypeWort::Noun)
+    {
+        if (delimiter == ' ' && prfx == "der")
+        {
+            n_artikel = TypeArtikel::Der;
+            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
+        }
+        else if (delimiter == ' ' && prfx == "das")
+        {
+            n_artikel = TypeArtikel::Das;
+            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
+        }
+        else if (delimiter == ' ' && prfx == "die")
+        {
+            n_artikel = TypeArtikel::Die;
+            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
+        } else
+        {
+            s_wort = s_raw;
+        }
+
+    } if (tw == TypeWort::Verb)
+    {
+        if (delimiter == ' ' && prfx == "sich")
+        {
+            v_sich = true;
+            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
+        } else
+        {
+            s_wort = s_raw;
+        }
+    }
+
+    if (s_wort.empty())
+        s_wort = s_raw;
+    return true;
+}
+
+void WortDe::parseRawDe(TypeWort tw)
+{
+    if (tw != TypeWort::None)
+    {
+        setNewTypeWort(tw);
+        return;
+    }
+
     char delimiter = 0;
     std::string prfx = getPrefix(s_raw, delimiter);
     if (delimiter == ' ')
@@ -177,61 +246,152 @@ void WortDe::parseRawDe()
         }
         if (!prfx.empty())
             s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
-        else
-            s_wort = s_raw;
     }
+
+    if (s_wort.empty())
+        s_wort = s_raw;
 }
 
-static const char *DerDieDasStr[] =
+const std::string WortDe::prefix() const
 {
-    "None",
-    "Der",
-    "Das",
-    "Die",
-    "Pl",
-    "ProperNoun",
-    "Der_Das",
-    "Der_Die"
-};
+    if (w_type == TypeWort::Noun)
+        return TypeArtikeltToString(n_artikel);
+    if (w_type == TypeWort::Verb)
+        return v_sich ? "sich" : "";
+    return "";
+}
 
-static const char *WTypeStr[] =
+std::string WortDe::TypeWortToString(TypeWort tw, const char *local)
 {
-    "None",
-    "Combination",
-    "Noun",
-    "Verb",
-    "Adjective",
-    "Pronoun",
-    "Numeral",
-    "Pretext",
-    "Conjunction",
-    "Particle",
-    "Artikel",
-    "Interjection"
-};
+    int index = 2; // de
+    const std::string locStr((local == nullptr) ? "de" : local);
+    if (locStr == "en")
+        index = 0;
+    else if (locStr == "ru")
+        index = 1;
+    else if (locStr == "de")
+        index = 2;
 
-static const char *WKursStr[] =
+    const int countLeng = 3;
+    switch (tw) {
+    case WortDe::TypeWort::None:
+    {
+        const char *tws[countLeng] = {"None", "Нет", "None"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Combination:  // словосочитание  // Wortverbindung
+    {
+        const char *tws[countLeng] = {"Combination", "словосочитание", "Wortverbindung"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Noun:         // существительное // das Nomen
+    {
+        const char *tws[countLeng] = {"Noun", "существительное", "Nomen"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Verb:         // глагол          // das Verb
+    {
+        const char *tws[countLeng] = {"Verb", "глагол", "Verb"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Adjective:    // прилагательное  // das Adjektiv
+    {
+        const char *tws[countLeng] = {"Adjective", "прилагательное", "Adjektiv"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Pronoun:      // местоимение     // das Pronomen
+    {
+        const char *tws[countLeng] = {"Pronoun", "местоимение", "Pronomen"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Numeral:      // числительное    // das Numerale
+    {
+        const char *tws[countLeng] = {"Numeral", "числительное", "Numerale"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Pretext:      // предлог         // die Präposition
+    {
+        const char *tws[countLeng] = {"Pretext", "предлог", "Präposition"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Conjunction:  // союз            // die Konjunktion
+    {
+        const char *tws[countLeng] = {"Conjunction", "союз", "Konjunktion"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Particle:     // частица         // die Partikel
+    {
+        const char *tws[countLeng] = {"Particle", "частица", "Partikel"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Artikel:      // артикль         // der Artikel
+    {
+        const char *tws[countLeng] = {"Artikel", "артикль", "Artikel"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::Interjection: // междометие      // die Interjektion
+    {
+        const char *tws[countLeng] = {"Interjection", "междометие", "Interjektion"};
+        return tws[index];
+    }
+    case WortDe::TypeWort::_last_one:
+        break;
+    }
+    return "";
+}
+
+std::string WortDe::TypeArtikeltToString(TypeArtikel ta, const bool forLabel)
 {
-    "None",
-    "A1",
-    "A2",
-    "B1",
-    "B2",
-    "C1",
-    "C2"
-};
-
+    switch (ta) {
+    case TypeArtikel::None:
+        return forLabel ? "None"       : "";
+    case TypeArtikel::Der:
+        return forLabel ? "Der"        : "der";
+    case TypeArtikel::Das:
+        return forLabel ? "Das"        : "das";
+    case TypeArtikel::Die:
+        return forLabel ? "Die"        : "die";
+    case TypeArtikel::Pl:
+        return forLabel ? "Pl"         : "die";
+    case TypeArtikel::ProperNoun:
+        return forLabel ? "ProperNoun" : "";
+    case TypeArtikel::Der_Das:
+        return forLabel ? "Der/Das"    : "der/das";
+    case TypeArtikel::Der_Die:
+        return forLabel ? "Der/Die"    : "der/die";
+    case TypeArtikel::_last_one:
+        break;
+    }
+    return "";
+}
 
 void WortDe::debugPrint(std::ostream &os)
 {
-    os << WKursStr[w_block >> 24] << "." << ((w_block >> 16) & 0xff) << ".k" << ((w_block >> 8) & 0xff) << ".t" << (w_block & 0xff) << "; ";
-    if (n_artikel != TypeArtikel::None)
-        os << DerDieDasStr[static_cast<int>(n_artikel)] << ";\t";
-    if (v_sich)
-        os << "sich" << ";\t";
+    static const char *WKursStr[] =
+    {
+        "None",
+        "A1",
+        "A2",
+        "B1",
+        "B2",
+        "C1",
+        "C2"
+    };
+
+    const int headBlock = w_block >> 24;
+    if (headBlock > 0 && headBlock <= 6)
+        os << WKursStr[w_block >> 24];
+    else
+        os << headBlock;
+    os << "." << ((w_block >> 16) & 0xff) << ".k" << ((w_block >> 8) & 0xff) << ".t" << (w_block & 0xff) << "; ";
+
+    const std::string prfx = prefix();
+    if (!prfx.empty())
+        os << prfx << ";\t";
+
     os << s_wort << "; ";
     if (w_type != TypeWort::None)
-       os << WTypeStr[static_cast<int>(w_type)] << "; ";
+       os << TypeWortToString(w_type) << "; ";
 
     os << "RAW: " << s_raw << " = " << s_translation;
     os << std::endl;

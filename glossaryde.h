@@ -11,13 +11,23 @@ public:
 
 public:
     GlossaryDe();
+    void setPath(const std::string &path);
+    void setFile(const std::string &name);
     void load();
     void save();
+
+    void add(const WortDe &wd);
+    const WortDe &at(size_t idx) const;
+    WortDe &at(size_t idx);
+    const WortDe &operator[] (size_t idx) { return at(idx); }
+    size_t size() const { return dictionary.size(); }
+    void saveClear();
 
 private:
     DictionaryDe dictionary;
     std::string fileName;
     std::string filePath;
+    bool cleared = false;
 };
 
 #endif // GLOSSARYDE_H
