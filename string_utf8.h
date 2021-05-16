@@ -14,13 +14,14 @@ public:
 
     char raw(size_t idx) { return str[idx + beginPos]; }
     bool eof() const { return pos >= size(); }
-    size_t size() const { return sizeStr; }
     size_t tellg() const { return pos; }
     void seekg(size_t aPos);
     AreaString& operator++();
     AreaString& operator--();
     char operator*() { return raw(pos); };
     std::string toString() { return str.substr(beginPos, sizeStr); }
+    size_t size() const { return sizeStr; }
+    bool empty() const { return size() == 0; }
     AreaString subArea(size_t pos = 0, size_t len = std::numeric_limits<size_t>::max());
     bool find(const char *s);
     void trim();

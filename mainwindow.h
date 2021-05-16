@@ -50,9 +50,17 @@ private slots:
     void slotShortcutAltV();
     void slotShortcutAltA();
 
+    void on_pushButton_8_clicked();
+
+    void on_pushButton_9_clicked();
+
+    void on_pushButton_10_clicked();
+
 private:
     void selectItem(int idx);
     void setWortDe(WortDe wd);
+    void wortTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
+    void CombinationTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
 
 private:
     std::string pathDic;

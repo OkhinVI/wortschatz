@@ -6,6 +6,7 @@
 #include <fstream>
 #include <QFileDialog>
 #include <QSettings>
+#include <QDesktopServices>
 #include "qlistviewglossarydemodel.h"
 #include "string_utf8.h"
 #include <sstream>
@@ -182,6 +183,7 @@ void MainWindow::selectItem(int idx)
     origWd = wd;
 }
 
+
 void MainWindow::on_listView_activated(const QModelIndex &index)
 {
     selectItem(index.row());
@@ -268,3 +270,62 @@ void MainWindow::slotShortcutAltA()
     setWortDe(currWd);
 }
 
+
+void MainWindow::wortTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str)
+{
+    if (str.empty())
+        return;
+    AreaUtf8 au8(str);
+    bool isToken;
+    AreaUtf8 wort = au8.getToken(isToken);
+    if (wort.empty())
+        return;
+    QString url = QString::fromStdString(beginUrl + wort.toString() + endUrl);
+    ui->label->setText(url);
+    QDesktopServices::openUrl(QUrl(url));
+}
+
+void MainWindow::CombinationTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str)
+{
+    if (str.empty())
+        return;
+    std::stringstream ss;
+    for (size_t i = 0; i < str.size(); ++i)
+    {
+        const char sym = str[i];
+        if (sym >= 0x10 && sym < 0x30)
+            ss << "%" << std::hex << static_cast<int>(sym);
+        else
+            ss << sym;
+    }
+    QString url = QString::fromStdString(beginUrl + ss.str() + endUrl);
+    ui->label->setText(url);
+    QDesktopServices::openUrl(QUrl(url));
+}
+
+void MainWindow::on_pushButton_8_clicked()
+{
+    const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
+    const std::string endUrl = "";
+    wortTranslate(beginUrl, endUrl, currWd.wort());
+}
+
+void MainWindow::on_pushButton_9_clicked()
+{
+    const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
+    const std::string endUrl = "&lang=de-ru";
+    if (currWd.type() != WortDe::TypeWort::Combination)
+        wortTranslate(beginUrl, endUrl, currWd.wort());
+    else
+        CombinationTranslate(beginUrl, endUrl, currWd.wort());
+}
+
+void MainWindow::on_pushButton_10_clicked()
+{
+    const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
+    const std::string endUrl = "&op=translate";
+    if (currWd.type() != WortDe::TypeWort::Combination)
+        wortTranslate(beginUrl, endUrl, currWd.wort());
+    else
+        CombinationTranslate(beginUrl, endUrl, currWd.wort());
+}

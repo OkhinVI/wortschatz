@@ -248,7 +248,7 @@ AreaUtf8 AreaUtf8::getToken(bool &delimiterToken, const char *delimiters)
         result = find([delimiters](SymbolType sym) { return isDelimiter(sym, delimiters); });
 
     if (!result)
-        return subArea(size(), 0); // paranoid check
+        return subArea(startPos, size() - startPos);
 
     return subArea(startPos, tellg() - startPos);
 }

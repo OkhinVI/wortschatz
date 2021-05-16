@@ -16,18 +16,18 @@ GlossaryDe::GlossaryDe()
 void GlossaryDe::setPath(const std::string &aPath)
 {
     filePath = (aPath.empty() || aPath.back() == '\\') ? aPath : aPath + '\\';
-    cleared = false;
+    notLoaded = false;
 }
 
 void GlossaryDe::setFile(const std::string &name)
 {
     fileName = name;
-    cleared = false;
+    notLoaded = false;
 }
 
 void GlossaryDe::load()
 {
-    cleared = false;
+    notLoaded = false;
     LinesRamIStream ils;
     const bool isOpened = ils.loadFromFile(filePath + fileName);
 
@@ -39,7 +39,7 @@ void GlossaryDe::load()
     if (!isOpened)
     {
         logError << "Error open file: " << filePath + fileName << std::endl;
-        cleared = true;
+        notLoaded = true;
         return;
     }
 
@@ -52,7 +52,7 @@ void GlossaryDe::load()
     if (prefix != GlossaryDePrefix)
     {
         logError << "Error: file \"" << filePath + fileName << "\" is bad: '" << prefix << "' != '" << GlossaryDePrefix << "'" << std::endl;
-        cleared = true;
+        notLoaded = true;
         return;
     }
 
@@ -69,7 +69,7 @@ void GlossaryDe::load()
 
 void GlossaryDe::save()
 {
-    if (cleared)
+    if (notLoaded)
         return;
     std::ofstream os;
     os.open(filePath + fileName);
@@ -83,13 +83,13 @@ void GlossaryDe::saveClear()
 {
     save();
     dictionary.clear();
-    cleared = true;
+    notLoaded = true;
 }
 
 void GlossaryDe::add(const WortDe &wd)
 {
     dictionary.push_back(wd);
-    cleared = false;
+    notLoaded = false;
 }
 
 const WortDe &GlossaryDe::at(size_t idx) const
