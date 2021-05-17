@@ -15,7 +15,7 @@ GlossaryDe::GlossaryDe()
 
 void GlossaryDe::setPath(const std::string &aPath)
 {
-    filePath = (aPath.empty() || aPath.back() == '\\') ? aPath : aPath + '\\';
+    filePath = (aPath.empty() || aPath.back() == '\\' || aPath.back() == '/') ? aPath : aPath + '/';
     notLoaded = false;
 }
 
@@ -24,6 +24,41 @@ void GlossaryDe::setFile(const std::string &name)
     fileName = name;
     notLoaded = false;
 }
+
+std::string GlossaryDe::tema(const unsigned int blockNum)
+{
+    auto it = themes.find(blockNum);
+    if (it == themes.end())
+        return std::string();
+    return it->second;
+}
+
+void GlossaryDe::loadThemes(const std::string &fileName)
+{
+    std::ifstream is;
+    is.open(fileName);
+
+    std::string str;
+    unsigned int blockNum = 0;
+    while (!is.eof())
+    {
+        std::getline(is, str);
+        if (str.empty())
+            continue;
+        AreaUtf8 ut8(str);
+        const std::string blockNumStr = ut8.getToken(" ").toString();
+        if (blockNumStr.empty() || blockNumStr.size() > 8)
+            continue;
+        try {
+            blockNum = stoul(blockNumStr, nullptr, 16);
+            themes[blockNum] = ut8.getRestArea().trim().toString();
+        }  catch (...) {
+            continue;
+        }
+    }
+    is.close();
+}
+
 
 void GlossaryDe::load()
 {
@@ -47,8 +82,7 @@ void GlossaryDe::load()
 
     // check head file
     AreaUtf8 au8(headGlossary);
-    bool isDelimeter;
-    const std::string prefix = au8.getToken(isDelimeter).toString();
+    const std::string prefix = au8.getToken().toString();
     if (prefix != GlossaryDePrefix)
     {
         logError << "Error: file \"" << filePath + fileName << "\" is bad: '" << prefix << "' != '" << GlossaryDePrefix << "'" << std::endl;
@@ -65,6 +99,8 @@ void GlossaryDe::load()
             add(wd);
         }
     }
+
+    loadThemes(filePath + "logTema.txt");
 }
 
 void GlossaryDe::save()

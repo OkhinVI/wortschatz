@@ -112,6 +112,7 @@ void MainWindow::on_actionRaw_Text_triggered()
         dicDe.save();
     }
     delete pdlg;
+    model->upDate();
 }
 
 
@@ -142,6 +143,7 @@ void MainWindow::setWortDe(WortDe wd)
     ui->lineEdit_2->setText(QString::fromStdString(wd.translation()));
     ui->lineEdit_3->setText(QString::fromStdString(wd.prefix()));
     ui->lineEdit_4->setText(QString::fromStdString(wd.raw()));
+    ui->lineEdit_6->setText(QString::fromStdString(wd.blockToStr() + " = " + dicDe.tema(wd.block())));
 
     std::string options;
     if (wd.type() == WortDe::TypeWort::Noun)
@@ -171,6 +173,9 @@ void MainWindow::selectItem(int idx)
     {
         if (origIndex >= 0 || static_cast<size_t>(origIndex) < dicDe.size())
         {
+            // TODO: add save currWd
+            const std::string trStr = ui->lineEdit_2->text().toUtf8().toStdString();
+            currWd.setNewTranslation(trStr);
             origWd = currWd;
             dicDe.at(origIndex) = origWd;
         }
@@ -210,6 +215,8 @@ void MainWindow::on_pushButton_2_clicked()
 {
     if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
         return;
+    const std::string trStr = ui->lineEdit_2->text().toUtf8().toStdString();
+    currWd.setNewTranslation(trStr);
     origWd = currWd;
     dicDe.at(origIndex) = origWd;
 }
@@ -276,8 +283,7 @@ void MainWindow::wortTranslate(const std::string &beginUrl, const std::string &e
     if (str.empty())
         return;
     AreaUtf8 au8(str);
-    bool isToken;
-    AreaUtf8 wort = au8.getToken(isToken);
+    AreaUtf8 wort = au8.getToken();
     if (wort.empty())
         return;
     QString url = QString::fromStdString(beginUrl + wort.toString() + endUrl);
@@ -328,4 +334,31 @@ void MainWindow::on_pushButton_10_clicked()
         wortTranslate(beginUrl, endUrl, currWd.wort());
     else
         CombinationTranslate(beginUrl, endUrl, currWd.wort());
+}
+
+void MainWindow::on_pushButton_11_clicked()
+{
+    const std::string rawStr = ui->lineEdit_4->text().toUtf8().toStdString();
+    const std::string trStr = ui->lineEdit_2->text().toUtf8().toStdString();
+    currWd.parseRawLine(rawStr, trStr, currWd.block(), currWd.type());
+    setWortDe(currWd);
+}
+
+void MainWindow::on_actionSave_as_raw_triggered()
+{
+    // TODO: add file selection
+    std::ofstream os;
+    os.open(pathDic + "/" + "raw_dic_out.txt");
+    unsigned int lastBlockNum = 0;
+    for (size_t i = 0; i < dicDe.size(); ++i)
+    {
+        const WortDe &wd = dicDe[i];
+        if (wd.block() != lastBlockNum)
+        {
+            os << "\n#" << (wd.block() >> 24) << " " << ((wd.block() >> 16) & 0xFF) << " " << ((wd.block() >> 8) & 0xFF) << " " << (wd.block() & 0xFF) << " "
+                << dicDe.tema(wd.block()) << "\n" << std::endl;
+            lastBlockNum = wd.block();
+        }
+        os << wd.raw() << "\t" << wd.translation() << std::endl;
+    }
 }

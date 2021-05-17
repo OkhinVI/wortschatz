@@ -12,6 +12,9 @@ public:
     int rowCount(const QModelIndex &) const;
     QVariant data(const QModelIndex &index, int role) const;
 
+    void upDate();
+    void upDate(size_t idxBegin, size_t idxLast);
+
 private:
     GlossaryDe *glossary = nullptr;
 };

@@ -22,7 +22,7 @@ AreaString& AreaString::operator--()
     return *this;
 }
 
-AreaString AreaString::subArea(size_t pos, size_t len)
+AreaString AreaString::subArea(size_t pos, size_t len) const
 {
     if (pos >= size())
         return AreaString(str, beginPos + size(), 0);
@@ -43,7 +43,7 @@ bool AreaString::find(const char *s)
     return false;
 }
 
-void AreaString::trim()
+AreaString &AreaString::trim()
 {
     pos = 0;
     for (; sizeStr > 0; --sizeStr)
@@ -56,17 +56,21 @@ void AreaString::trim()
         if (!::isspace(str[beginPos]))
             break;
     }
+    return *this;
 }
 
 
 // class AreaUtf8
 
-AreaUtf8::SymbolType AreaUtf8::symbol(uint8_t &symSize)
+const char * const AreaUtf8::defaulDelimiters = " ,\t";
+
+
+AreaUtf8::SymbolType AreaUtf8::symbol(uint8_t &symSize) const
 {
     return symbolFromPos(pos, symSize);
 }
 
-AreaUtf8::SymbolType AreaUtf8::symbolFromPos(size_t aPos, uint8_t &symSize)
+AreaUtf8::SymbolType AreaUtf8::symbolFromPos(size_t aPos, uint8_t &symSize) const
 {
     symSize = 0;
     if (aPos >= size())
@@ -86,7 +90,7 @@ AreaUtf8::SymbolType AreaUtf8::symbolFromPos(size_t aPos, uint8_t &symSize)
 #define UTF8_RAW_SYMBOL_MIN 0x80
 #define UTF8_RAW_SYMBOL_MAX 0xBF
 
-bool AreaUtf8::isUtf8Pos(size_t aPos)
+bool AreaUtf8::isUtf8Pos(size_t aPos) const
 {
     return aPos + 1 < size() &&
            static_cast<uint8_t>(raw(aPos)) >= UTF8_PREFIX_MIN &&
@@ -175,32 +179,32 @@ AreaUtf8::SymbolType AreaUtf8::getSymbol()
     return sym;
 }
 
-AreaUtf8::SymbolType AreaUtf8::peek()
+AreaUtf8::SymbolType AreaUtf8::peek() const
 {
     uint8_t symSyze;
     return symbol(symSyze);
 }
 
-bool AreaUtf8::hasAsciiSymbol()
+bool AreaUtf8::hasAsciiSymbol() const
 {
     return eof() ? false : static_cast<uint8_t>(raw(pos)) <= 0x7F;
 }
 
-bool AreaUtf8::hasSymbolEn()
+bool AreaUtf8::hasSymbolEn() const
 {
     uint8_t symSyze;
     const SymbolType sym = symbol(symSyze);
     return symSyze > 0 && isSymbolEn(sym);
 }
 
-bool AreaUtf8::hasSymbolDe()
+bool AreaUtf8::hasSymbolDe() const
 {
     uint8_t symSyze;
     const SymbolType sym = symbol(symSyze);
     return symSyze > 0 && isSymbolDe(sym);
 }
 
-bool AreaUtf8::hasSymbolRu()
+bool AreaUtf8::hasSymbolRu() const
 {
     uint8_t symSyze;
     const SymbolType sym = symbol(symSyze);
@@ -231,7 +235,17 @@ AreaUtf8& AreaUtf8::operator--()
     return *this;
 }
 
-AreaUtf8 AreaUtf8::getToken(bool &delimiterToken, const char *delimiters)
+bool AreaUtf8::operator==(const char *cStr) const
+{
+    for (size_t i = 0; i < size(); ++i)
+    {
+        if(cStr[i] == 0 || raw(i) != cStr[i])
+            return false;
+    }
+    return cStr[size()] == 0;
+}
+
+AreaUtf8 AreaUtf8::getToken(const char *delimiters)
 {
     if (eof())
         return subArea(size(), 0);
@@ -239,7 +253,7 @@ AreaUtf8 AreaUtf8::getToken(bool &delimiterToken, const char *delimiters)
     const size_t startPos = tellg();
     uint8_t symSyze;
     const SymbolType startSym = symbol(symSyze);
-    delimiterToken = isDelimiter(startSym);
+    const bool delimiterToken = isDelimiter(startSym, delimiters);
     bool result;
 
     if (delimiterToken)
@@ -248,11 +262,20 @@ AreaUtf8 AreaUtf8::getToken(bool &delimiterToken, const char *delimiters)
         result = find([delimiters](SymbolType sym) { return isDelimiter(sym, delimiters); });
 
     if (!result)
+    {
+        seekg(size()); // end data
         return subArea(startPos, size() - startPos);
+    }
 
     return subArea(startPos, tellg() - startPos);
 }
 
+void AreaUtf8::getAllTokens(std::vector<AreaUtf8> &tokens, const char *delimiters)
+{
+    tokens.clear();
+    while (AreaUtf8 tok = getToken(delimiters))
+        tokens.push_back(tok);
+}
 
 bool isWortDe(const char ch)
 {

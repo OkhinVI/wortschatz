@@ -23,7 +23,7 @@ QVariant QListViewGlossaryDeModel::data(const QModelIndex &index, int role) cons
             const WortDe &wd = this->glossary->at(index.row());
             const std::string prefix = wd.prefix();
             const std::string wort = prefix.empty() ? wd.wort() : prefix + ' ' + wd.wort();
-            value = QString::fromStdString(wort);
+            value = QString::fromStdString(wort + " - " + wd.translation());
             break;
         }
         case Qt::UserRole: //data
@@ -31,7 +31,7 @@ QVariant QListViewGlossaryDeModel::data(const QModelIndex &index, int role) cons
             const WortDe &wd = this->glossary->at(index.row());
             const std::string prefix = wd.prefix();
             const std::string wort = prefix.empty() ? wd.wort() : prefix + ' ' + wd.wort();
-            value = QString::fromStdString(wort);
+            value = QString::fromStdString(wort + " - " + wd.translation());
             break;
         }
         default:
@@ -39,4 +39,18 @@ QVariant QListViewGlossaryDeModel::data(const QModelIndex &index, int role) cons
     }
 
     return value;
+}
+
+void QListViewGlossaryDeModel::upDate(size_t idxBegin, size_t idxLast)
+{
+    if (idxBegin >= glossary->size())
+        idxBegin = glossary->size() > 0 ? glossary->size() - 1 : 0;
+    if (idxLast >= glossary->size())
+        idxLast = glossary->size() > 0 ? glossary->size() - 1 : 0;
+    this->dataChanged(QAbstractItemModel::createIndex(idxBegin, 0), QAbstractItemModel::createIndex(idxLast, 0) );
+}
+
+void QListViewGlossaryDeModel::upDate()
+{
+    upDate(0, glossary->size());
 }

@@ -56,6 +56,10 @@ private slots:
 
     void on_pushButton_10_clicked();
 
+    void on_pushButton_11_clicked();
+
+    void on_actionSave_as_raw_triggered();
+
 private:
     void selectItem(int idx);
     void setWortDe(WortDe wd);

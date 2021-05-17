@@ -76,7 +76,9 @@ public:
     const std::string& vPerfect() const { return v_perfect; }
     TypeArtikel artikel() const { return n_artikel; }
     TypeWort type() const { return w_type; }
-    const std::string prefix() const;
+    std::string prefix() const;
+    std::string blockToStr() const;
+    unsigned int block() const { return w_block; }
 
     bool save(std::ostream &os);
     bool load(LinesRamIStream &ils, std::ostream &osErr);
@@ -85,14 +87,17 @@ public:
     static std::string TypeWortToString(TypeWort tw, const char *local = "de");
     static std::string TypeArtikeltToString(TypeArtikel ta, const bool forLabel = false);
 
-    void parseRawLineTab(const std::string &rawStr, unsigned int _block); // Example rawStr: "das Wort \t a translation of a word"
     void parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw = TypeWort::None);
     void debugPrint(std::ostream &os);
 
     bool setNewTypeWort(const TypeWort tw);
+    void setNewTranslation(const std::string &str) { s_translation = str; }
 
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);
+    bool parseRawDeNoun();
+    bool parseRawDeVerb();
+    void clearOptions();
 
 private:
     std::string s_wort; // только само слово в словарной форме (для TypeWort::None должно быть то же что и s_raw)
@@ -102,6 +107,8 @@ private:
     int w_accent = -1; // Позиция ударной буквы
     std::string s_raw; // как есть, но без перевода (он в s_translation)
     std::string s_translation; // перевод как есть
+    std::string s_phrasePrefix; // начало фразы со смысловым словом, например "etwas", которое в предложении скорее будет заменено на другие слова
+    std::string s_phraseEnd; // дополнение в скобках после слова, например "(auf + A.)" или "(an +D.)", которое в предложении будет заменено на другие слова
     std::string s_example; // примеры использования
     // Noun
     std::string n_wortPl; // Форма множественного числа

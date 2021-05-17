@@ -44,6 +44,8 @@ static inline void saveBlockLines(std::ostream &os, const Types&... args)
                    SerializeWrapper(w_accent),\
                    SerializeWrapper(s_raw),\
                    SerializeWrapper(s_translation),\
+                   SerializeWrapper(s_phrasePrefix),\
+                   SerializeWrapper(s_phraseEnd),\
                    SerializeWrapper(s_example),\
                    SerializeWrapper(n_wortPl),\
                    SerializeWrapper(n_artikel),\
@@ -135,73 +137,141 @@ WortDe::~WortDe()
 
 }
 
-void WortDe::parseRawLineTab(const std::string &rawStr, unsigned int _block)
-{
-    size_type posTab = rawStr.find('\t');
-    if (posTab != std::string::npos)
-    {
-        s_translation = substrWithoutSideSpaces(rawStr, posTab);
-        s_raw = substrWithoutSideSpaces(rawStr, 0, posTab);
-    } else
-    {
-        s_raw = substrWithoutSideSpaces(rawStr, 0);
-    }
-    parseRawDe();
-    w_block = _block;
-}
-
 void WortDe::parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw)
 {
-    s_raw = substrWithoutSideSpaces(rawDeStr);
-    s_translation = substrWithoutSideSpaces(rawTrStr);
+    s_raw = AreaUtf8(rawDeStr).trim().toString();
+    s_translation = AreaUtf8(rawTrStr).trim().toString();
     parseRawDe(tw);
     w_block = _block;
 }
 
-bool WortDe::setNewTypeWort(const TypeWort tw)
+void WortDe::clearOptions()
 {
-    if (tw == w_type)
-        return false;
     s_wort.clear();
+    w_type = TypeWort::None;
+    w_frequency = 0;
+    w_accent = -1;
+    s_phrasePrefix.clear();
+    s_phraseEnd.clear();
+    n_wortPl.clear();
+    n_artikel = TypeArtikel::None;
+    v_sich = false;
+    v_prasens3f.clear();
+    v_perfect.clear();
+    v_prateritum.clear();
+    v_trennbar.clear();
+    v_Pretexts.clear();
+    v_Cases.clear();
+    v_TypePerfect = TypePerfect::None;
+}
 
-    char delimiter = 0;
-    std::string prfx = getPrefix(s_raw, delimiter);
-    w_type = tw;
-    if (tw == TypeWort::Noun)
-    {
-        if (delimiter == ' ' && prfx == "der")
-        {
-            n_artikel = TypeArtikel::Der;
-            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
-        }
-        else if (delimiter == ' ' && prfx == "das")
-        {
-            n_artikel = TypeArtikel::Das;
-            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
-        }
-        else if (delimiter == ' ' && prfx == "die")
-        {
-            n_artikel = TypeArtikel::Die;
-            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
-        } else
-        {
-            s_wort = s_raw;
-        }
+bool WortDe::parseRawDeVerb()
+{
+    AreaUtf8 aRaw(s_raw);
+    const AreaUtf8 prfx = aRaw.getToken();
+    if (prfx == "sich" && aRaw.getToken() == " ")
+        v_sich = true;
+    else
+        aRaw.seekg(0); // read again
 
-    } if (tw == TypeWort::Verb)
+    s_wort = aRaw.getRestArea().toString();
+    return true;
+}
+
+bool WortDe::parseRawDeNoun()
+{
+    clearOptions();
+    AreaUtf8 aRaw(s_raw);
+    const AreaUtf8 prfx = aRaw.getToken();
+    if (aRaw.getToken() != " " || !aRaw.hasSymbolDe())
     {
-        if (delimiter == ' ' && prfx == "sich")
-        {
-            v_sich = true;
-            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
-        } else
-        {
-            s_wort = s_raw;
-        }
+        s_wort = s_raw;
+        return false;
     }
 
-    if (s_wort.empty())
+    if (prfx == "der")
+        n_artikel = TypeArtikel::Der;
+    else if (prfx == "das")
+        n_artikel = TypeArtikel::Das;
+    else if (prfx == "die")
+        n_artikel = TypeArtikel::Die;
+    else if (prfx == "der/die")
+        n_artikel = TypeArtikel::Der_Die;
+    else if (prfx == "der/das")
+        n_artikel = TypeArtikel::Der_Das;
+    else
+    {
         s_wort = s_raw;
+        return false;
+    }
+
+    const size_t startWort = aRaw.tellg();
+    const AreaUtf8 wort = aRaw.getToken();
+    const AreaUtf8 delimiter = aRaw.getToken();
+    const AreaUtf8 plural = aRaw.getToken();
+
+    if (aRaw)
+    {
+        aRaw.seekg(startWort);
+        s_wort = aRaw.getRestArea().toString();
+    }
+    else if (plural.empty() && delimiter == ",")
+    {
+        s_wort = AreaUtf8(wort).toString();
+    }
+    else if ((plural == "(PI.)" || plural == "(Pl.)" || plural == "(PL)") &&
+             (delimiter == " " || delimiter == ", " || delimiter == ","))
+    {
+        s_wort = AreaUtf8(wort).toString();
+        n_wortPl = "Pl.";
+        n_artikel = TypeArtikel::Pl;
+    }
+    else if ((plural == "(Sg.)") &&
+             (delimiter == " " || delimiter == ", " || delimiter == ","))
+    {
+        s_wort = AreaUtf8(wort).toString();
+        n_wortPl = "Sg.";
+        n_artikel = TypeArtikel::Pl;
+    }
+    else if (plural.hasSymbolDe() &&
+             (delimiter == ", " || delimiter == ","))
+    {
+        s_wort = AreaUtf8(wort).toString();
+        n_wortPl = plural.toString();
+    }
+    else if ((plural == "-" ||
+            plural == "¨" ||
+            plural == "-e" ||
+            plural == "¨e" ||
+            plural == "-er" ||
+            plural == "¨er" ||
+            plural == "-n" ||
+            plural == "-en" ||
+            plural == "-s" ||
+            *plural == '-') && (delimiter == " " || delimiter == ", " || delimiter == ","))
+    {
+        s_wort = AreaUtf8(wort).toString();
+        n_wortPl = AreaUtf8(plural).toString();
+    } else
+    {
+        aRaw.seekg(startWort);
+        s_wort = aRaw.getRestArea().toString();
+    }
+
+    return true;
+}
+
+bool WortDe::setNewTypeWort(const TypeWort tw)
+{
+    clearOptions();
+    w_type = tw;
+
+    if (tw == TypeWort::Noun)
+        return parseRawDeNoun();
+    else if (tw == TypeWort::Verb)
+        return parseRawDeVerb();
+
+    s_wort = s_raw;
     return true;
 }
 
@@ -213,46 +283,26 @@ void WortDe::parseRawDe(TypeWort tw)
         return;
     }
 
-    char delimiter = 0;
-    std::string prfx = getPrefix(s_raw, delimiter);
-    if (delimiter == ' ')
+    AreaUtf8 aRaw(s_raw);
+    AreaUtf8 prfx = aRaw.getToken();
+    if (aRaw.getToken() == " " && aRaw.hasSymbolDe())
     {
-        TypeArtikel artikel = TypeArtikel::None;
-        if (prfx == "der")
+        if (prfx == "der" || prfx == "das" || prfx == "die" || prfx == "der/die" || prfx == "der/das")
         {
-            artikel = TypeArtikel::Der;
-        }
-        else if (prfx == "das")
-        {
-            artikel = TypeArtikel::Das;
-        }
-        else if (prfx == "die")
-        {
-            artikel = TypeArtikel::Die;
+            setNewTypeWort(TypeWort::Noun);
+            return;
         }
         else if (prfx == "sich")
         {
-            w_type = TypeWort::Verb; // TODO: test Combination
-            v_sich = true;
+            setNewTypeWort(TypeWort::Verb);
+            return;
         }
-        else
-            prfx.clear();
-
-        if (artikel != TypeArtikel::None)
-        {
-            // TODO: test Combination
-            w_type = TypeWort::Noun;
-            n_artikel = artikel;
-        }
-        if (!prfx.empty())
-            s_wort = substrWithoutSideSpaces(s_raw, prfx.size());
     }
-
-    if (s_wort.empty())
-        s_wort = s_raw;
+    clearOptions();
+    s_wort = s_raw;
 }
 
-const std::string WortDe::prefix() const
+std::string WortDe::prefix() const
 {
     if (w_type == TypeWort::Noun)
         return TypeArtikeltToString(n_artikel);
@@ -365,7 +415,7 @@ std::string WortDe::TypeArtikeltToString(TypeArtikel ta, const bool forLabel)
     return "";
 }
 
-void WortDe::debugPrint(std::ostream &os)
+std::string WortDe::blockToStr() const
 {
     static const char *WKursStr[] =
     {
@@ -377,13 +427,19 @@ void WortDe::debugPrint(std::ostream &os)
         "C1",
         "C2"
     };
-
+    std::string str;
     const int headBlock = w_block >> 24;
     if (headBlock > 0 && headBlock <= 6)
-        os << WKursStr[w_block >> 24];
+        str = WKursStr[w_block >> 24];
     else
-        os << headBlock;
-    os << "." << ((w_block >> 16) & 0xff) << ".k" << ((w_block >> 8) & 0xff) << ".t" << (w_block & 0xff) << "; ";
+        str = std::to_string(headBlock);
+    str = str + "." + std::to_string((w_block >> 16) & 0xff) + ".k" + std::to_string((w_block >> 8) & 0xff) + ".t" + std::to_string(w_block & 0xff);
+    return str;
+}
+
+void WortDe::debugPrint(std::ostream &os)
+{
+    os << blockToStr() << "; ";
 
     const std::string prfx = prefix();
     if (!prfx.empty())
