@@ -17,6 +17,7 @@ SOURCES += \
     mainwindow.cpp \
     qlistviewglossarydemodel.cpp \
     string_utf8.cpp \
+    utilQtTypes.cpp \
     utility.cpp \
     wortde.cpp
 
@@ -29,6 +30,7 @@ HEADERS += \
     mainwindow.h \
     qlistviewglossarydemodel.h \
     string_utf8.h \
+    utilQtTypes.h \
     utility.h \
     wortde.h
 

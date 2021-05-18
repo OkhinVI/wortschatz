@@ -22,3 +22,12 @@ void util::VectorFromString(VectorString &vec, const std::string &str)
         vec.push_back(line);
     }
 }
+
+void util::replaceEndLines(std::string &str)
+{
+    for(size_t i = 0; i < str.size(); ++i)
+    {
+        if (str[i] == '\n' || str[i] == '\r')
+            str[i] = ' ';
+    }
+}

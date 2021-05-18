@@ -7,6 +7,7 @@
 #include <fstream>
 #include "string_utf8.h"
 #include "SerializeString.h"
+#include "utilQtTypes.h"
 
 static unsigned int CurrBlock = 0;
 
@@ -154,7 +155,7 @@ unsigned int DialogRawEdit::getBlockNum(std::string &tema)
         num4 = 0xFF;
 
     CurrBlock = (num1 << 24) + (num2 << 16) + (num3 << 8) + num4;
-    tema = ui->lineEdit_8->text().toUtf8().toStdString();
+    tema = utilQt::lineEditToStdStr(ui->lineEdit_8);
 
     return CurrBlock;
 }

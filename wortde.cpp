@@ -140,9 +140,37 @@ WortDe::~WortDe()
 void WortDe::parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw)
 {
     s_raw = AreaUtf8(rawDeStr).trim().toString();
+    util::replaceEndLines(s_raw);
+
     s_translation = AreaUtf8(rawTrStr).trim().toString();
+    util::replaceEndLines(s_translation);
+
     parseRawDe(tw);
     w_block = _block;
+}
+
+void WortDe::setNewTranslation(const std::string &str)
+{
+    s_translation = AreaUtf8(str).trim().toString();
+    util::replaceEndLines(s_translation);
+}
+
+void WortDe::setNewWort(const std::string &str)
+{
+    s_wort = AreaUtf8(str).trim().toString();
+    util::replaceEndLines(s_wort);
+}
+
+void WortDe::setNewPrefix(const std::string &str)
+{
+    s_phrasePrefix = AreaUtf8(str).trim().toString();
+    util::replaceEndLines(s_phrasePrefix);
+}
+
+void WortDe::setNewPlural(const std::string &str)
+{
+    n_wortPl = AreaUtf8(str).trim().toString();
+    util::replaceEndLines(n_wortPl);
 }
 
 void WortDe::clearOptions()

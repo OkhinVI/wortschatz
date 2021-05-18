@@ -11,6 +11,7 @@
 #include "string_utf8.h"
 #include <sstream>
 #include "SerializeString.h"
+#include "utilQtTypes.h"
 
 static const char *SettingsFirma = "OchinWassili";
 static const char *SettingsApp = "LernenDe";
@@ -139,12 +140,12 @@ void MainWindow::on_actionOpenDir_triggered()
 
 void MainWindow::getWortDeToCurrWd()
 {
-    currWd.setNewTranslation(AreaUtf8( ui->lineEdit_2->text().toUtf8().toStdString() ).trim().toString());
-    currWd.setNewWort(AreaUtf8( ui->lineEdit->text().toUtf8().toStdString() ).trim().toString());
+    currWd.setNewTranslation(utilQt::lineEditToStdStr(ui->lineEdit_2));
+    currWd.setNewWort(utilQt::lineEditToStdStr(ui->lineEdit));
     if (currWd.type() == WortDe::TypeWort::Noun)
-        currWd.setNewPlural(AreaUtf8( ui->lineEdit_5->text().toUtf8().toStdString() ).trim().toString());
+        currWd.setNewPlural(utilQt::lineEditToStdStr(ui->lineEdit_5));
 
-    std::string prfxStr = AreaUtf8( ui->lineEdit_3->text().toUtf8().toStdString() ).trim().toString();
+    std::string prfxStr = utilQt::lineEditToStdStr(ui->lineEdit_3);
     AreaUtf8 prfx(prfxStr);
     AreaUtf8 erstWort = prfx.getToken(" ");
     prfx.getToken(" ");
@@ -186,11 +187,11 @@ void MainWindow::getWortDeToCurrWd()
 
 void MainWindow::setWortDe(WortDe wd)
 {
-    ui->lineEdit->setText(QString::fromStdString(wd.wort()));
-    ui->lineEdit_2->setText(QString::fromStdString(wd.translation()));
-    ui->lineEdit_3->setText(QString::fromStdString(wd.prefix()));
-    ui->lineEdit_4->setText(QString::fromStdString(wd.raw()));
-    ui->lineEdit_6->setText(QString::fromStdString(wd.blockToStr() + " = " + dicDe.tema(wd.block())));
+    utilQt::strToLineEdit(ui->lineEdit, wd.wort());
+    utilQt::strToLineEdit(ui->lineEdit_2, wd.translation());
+    utilQt::strToLineEdit(ui->lineEdit_3, wd.prefix());
+    utilQt::strToLineEdit(ui->lineEdit_4, wd.raw());
+    utilQt::strToLineEdit(ui->lineEdit_6, wd.blockToStr() + " = " + dicDe.tema(wd.block()));
 
     std::string options;
     if (wd.type() == WortDe::TypeWort::Noun)
@@ -201,7 +202,7 @@ void MainWindow::setWortDe(WortDe wd)
     {
         options = wd.vPrasens3f() + "; " + wd.vPrateritum() + "; " + wd.vPerfect();
     }
-    ui->lineEdit_5->setText(QString::fromStdString(options));
+    utilQt::strToLineEdit(ui->lineEdit_5, options);
 
     ui->pushButton_13->setEnabled(wd.type() == WortDe::TypeWort::Verb);
 
@@ -361,27 +362,27 @@ void MainWindow::on_pushButton_8_clicked()
 {
     const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
     const std::string endUrl = "";
-    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
 
 void MainWindow::on_pushButton_9_clicked()
 {
     const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
     const std::string endUrl = "&lang=de-ru";
-    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
 
 void MainWindow::on_pushButton_10_clicked()
 {
     const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
     const std::string endUrl = "&op=translate";
-    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
 
 void MainWindow::on_pushButton_11_clicked()
 {
-    const std::string rawStr = ui->lineEdit_4->text().toUtf8().toStdString();
-    const std::string trStr = ui->lineEdit_2->text().toUtf8().toStdString();
+    const std::string rawStr = utilQt::lineEditToStdStr(ui->lineEdit_4);
+    const std::string trStr = utilQt::lineEditToStdStr(ui->lineEdit_2);
     currWd.parseRawLine(rawStr, trStr, currWd.block(), currWd.type());
     setWortDe(currWd);
 }
@@ -409,21 +410,21 @@ void MainWindow::on_pushButton_12_clicked()
 {
     const std::string beginUrl = "https://www.dwds.de/wb/";
     const std::string endUrl = "";
-    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
 
 void MainWindow::on_pushButton_13_clicked()
 {
     const std::string beginUrl = "https://www.verbformen.ru/sprjazhenie/";
     const std::string endUrl = ".htm";
-    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
 
 void MainWindow::on_pushButton_14_clicked()
 {
     const std::string beginUrl = "https://ru.pons.com/%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4/%D0%BD%D0%B5%D0%BC%D0%B5%D1%86%D0%BA%D0%B8%D0%B9-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9/";
     const std::string endUrl = "";
-    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
 
 void MainWindow::on_pushButton_15_clicked()
@@ -431,9 +432,9 @@ void MainWindow::on_pushButton_15_clicked()
     const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
     const std::string endUrl = "&lang=de-ru";
     if (ui->checkBox_2->checkState() == Qt::Checked)
-        CombinationTranslate(beginUrl, endUrl, ui->lineEdit_4->text().toUtf8().toStdString());
+        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit_4));
     else
-        CombinationTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
 
 void MainWindow::on_pushButton_16_clicked()
@@ -441,7 +442,7 @@ void MainWindow::on_pushButton_16_clicked()
     const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
     const std::string endUrl = "&op=translate";
     if (ui->checkBox_2->checkState() == Qt::Checked)
-        CombinationTranslate(beginUrl, endUrl, ui->lineEdit_4->text().toUtf8().toStdString());
+        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit_4));
     else
-        CombinationTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }

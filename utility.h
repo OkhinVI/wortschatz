@@ -20,6 +20,7 @@ size_t NumberOfFunctionArguments(Types... args)
     return  sizeof...(args);
 }
 
+void replaceEndLines(std::string &str);
 
 } // namespace util
 
