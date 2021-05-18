@@ -54,3 +54,9 @@ void QListViewGlossaryDeModel::upDate()
 {
     upDate(0, glossary->size());
 }
+
+QModelIndex QListViewGlossaryDeModel::creatNewIndex(size_t idx)
+{
+    QModelIndex index = createIndex(idx, 0);
+    return index;
+}

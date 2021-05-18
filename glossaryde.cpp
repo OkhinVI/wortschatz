@@ -139,3 +139,19 @@ WortDe &GlossaryDe::at(size_t idx)
     static WortDe nullWortDe;
     return idx < dictionary.size() ? dictionary[idx] : nullWortDe;
 }
+
+size_t GlossaryDe::find(const std::string &str, size_t pos)
+{
+    if (str.empty())
+        return 0;
+
+    for (; pos < dictionary.size(); ++pos)
+    {
+        if (dictionary[pos].wort().find(str) != std::string::npos)
+            return pos;
+
+        if (dictionary[pos].translation().find(str) != std::string::npos)
+            return pos;
+    }
+    return dictionary.size();
+}

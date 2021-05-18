@@ -14,6 +14,7 @@ public:
 
     void upDate();
     void upDate(size_t idxBegin, size_t idxLast);
+    QModelIndex creatNewIndex(size_t idx);
 
 private:
     GlossaryDe *glossary = nullptr;

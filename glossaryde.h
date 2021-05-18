@@ -25,6 +25,8 @@ public:
     const WortDe &operator[] (size_t idx) { return at(idx); }
     size_t size() const { return dictionary.size(); }
 
+    size_t find(const std::string &str, size_t pos = 0);
+
     std::string tema(const unsigned int blockNum);
 
 private:

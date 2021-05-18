@@ -456,3 +456,56 @@ void MainWindow::on_pushButton_16_clicked()
     else
         CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
 }
+
+void MainWindow::on_pushButton_17_clicked()
+{
+    const std::string str = utilQt::lineEditToStdStr(ui->lineEdit_7);
+    const size_t idx = dicDe.find(str, currIndex + 1);
+    if (idx == dicDe.size())
+    {
+        QMessageBox::information(this, utilQt::strToQt(str), "nicht finden", QMessageBox::Yes);
+        return;
+    }
+
+    QModelIndex index = model->creatNewIndex(idx);
+    if ( index.isValid() ) {
+        ui->listView->setCurrentIndex(index);
+        selectItem(idx);
+    }
+}
+
+void MainWindow::on_lineEdit_7_textChanged(const QString &arg1)
+{
+    const std::string str = utilQt::strToStd(arg1);
+    if (str.empty())
+        return;
+
+    const size_t idx = dicDe.find(str, 0);
+    if (idx == dicDe.size())
+    {
+        ui->lineEdit_7->setStyleSheet("color: rgb(255, 0, 0)");
+        return;
+    }
+
+    ui->lineEdit_7->setStyleSheet("color: rgb(0, 0, 0)");
+
+    QModelIndex index = model->creatNewIndex(idx);
+    if ( index.isValid() ) {
+        ui->listView->setCurrentIndex(index);
+        selectItem(idx);
+    }
+}
+
+void MainWindow::on_pushButton_18_clicked()
+{
+    const std::string str = utilQt::lineEditToStdStr(ui->lineEdit_7);
+    size_t idx = dicDe.find(str, 0);
+    if (idx == dicDe.size())
+        idx = 0;
+
+    QModelIndex index = model->creatNewIndex(idx);
+    if ( index.isValid() ) {
+        ui->listView->setCurrentIndex(index);
+        selectItem(idx);
+    }
+}

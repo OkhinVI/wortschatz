@@ -70,6 +70,12 @@ private slots:
 
     void on_pushButton_16_clicked();
 
+    void on_pushButton_17_clicked();
+
+    void on_lineEdit_7_textChanged(const QString &arg1);
+
+    void on_pushButton_18_clicked();
+
 private:
     void selectItem(int idx);
     void setWortDe(WortDe wd);
