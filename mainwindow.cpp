@@ -137,6 +137,53 @@ void MainWindow::on_actionOpenDir_triggered()
     settings.setValue(SettingsDictionaryPath, QString::fromStdString(pathDic));
 }
 
+void MainWindow::getWortDeToCurrWd()
+{
+    currWd.setNewTranslation(AreaUtf8( ui->lineEdit_2->text().toUtf8().toStdString() ).trim().toString());
+    currWd.setNewWort(AreaUtf8( ui->lineEdit->text().toUtf8().toStdString() ).trim().toString());
+    if (currWd.type() == WortDe::TypeWort::Noun)
+        currWd.setNewPlural(AreaUtf8( ui->lineEdit_5->text().toUtf8().toStdString() ).trim().toString());
+
+    std::string prfxStr = AreaUtf8( ui->lineEdit_3->text().toUtf8().toStdString() ).trim().toString();
+    AreaUtf8 prfx(prfxStr);
+    AreaUtf8 erstWort = prfx.getToken(" ");
+    prfx.getToken(" ");
+    if (currWd.type() == WortDe::TypeWort::Noun)
+    {
+        if (erstWort == "der")
+            currWd.setNewArtikel(WortDe::TypeArtikel::Der);
+        else if (erstWort == "das")
+            currWd.setNewArtikel(WortDe::TypeArtikel::Das);
+        else if (erstWort == "die")
+        {
+            if (currWd.artikel() != WortDe::TypeArtikel::Pl)
+                currWd.setNewArtikel(WortDe::TypeArtikel::Die);
+        }
+        else if (erstWort == "der/das")
+            currWd.setNewArtikel(WortDe::TypeArtikel::Der_Das);
+        else if (erstWort == "der/die")
+            currWd.setNewArtikel(WortDe::TypeArtikel::Der_Die);
+        else
+            prfx.seekg(0);
+    }
+    else if(currWd.type() == WortDe::TypeWort::Verb)
+    {
+        if (erstWort == "sich")
+        {
+            currWd.setNewSich(true);
+        }
+        else
+        {
+            currWd.setNewSich(false);
+            prfx.seekg(0);
+        }
+    }
+    else
+        prfx.seekg(0);
+
+    currWd.setNewPrefix(prfx.getRestArea().trim().toString());
+}
+
 void MainWindow::setWortDe(WortDe wd)
 {
     ui->lineEdit->setText(QString::fromStdString(wd.wort()));
@@ -156,6 +203,8 @@ void MainWindow::setWortDe(WortDe wd)
     }
     ui->lineEdit_5->setText(QString::fromStdString(options));
 
+    ui->pushButton_13->setEnabled(wd.type() == WortDe::TypeWort::Verb);
+
     std::string typeStr = WortDe::TypeWortToString(wd.type()) + "/" + WortDe::TypeWortToString(wd.type(), "ru");
     ui->pushButton->setText(QString::fromStdString(typeStr));
 }
@@ -173,9 +222,7 @@ void MainWindow::selectItem(int idx)
     {
         if (origIndex >= 0 || static_cast<size_t>(origIndex) < dicDe.size())
         {
-            // TODO: add save currWd
-            const std::string trStr = ui->lineEdit_2->text().toUtf8().toStdString();
-            currWd.setNewTranslation(trStr);
+            getWortDeToCurrWd();
             origWd = currWd;
             dicDe.at(origIndex) = origWd;
         }
@@ -215,8 +262,8 @@ void MainWindow::on_pushButton_2_clicked()
 {
     if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
         return;
-    const std::string trStr = ui->lineEdit_2->text().toUtf8().toStdString();
-    currWd.setNewTranslation(trStr);
+
+    getWortDeToCurrWd();
     origWd = currWd;
     dicDe.at(origIndex) = origWd;
 }
@@ -283,6 +330,7 @@ void MainWindow::wortTranslate(const std::string &beginUrl, const std::string &e
     if (str.empty())
         return;
     AreaUtf8 au8(str);
+    au8.trim();
     AreaUtf8 wort = au8.getToken();
     if (wort.empty())
         return;
@@ -313,27 +361,21 @@ void MainWindow::on_pushButton_8_clicked()
 {
     const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
     const std::string endUrl = "";
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
 }
 
 void MainWindow::on_pushButton_9_clicked()
 {
     const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
     const std::string endUrl = "&lang=de-ru";
-    if (currWd.type() != WortDe::TypeWort::Combination)
-        wortTranslate(beginUrl, endUrl, currWd.wort());
-    else
-        CombinationTranslate(beginUrl, endUrl, currWd.wort());
+    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
 }
 
 void MainWindow::on_pushButton_10_clicked()
 {
     const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
     const std::string endUrl = "&op=translate";
-    if (currWd.type() != WortDe::TypeWort::Combination)
-        wortTranslate(beginUrl, endUrl, currWd.wort());
-    else
-        CombinationTranslate(beginUrl, endUrl, currWd.wort());
+    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
 }
 
 void MainWindow::on_pushButton_11_clicked()
@@ -361,4 +403,45 @@ void MainWindow::on_actionSave_as_raw_triggered()
         }
         os << wd.raw() << "\t" << wd.translation() << std::endl;
     }
+}
+
+void MainWindow::on_pushButton_12_clicked()
+{
+    const std::string beginUrl = "https://www.dwds.de/wb/";
+    const std::string endUrl = "";
+    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+}
+
+void MainWindow::on_pushButton_13_clicked()
+{
+    const std::string beginUrl = "https://www.verbformen.ru/sprjazhenie/";
+    const std::string endUrl = ".htm";
+    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+}
+
+void MainWindow::on_pushButton_14_clicked()
+{
+    const std::string beginUrl = "https://ru.pons.com/%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4/%D0%BD%D0%B5%D0%BC%D0%B5%D1%86%D0%BA%D0%B8%D0%B9-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9/";
+    const std::string endUrl = "";
+    wortTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+}
+
+void MainWindow::on_pushButton_15_clicked()
+{
+    const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
+    const std::string endUrl = "&lang=de-ru";
+    if (ui->checkBox_2->checkState() == Qt::Checked)
+        CombinationTranslate(beginUrl, endUrl, ui->lineEdit_4->text().toUtf8().toStdString());
+    else
+        CombinationTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
+}
+
+void MainWindow::on_pushButton_16_clicked()
+{
+    const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
+    const std::string endUrl = "&op=translate";
+    if (ui->checkBox_2->checkState() == Qt::Checked)
+        CombinationTranslate(beginUrl, endUrl, ui->lineEdit_4->text().toUtf8().toStdString());
+    else
+        CombinationTranslate(beginUrl, endUrl, ui->lineEdit->text().toUtf8().toStdString());
 }

@@ -92,6 +92,11 @@ public:
 
     bool setNewTypeWort(const TypeWort tw);
     void setNewTranslation(const std::string &str) { s_translation = str; }
+    void setNewWort(const std::string &str) { s_wort = str; }
+    void setNewPrefix(const std::string &str) { s_phrasePrefix = str; }
+    void setNewPlural(const std::string &str) { n_wortPl = str; }
+    void setNewArtikel(const TypeArtikel art) { n_artikel = art; }
+    void setNewSich(const bool sich) { v_sich = sich; }
 
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);

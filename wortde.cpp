@@ -168,11 +168,20 @@ void WortDe::clearOptions()
 bool WortDe::parseRawDeVerb()
 {
     AreaUtf8 aRaw(s_raw);
-    const AreaUtf8 prfx = aRaw.getToken();
-    if (prfx == "sich" && aRaw.getToken() == " ")
+    const AreaUtf8 prfxS = aRaw.getToken();
+    if (prfxS == "sich" && aRaw.getToken() == " ")
         v_sich = true;
     else
         aRaw.seekg(0); // read again
+
+    const size_t startNextWort = aRaw.tellg();
+    const AreaUtf8 prfx = aRaw.getToken();
+    if ((prfx == "etwas" || prfx == "jdn." || prfx == "jmd." || prfx == "jdn," || prfx == "jemandem" || prfx == "etwas/jemanden" || prfx == "sich/jemanden" || prfx == "etw." ||
+         prfx == "jemanden" || prfx == "jemandem")
+         && aRaw.getToken() == " ")
+        s_phrasePrefix = prfx.toString();
+    else
+        aRaw.seekg(startNextWort);
 
     s_wort = aRaw.getRestArea().toString();
     return true;
@@ -180,7 +189,6 @@ bool WortDe::parseRawDeVerb()
 
 bool WortDe::parseRawDeNoun()
 {
-    clearOptions();
     AreaUtf8 aRaw(s_raw);
     const AreaUtf8 prfx = aRaw.getToken();
     if (aRaw.getToken() != " " || !aRaw.hasSymbolDe())
@@ -297,6 +305,14 @@ void WortDe::parseRawDe(TypeWort tw)
             setNewTypeWort(TypeWort::Verb);
             return;
         }
+        else if (prfx == "etwas" || prfx == "jdn." || prfx == "jmd." || prfx == "jdn," || prfx == "jemandem" || prfx == "etwas/jemanden" || prfx == "sich/jemanden" || prfx == "etw." ||
+             prfx == "jemanden" || prfx == "jemandem")
+        {
+            clearOptions();
+            s_phrasePrefix = prfx.toString();
+            s_wort = aRaw.getRestArea().trim().toString();
+            return;
+        }
     }
     clearOptions();
     s_wort = s_raw;
@@ -304,11 +320,17 @@ void WortDe::parseRawDe(TypeWort tw)
 
 std::string WortDe::prefix() const
 {
+    std::string str = s_phrasePrefix;
     if (w_type == TypeWort::Noun)
-        return TypeArtikeltToString(n_artikel);
-    if (w_type == TypeWort::Verb)
-        return v_sich ? "sich" : "";
-    return "";
+    {
+        str = str.empty() ? TypeArtikeltToString(n_artikel) : str + " " + TypeArtikeltToString(n_artikel);
+    }
+    else if (w_type == TypeWort::Verb)
+    {
+        if (v_sich)
+            str = str.empty() ? "sich" : "sich " + str;
+    }
+    return str;
 }
 
 std::string WortDe::TypeWortToString(TypeWort tw, const char *local)
