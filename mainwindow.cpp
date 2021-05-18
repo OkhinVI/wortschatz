@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QMessageBox>
 #include "qlistviewglossarydemodel.h"
 #include "string_utf8.h"
 #include <sstream>
@@ -210,6 +211,29 @@ void MainWindow::setWortDe(WortDe wd)
     ui->pushButton->setText(QString::fromStdString(typeStr));
 }
 
+void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
+{
+    if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
+        return;
+
+    getWortDeToCurrWd();
+    if (currWd == origWd)
+        return;
+
+    if (ui->checkBox->checkState() != Qt::Checked && !saveWithoutAsk)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Wortschatzkarte geändert", "Änderungen speichern?",
+        QMessageBox::Yes|QMessageBox::No);
+        if (reply != QMessageBox::Yes)
+            return;
+    }
+
+    origWd = currWd;
+    dicDe.at(origIndex) = origWd;
+    model->upDate(origIndex, origIndex);
+}
+
 void MainWindow::selectItem(int idx)
 {
     if (currIndex == idx)
@@ -218,16 +242,7 @@ void MainWindow::selectItem(int idx)
     if (idx < 0 || static_cast<size_t>(idx) >= dicDe.size())
         return;
 
-    // TODO: check currWd changes
-    if (ui->checkBox->checkState() == Qt::Checked)
-    {
-        if (origIndex >= 0 || static_cast<size_t>(origIndex) < dicDe.size())
-        {
-            getWortDeToCurrWd();
-            origWd = currWd;
-            dicDe.at(origIndex) = origWd;
-        }
-    }
+    checkChangesCurrWd();
 
     WortDe wd = dicDe[idx];
     setWortDe(wd);
@@ -261,12 +276,7 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
-        return;
-
-    getWortDeToCurrWd();
-    origWd = currWd;
-    dicDe.at(origIndex) = origWd;
+    checkChangesCurrWd(true);
 }
 
 void MainWindow::on_pushButton_3_clicked()

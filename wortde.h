@@ -84,6 +84,8 @@ public:
     bool load(LinesRamIStream &ils, std::ostream &osErr);
     size_t countSaveLines();
 
+    bool operator==(const WortDe& wd2) const;
+
     static std::string TypeWortToString(TypeWort tw, const char *local = "de");
     static std::string TypeArtikeltToString(TypeArtikel ta, const bool forLabel = false);
 

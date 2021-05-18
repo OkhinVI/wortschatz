@@ -137,6 +137,31 @@ WortDe::~WortDe()
 
 }
 
+bool WortDe::operator==(const WortDe& wd2) const
+{
+    return  s_wort == wd2.s_wort &&
+            w_type == wd2.w_type &&
+            w_block == wd2.w_block &&
+            w_frequency == wd2.w_frequency &&
+            w_accent == wd2.w_accent &&
+            s_raw == wd2.s_raw &&
+            s_translation == wd2.s_translation &&
+            s_phrasePrefix == wd2.s_phrasePrefix &&
+            s_phraseEnd == wd2.s_phraseEnd &&
+            s_example == wd2.s_example &&
+            n_wortPl == wd2.n_wortPl &&
+            n_artikel == wd2.n_artikel &&
+            v_sich == wd2.v_sich &&
+            v_prasens3f == wd2.v_prasens3f &&
+            v_perfect == wd2.v_perfect &&
+            v_prateritum == wd2.v_prateritum &&
+            v_trennbar == wd2.v_trennbar &&
+            v_Pretexts == wd2.v_Pretexts &&
+            v_Cases == wd2.v_Cases &&
+            v_TypePerfect == wd2.v_TypePerfect;
+
+}
+
 void WortDe::parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw)
 {
     s_raw = AreaUtf8(rawDeStr).trim().toString();

@@ -76,6 +76,7 @@ private:
     void getWortDeToCurrWd();
     void wortTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
     void CombinationTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
+    void checkChangesCurrWd(const bool saveWithoutAsk = false);
 
 private:
     std::string pathDic;
