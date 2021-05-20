@@ -92,13 +92,17 @@ private slots:
 
     void on_pushButton_23_clicked();
 
+    void on_pushButton_27_clicked();
+
+    void on_pushButton_28_clicked();
+
 private:
     void selectItem(int idx);
     void setButtonEnable(WortDe wd);
     void setWortDe(WortDe wd);
     void getWortDeToCurrWd();
     void wortTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
-    void CombinationTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
+    void CombinationTranslate(const std::string &beginUrl, const std::string &endUrl);
     void checkChangesCurrWd(const bool saveWithoutAsk = false);
 
 private:

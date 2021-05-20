@@ -78,6 +78,7 @@ public:
     TypeWort type() const { return w_type; }
     bool hasSich() const { return v_sich; }
 
+    std::string rawPrefix() const { return s_phrasePrefix; }
     std::string prefix() const;
     std::string blockToStr() const;
     unsigned int block() const { return w_block; }

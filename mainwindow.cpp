@@ -145,45 +145,7 @@ void MainWindow::getWortDeToCurrWd()
     currWd.setNewWort(utilQt::lineEditToStdStr(ui->lineEdit));
     if (currWd.type() == WortDe::TypeWort::Noun)
         currWd.setNewPlural(utilQt::lineEditToStdStr(ui->lineEdit_5));
-
-    std::string prfxStr = utilQt::lineEditToStdStr(ui->lineEdit_3);
-    AreaUtf8 prfx(prfxStr);
-    AreaUtf8 erstWort = prfx.getToken(" ");
-    prfx.getToken(" ");
-    if (currWd.type() == WortDe::TypeWort::Noun)
-    {
-        if (erstWort == "der")
-            currWd.setNewArtikel(WortDe::TypeArtikel::Der);
-        else if (erstWort == "das")
-            currWd.setNewArtikel(WortDe::TypeArtikel::Das);
-        else if (erstWort == "die")
-        {
-            if (currWd.artikel() != WortDe::TypeArtikel::Pl)
-                currWd.setNewArtikel(WortDe::TypeArtikel::Die);
-        }
-        else if (erstWort == "der/das")
-            currWd.setNewArtikel(WortDe::TypeArtikel::Der_Das);
-        else if (erstWort == "der/die")
-            currWd.setNewArtikel(WortDe::TypeArtikel::Der_Die);
-        else
-            prfx.seekg(0);
-    }
-    else if(currWd.type() == WortDe::TypeWort::Verb)
-    {
-        if (erstWort == "sich")
-        {
-            currWd.setNewSich(true);
-        }
-        else
-        {
-            currWd.setNewSich(false);
-            prfx.seekg(0);
-        }
-    }
-    else
-        prfx.seekg(0);
-
-    currWd.setNewPrefix(prfx.getRestArea().trim().toString());
+    // TODO: if (currWd.type() == WortDe::TypeWort::Verb)
 }
 
 void MainWindow::setWortDe(WortDe wd)
@@ -359,10 +321,21 @@ void MainWindow::wortTranslate(const std::string &beginUrl, const std::string &e
     QDesktopServices::openUrl(QUrl(url));
 }
 
-void MainWindow::CombinationTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str)
+void MainWindow::CombinationTranslate(const std::string &beginUrl, const std::string &endUrl)
 {
+    getWortDeToCurrWd();
+    std::string str;
+    if (ui->checkBox_2->checkState() == Qt::Checked)
+        str = currWd.raw();
+    else
+    {
+        const std::string prfx = currWd.prefix();
+        str = prfx.empty() ? currWd.wort() : prfx + " " + currWd.wort();
+    }
+
     if (str.empty())
         return;
+
     std::stringstream ss;
     for (size_t i = 0; i < str.size(); ++i)
     {
@@ -381,28 +354,30 @@ void MainWindow::on_pushButton_8_clicked()
 {
     const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
     const std::string endUrl = "";
-    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    getWortDeToCurrWd();
+    wortTranslate(beginUrl, endUrl, currWd.wort());
 }
 
 void MainWindow::on_pushButton_9_clicked()
 {
     const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
     const std::string endUrl = "&lang=de-ru";
-    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    getWortDeToCurrWd();
+    wortTranslate(beginUrl, endUrl, currWd.wort());
 }
 
 void MainWindow::on_pushButton_10_clicked()
 {
     const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
     const std::string endUrl = "&op=translate";
-    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    getWortDeToCurrWd();
+    wortTranslate(beginUrl, endUrl, currWd.wort());
 }
 
 void MainWindow::on_pushButton_11_clicked()
 {
-    const std::string rawStr = utilQt::lineEditToStdStr(ui->lineEdit_4);
-    const std::string trStr = utilQt::lineEditToStdStr(ui->lineEdit_2);
-    currWd.parseRawLine(rawStr, trStr, currWd.block(), currWd.type());
+    getWortDeToCurrWd();
+    currWd.parseRawLine(currWd.raw(), currWd.translation(), currWd.block(), currWd.type());
     setWortDe(currWd);
 }
 
@@ -429,41 +404,38 @@ void MainWindow::on_pushButton_12_clicked()
 {
     const std::string beginUrl = "https://www.dwds.de/wb/";
     const std::string endUrl = "";
-    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    getWortDeToCurrWd();
+    wortTranslate(beginUrl, endUrl, currWd.wort());
 }
 
 void MainWindow::on_pushButton_13_clicked()
 {
     const std::string beginUrl = "https://www.verbformen.ru/sprjazhenie/";
     const std::string endUrl = ".htm";
-    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    getWortDeToCurrWd();
+    wortTranslate(beginUrl, endUrl, currWd.wort());
 }
 
 void MainWindow::on_pushButton_14_clicked()
 {
     const std::string beginUrl = "https://ru.pons.com/%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4/%D0%BD%D0%B5%D0%BC%D0%B5%D1%86%D0%BA%D0%B8%D0%B9-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9/";
     const std::string endUrl = "";
-    wortTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    getWortDeToCurrWd();
+    wortTranslate(beginUrl, endUrl, currWd.wort());
 }
 
 void MainWindow::on_pushButton_15_clicked()
 {
     const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
     const std::string endUrl = "&lang=de-ru";
-    if (ui->checkBox_2->checkState() == Qt::Checked)
-        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit_4));
-    else
-        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    CombinationTranslate(beginUrl, endUrl);
 }
 
 void MainWindow::on_pushButton_16_clicked()
 {
     const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
     const std::string endUrl = "&op=translate";
-    if (ui->checkBox_2->checkState() == Qt::Checked)
-        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit_4));
-    else
-        CombinationTranslate(beginUrl, endUrl, utilQt::lineEditToStdStr(ui->lineEdit));
+    CombinationTranslate(beginUrl, endUrl);
 }
 
 void MainWindow::on_pushButton_17_clicked()
@@ -621,4 +593,33 @@ void MainWindow::setButtonEnable(WortDe wd)
     ui->pushButton_24->setEnabled(artikl);
     ui->pushButton_25->setEnabled(artikl);
     ui->pushButton_26->setEnabled(artikl);
+}
+
+void MainWindow::on_pushButton_27_clicked()
+{
+    std::string str = currWd.wort();
+    AreaUtf8 au8(str);
+    auto prfx = au8.getToken(" ");
+    auto newWort = au8.getRestArea().trim();
+    if (newWort.empty())
+        return;
+
+    currWd.setNewPrefix(currWd.rawPrefix() + " " + prfx.toString());
+    currWd.setNewWort(newWort.toString());
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_28_clicked()
+{
+    std::string str = currWd.rawPrefix();
+    AreaUtf8 au8(str);
+    std::vector<AreaUtf8> tokens;
+    au8.getAllTokens(tokens, " ");
+    if (tokens.empty())
+        return;
+
+    auto prfxEnd = tokens.back();
+    currWd.setNewPrefix(au8.subArea(0, str.size() - prfxEnd.size()).trim().toString());
+    currWd.setNewWort(prfxEnd.toString() + " " +  currWd.wort());
+    setWortDe(currWd);
 }

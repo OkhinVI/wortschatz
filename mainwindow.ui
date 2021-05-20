@@ -74,6 +74,9 @@
     <property name="alignment">
      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit_4">
     <property name="geometry">
@@ -108,8 +111,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>584</x>
-      <y>7</y>
+      <x>678</x>
+      <y>34</y>
       <width>261</width>
       <height>31</height>
      </rect>
@@ -165,8 +168,8 @@
    <widget class="QPushButton" name="pushButton_4">
     <property name="geometry">
      <rect>
-      <x>880</x>
-      <y>10</y>
+      <x>700</x>
+      <y>2</y>
       <width>41</width>
       <height>23</height>
      </rect>
@@ -178,8 +181,8 @@
    <widget class="QPushButton" name="pushButton_5">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>10</y>
+      <x>750</x>
+      <y>2</y>
       <width>51</width>
       <height>23</height>
      </rect>
@@ -191,8 +194,8 @@
    <widget class="QPushButton" name="pushButton_6">
     <property name="geometry">
      <rect>
-      <x>990</x>
-      <y>10</y>
+      <x>810</x>
+      <y>2</y>
       <width>41</width>
       <height>23</height>
      </rect>
@@ -204,8 +207,8 @@
    <widget class="QPushButton" name="pushButton_7">
     <property name="geometry">
      <rect>
-      <x>1040</x>
-      <y>10</y>
+      <x>860</x>
+      <y>2</y>
       <width>51</width>
       <height>23</height>
      </rect>
@@ -396,7 +399,7 @@
      <string>Übersetzung raw</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_15">
@@ -563,6 +566,32 @@
     </property>
     <property name="text">
      <string>ProperNoun</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_27">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>69</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;- to Prefix</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_28">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>42</y>
+      <width>81</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>-&gt; from Prefix</string>
     </property>
    </widget>
   </widget>

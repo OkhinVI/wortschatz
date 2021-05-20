@@ -375,7 +375,7 @@ std::string WortDe::prefix() const
     std::string str = s_phrasePrefix;
     if (w_type == TypeWort::Noun)
     {
-        str = str.empty() ? TypeArtikeltToString(n_artikel) : str + " " + TypeArtikeltToString(n_artikel);
+        str = str.empty() ? TypeArtikeltToString(n_artikel) : TypeArtikeltToString(n_artikel) + " " + str;
     }
     else if (w_type == TypeWort::Verb)
     {
