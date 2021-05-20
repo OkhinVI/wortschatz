@@ -292,7 +292,6 @@ bool WortDe::parseRawDeNoun()
     {
         s_wort = AreaUtf8(wort).toString();
         n_wortPl = "Sg.";
-        n_artikel = TypeArtikel::Pl;
     }
     else if (plural.hasSymbolDe() &&
              (delimiter == ", " || delimiter == ","))
