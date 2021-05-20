@@ -205,10 +205,10 @@ void MainWindow::setWortDe(WortDe wd)
     }
     utilQt::strToLineEdit(ui->lineEdit_5, options);
 
-    ui->pushButton_13->setEnabled(wd.type() == WortDe::TypeWort::Verb);
-
     std::string typeStr = WortDe::TypeWortToString(wd.type()) + "/" + WortDe::TypeWortToString(wd.type(), "ru");
     ui->pushButton->setText(QString::fromStdString(typeStr));
+
+    setButtonEnable(wd);
 }
 
 void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
@@ -264,6 +264,7 @@ void MainWindow::on_listView_clicked(const QModelIndex &index)
 
 void MainWindow::on_pushButton_clicked()
 {
+    getWortDeToCurrWd();
     DialogTypeWort* pdlg = new DialogTypeWort(this);
     pdlg->setTypeWort(currWd.type());
     if (pdlg->exec() == QDialog::Accepted)
@@ -289,48 +290,56 @@ void MainWindow::on_pushButton_3_clicked()
 
 void MainWindow::on_pushButton_4_clicked()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Combination);
     setWortDe(currWd);
 }
 
 void MainWindow::on_pushButton_5_clicked()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Noun);
     setWortDe(currWd);
 }
 
 void MainWindow::on_pushButton_6_clicked()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Verb);
     setWortDe(currWd);
 }
 
 void MainWindow::on_pushButton_7_clicked()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Adjective);
     setWortDe(currWd);
 }
 
 void MainWindow::slotShortcutAltW()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Combination);
     setWortDe(currWd);
 }
 
 void MainWindow::slotShortcutAltN()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Noun);
     setWortDe(currWd);
 }
 
 void MainWindow::slotShortcutAltV()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Verb);
     setWortDe(currWd);
 }
 
 void MainWindow::slotShortcutAltA()
 {
+    getWortDeToCurrWd();
     currWd.setNewTypeWort(WortDe::TypeWort::Adjective);
     setWortDe(currWd);
 }
@@ -508,4 +517,108 @@ void MainWindow::on_pushButton_18_clicked()
         ui->listView->setCurrentIndex(index);
         selectItem(idx);
     }
+}
+
+void MainWindow::on_pushButton_19_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Noun)
+        currWd.setNewTypeWort(WortDe::TypeWort::Noun);
+    currWd.setNewArtikel(WortDe::TypeArtikel::Der);
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_20_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Noun)
+        currWd.setNewTypeWort(WortDe::TypeWort::Noun);
+    currWd.setNewArtikel(WortDe::TypeArtikel::Das);
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_21_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Noun)
+        currWd.setNewTypeWort(WortDe::TypeWort::Noun);
+    currWd.setNewArtikel(WortDe::TypeArtikel::Die);
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_22_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Noun)
+        currWd.setNewTypeWort(WortDe::TypeWort::Noun);
+    currWd.setNewArtikel(WortDe::TypeArtikel::Pl);
+    currWd.setNewPlural("Pl.");
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_24_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Noun)
+        currWd.setNewTypeWort(WortDe::TypeWort::Noun);
+    currWd.setNewArtikel(WortDe::TypeArtikel::Der_Die);
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_25_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Noun)
+        currWd.setNewTypeWort(WortDe::TypeWort::Noun);
+    currWd.setNewArtikel(WortDe::TypeArtikel::Der_Das);
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_26_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Noun)
+        currWd.setNewTypeWort(WortDe::TypeWort::Noun);
+    currWd.setNewArtikel(WortDe::TypeArtikel::ProperNoun);
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_23_clicked()
+{
+    getWortDeToCurrWd();
+    if (currWd.type() != WortDe::TypeWort::Verb)
+    {
+        currWd.setNewTypeWort(WortDe::TypeWort::Verb);
+        currWd.setNewSich(true);
+    }
+    else
+        currWd.setNewSich(!currWd.hasSich());
+    setWortDe(currWd);
+}
+
+void MainWindow::setButtonEnable(WortDe wd)
+{
+    const bool verb = wd.type() == WortDe::TypeWort::Verb || wd.type() == WortDe::TypeWort::None;
+    const bool artikl = wd.type() == WortDe::TypeWort::Noun || wd.type() == WortDe::TypeWort::None;
+
+    ui->pushButton_19->setStyleSheet(wd.artikel() == WortDe::TypeArtikel::Der ? "font-weight: bold; color: blue" : "");
+    ui->pushButton_20->setStyleSheet(wd.artikel() == WortDe::TypeArtikel::Das ? "font-weight: bold; color: green" : "");
+    ui->pushButton_21->setStyleSheet(wd.artikel() == WortDe::TypeArtikel::Die ? "font-weight: bold; color: red" : "");
+    ui->pushButton_22->setStyleSheet(wd.artikel() == WortDe::TypeArtikel::Pl  ? "font-weight: bold" : "");
+    ui->pushButton_24->setStyleSheet(wd.artikel() == WortDe::TypeArtikel::Der_Die  ? "font-weight: bold" : "");
+    ui->pushButton_25->setStyleSheet(wd.artikel() == WortDe::TypeArtikel::Der_Das  ? "font-weight: bold" : "");
+    ui->pushButton_26->setStyleSheet(wd.artikel() == WortDe::TypeArtikel::ProperNoun  ? "font-weight: bold" : "");
+
+    ui->pushButton_23->setStyleSheet(wd.hasSich()  ? "font-weight: bold" : "");
+
+    ui->pushButton_13->setEnabled(verb);
+    ui->pushButton_23->setEnabled(verb);
+
+    ui->pushButton_19->setEnabled(artikl);
+    ui->pushButton_20->setEnabled(artikl);
+    ui->pushButton_21->setEnabled(artikl);
+    ui->pushButton_22->setEnabled(artikl);
+    ui->pushButton_24->setEnabled(artikl);
+    ui->pushButton_25->setEnabled(artikl);
+    ui->pushButton_26->setEnabled(artikl);
 }

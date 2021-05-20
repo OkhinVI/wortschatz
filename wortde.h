@@ -76,6 +76,8 @@ public:
     const std::string& vPerfect() const { return v_perfect; }
     TypeArtikel artikel() const { return n_artikel; }
     TypeWort type() const { return w_type; }
+    bool hasSich() const { return v_sich; }
+
     std::string prefix() const;
     std::string blockToStr() const;
     unsigned int block() const { return w_block; }
