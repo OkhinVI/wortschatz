@@ -143,6 +143,7 @@ void MainWindow::getWortDeToCurrWd()
 {
     currWd.setNewTranslation(utilQt::lineEditToStdStr(ui->lineEdit_2));
     currWd.setNewWort(utilQt::lineEditToStdStr(ui->lineEdit));
+    currWd.setNewExample(utilQt::lineEditToStdStr(ui->lineEdit_6));
     if (currWd.type() == WortDe::TypeWort::Noun)
         currWd.setNewPlural(utilQt::lineEditToStdStr(ui->lineEdit_5));
     // TODO: if (currWd.type() == WortDe::TypeWort::Verb)
@@ -154,7 +155,9 @@ void MainWindow::setWortDe(WortDe wd)
     utilQt::strToLineEdit(ui->lineEdit_2, wd.translation());
     utilQt::strToLineEdit(ui->lineEdit_3, wd.prefix());
     utilQt::strToLineEdit(ui->lineEdit_4, wd.raw());
-    utilQt::strToLineEdit(ui->lineEdit_6, wd.blockToStr() + " = " + dicDe.tema(wd.block()));
+    utilQt::strToLineEdit(ui->lineEdit_6, wd.example());
+
+    ui->label->setText(QString::fromStdString(wd.blockToStr() + " = " + dicDe.tema(wd.block())));
 
     std::string options;
     if (wd.type() == WortDe::TypeWort::Noun)
@@ -317,7 +320,6 @@ void MainWindow::wortTranslate(const std::string &beginUrl, const std::string &e
     if (wort.empty())
         return;
     QString url = QString::fromStdString(beginUrl + wort.toString() + endUrl);
-    ui->label->setText(url);
     QDesktopServices::openUrl(QUrl(url));
 }
 
@@ -346,7 +348,6 @@ void MainWindow::CombinationTranslate(const std::string &beginUrl, const std::st
             ss << sym;
     }
     QString url = QString::fromStdString(beginUrl + ss.str() + endUrl);
-    ui->label->setText(url);
     QDesktopServices::openUrl(QUrl(url));
 }
 

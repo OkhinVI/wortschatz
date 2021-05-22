@@ -74,6 +74,7 @@ public:
     const std::string& vPrasens3f() const { return v_prasens3f; }
     const std::string& vPrateritum() const { return v_prateritum; }
     const std::string& vPerfect() const { return v_perfect; }
+    const std::string& example() const { return s_example; }
     TypeArtikel artikel() const { return n_artikel; }
     TypeWort type() const { return w_type; }
     bool hasSich() const { return v_sich; }
@@ -102,6 +103,7 @@ public:
     void setNewWort(const std::string &str);
     void setNewPrefix(const std::string &str);
     void setNewPlural(const std::string &str);
+    void setNewExample(const std::string &str);
 
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);

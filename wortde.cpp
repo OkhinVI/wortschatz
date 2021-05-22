@@ -198,6 +198,12 @@ void WortDe::setNewPlural(const std::string &str)
     util::replaceEndLines(n_wortPl);
 }
 
+void WortDe::setNewExample(const std::string &str)
+{
+    s_example = AreaUtf8(str).trim().toString();
+    util::replaceEndLines(s_example);
+}
+
 void WortDe::clearOptions()
 {
     s_wort.clear();
