@@ -204,6 +204,24 @@ void WortDe::setNewExample(const std::string &str)
     util::replaceEndLines(s_example);
 }
 
+void WortDe::setNewPrasens3f(const std::string &str)
+{
+    v_prasens3f = AreaUtf8(str).trim().toString();
+    util::replaceEndLines(v_prasens3f);
+}
+
+void WortDe::setNewPrateritum(const std::string &str)
+{
+   v_prateritum = AreaUtf8(str).trim().toString();
+   util::replaceEndLines(v_prateritum);
+}
+
+void WortDe::setNewPerfect(const std::string &str)
+{
+   v_perfect = AreaUtf8(str).trim().toString();
+   util::replaceEndLines(v_perfect);
+}
+
 void WortDe::clearOptions()
 {
     s_wort.clear();

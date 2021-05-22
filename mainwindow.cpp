@@ -139,14 +139,53 @@ void MainWindow::on_actionOpenDir_triggered()
     settings.setValue(SettingsDictionaryPath, QString::fromStdString(pathDic));
 }
 
+static bool FingVerbOpt(WortDe &wd, AreaUtf8 &au8, const AreaUtf8::SymbolType symDelimeter)
+{
+    if (au8.find([symDelimeter](AreaUtf8::SymbolType sym) { return symDelimeter == sym; }))
+    {
+        wd.setNewPrasens3f(au8.subArea(0, au8.tellg()).trim().toString());
+        ++au8;
+        size_t pos2 = au8.tellg();
+        if (au8.find([symDelimeter](AreaUtf8::SymbolType sym) { return symDelimeter == sym; }))
+        {
+            wd.setNewPrateritum(au8.subArea(pos2, au8.tellg() - pos2).trim().toString());
+            ++au8;
+            wd.setNewPerfect(au8.getRestArea().trim().toString());
+        }
+        else
+        {
+            wd.setNewPrateritum(au8.getRestArea().trim().toString());
+            wd.setNewPerfect("");
+        }
+        return true;
+    }
+    return false;
+}
+
 void MainWindow::getWortDeToCurrWd()
 {
     currWd.setNewTranslation(utilQt::lineEditToStdStr(ui->lineEdit_2));
     currWd.setNewWort(utilQt::lineEditToStdStr(ui->lineEdit));
     currWd.setNewExample(utilQt::lineEditToStdStr(ui->lineEdit_6));
-    if (currWd.type() == WortDe::TypeWort::Noun)
+    if (currWd.type() == WortDe::TypeWort::Noun || currWd.type() == WortDe::TypeWort::Combination)
         currWd.setNewPlural(utilQt::lineEditToStdStr(ui->lineEdit_5));
-    // TODO: if (currWd.type() == WortDe::TypeWort::Verb)
+
+    if (currWd.type() == WortDe::TypeWort::Verb)
+    {
+        std::string str = utilQt::lineEditToStdStr(ui->lineEdit_5);
+        AreaUtf8 au8(str);
+        au8.trim();
+        if (au8.empty() ||
+                (!FingVerbOpt(currWd, au8, UTF8_STRING_TO_SYMBOL("·")) && // parse from www.verbformen.ru
+                 !FingVerbOpt(currWd, au8, UTF8_STRING_TO_SYMBOL(";"))
+                 )
+                )
+        {
+            currWd.setNewPrasens3f("");
+            currWd.setNewPrateritum("");
+            currWd.setNewPerfect("");
+        }
+    }
 }
 
 void MainWindow::setWortDe(WortDe wd)
@@ -160,13 +199,16 @@ void MainWindow::setWortDe(WortDe wd)
     ui->label->setText(QString::fromStdString(wd.blockToStr() + " = " + dicDe.tema(wd.block())));
 
     std::string options;
-    if (wd.type() == WortDe::TypeWort::Noun)
+    if (wd.type() == WortDe::TypeWort::Noun || currWd.type() == WortDe::TypeWort::Combination)
     {
         options = wd.wortPl();
     }
     else if (wd.type() == WortDe::TypeWort::Verb)
     {
-        options = wd.vPrasens3f() + "; " + wd.vPrateritum() + "; " + wd.vPerfect();
+        if (wd.vPrasens3f().empty() && wd.vPrateritum().empty() &&  wd.vPerfect().empty())
+            options = "";
+        else
+            options = wd.vPrasens3f() + " ; " + wd.vPrateritum() + " ; " + wd.vPerfect();
     }
     utilQt::strToLineEdit(ui->lineEdit_5, options);
 

@@ -104,6 +104,9 @@ public:
     void setNewPrefix(const std::string &str);
     void setNewPlural(const std::string &str);
     void setNewExample(const std::string &str);
+    void setNewPrasens3f(const std::string &str);
+    void setNewPrateritum(const std::string &str);
+    void setNewPerfect(const std::string &str);
 
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);
