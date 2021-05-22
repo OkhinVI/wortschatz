@@ -147,10 +147,10 @@ size_t GlossaryDe::find(const std::string &str, size_t pos)
 
     for (; pos < dictionary.size(); ++pos)
     {
-        if (dictionary[pos].wort().find(str) != std::string::npos)
+        if (AreaUtf8(dictionary[pos].wort()).findCase(str))
             return pos;
 
-        if (dictionary[pos].translation().find(str) != std::string::npos)
+        if (AreaUtf8(dictionary[pos].translation()).findCase(str))
             return pos;
     }
     return dictionary.size();

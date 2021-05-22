@@ -80,13 +80,13 @@ void MainWindow::on_actionRaw_Text_triggered()
 
         for (size_t idx = 0; idx < deVector.size(); ++idx)
         {
-            std::string str = substrWithoutSideSpaces(deVector[idx]);
-            std::string strTr = substrWithoutSideSpaces(trVector[idx]);
+            std::string str = AreaUtf8(deVector[idx]).trim().toString();
+            std::string strTr = AreaUtf8(trVector[idx]).trim().toString();
             if (str.empty())
                 continue;
             if (str[0] == '#')
             {
-                str = substrWithoutSideSpaces(str, 1);
+                str = AreaUtf8(str).subArea(1).trim().toString();
                 int A_C = 0;
                 int book = 0;
                 int kapitel = 0;

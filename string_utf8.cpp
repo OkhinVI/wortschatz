@@ -86,16 +86,26 @@ AreaUtf8::SymbolType AreaUtf8::symbolFromPos(size_t aPos, uint8_t &symSize) cons
     return byte;
 }
 
-#define UTF8_PREFIX_MIN 0xC0
-#define UTF8_RAW_SYMBOL_MIN 0x80
-#define UTF8_RAW_SYMBOL_MAX 0xBF
-
 bool AreaUtf8::isUtf8Pos(size_t aPos) const
 {
-    return aPos + 1 < size() &&
-           static_cast<uint8_t>(raw(aPos)) >= UTF8_PREFIX_MIN &&
-           static_cast<uint8_t>(raw(aPos + 1)) >= UTF8_RAW_SYMBOL_MIN &&
-           static_cast<uint8_t>(raw(aPos + 1)) <= UTF8_RAW_SYMBOL_MAX;
+    return aPos + 1 < size() && IS_UTF8_PREFIX2(raw(aPos)) && IS_UTF8_RAW_SYMBOL(raw(aPos + 1));
+}
+
+int AreaUtf8::SymboToInt(SymbolType sym)
+{
+    if (!IS_VALID_UTF8_2BYTE_SYMBOL(sym)) // sym <= 0x7F or sym is not 2 byte utf8
+        return sym & 0xFF;
+
+    return UTF8_2BYTE_SYMBOL_TO_INT(sym);
+}
+
+AreaUtf8::SymbolType AreaUtf8::IntToSymbo(int sym)
+{
+    if (sym < 0 || sym > UTF8_MAX_INT_SYMBOL)
+        return 0;
+    if (sym < 0x100)
+        return sym;
+    return UTF8_INT_TO_2BYTE_SYMBOL(sym);
 }
 
 bool AreaUtf8::isSymbolEn(SymbolType sym)
@@ -114,62 +124,99 @@ bool AreaUtf8::isDelimiter(SymbolType sym, const char *delimiters)
     return false;
 }
 
-#define UTF8_SYMBOL_DE_U_Umlaut 0xC39C
-#define UTF8_SYMBOL_DE_u_Umlaut 0xC3BC
-#define UTF8_SYMBOL_DE_A_Umlaut 0xC384
-#define UTF8_SYMBOL_DE_a_Umlaut 0xC3A4
-#define UTF8_SYMBOL_DE_O_Umlaut 0xC396
-#define UTF8_SYMBOL_DE_o_Umlaut 0xC3B6
-#define UTF8_SYMBOL_DE_Eszett   0xC39F
-
 // if Umlaut return 'u', 'U', 'a', 'A', 'o', 'O' or if Eszett then return 's', else return 0
 char AreaUtf8::symbolDeUmlaut(SymbolType sym)
 {
     switch (sym)
     {
-    case UTF8_SYMBOL_DE_U_Umlaut:
+    case UTF8_STRING_TO_SYMBOL("Ü"):
         return 'U';
-    case UTF8_SYMBOL_DE_u_Umlaut:
+    case UTF8_STRING_TO_SYMBOL("ü"):
         return 'u';
-    case UTF8_SYMBOL_DE_A_Umlaut:
+    case UTF8_STRING_TO_SYMBOL("Ä"):
         return 'A';
-    case UTF8_SYMBOL_DE_a_Umlaut:
+    case UTF8_STRING_TO_SYMBOL("ä"):
         return 'a';
-    case UTF8_SYMBOL_DE_O_Umlaut:
+    case UTF8_STRING_TO_SYMBOL("Ö"):
         return 'O';
-    case UTF8_SYMBOL_DE_o_Umlaut:
+    case UTF8_STRING_TO_SYMBOL("ö"):
         return 'o';
-    case UTF8_SYMBOL_DE_Eszett:
+    case UTF8_STRING_TO_SYMBOL("ß"):
         return 's';
+    case 0:
+        return 0;
     }
     return 0;
 }
 
+AreaUtf8::SymbolType AreaUtf8::tolowerU8(SymbolType sym)
+{
+    if (sym <= 0x7F)
+        return ::towlower(static_cast<char>(sym));
+    const int intSym = SymboToInt(sym);
+    if ((intSym >= UTF8_STRING_TO_INT_SYMBOL("А") && intSym <= UTF8_STRING_TO_INT_SYMBOL("Я")))
+        return IntToSymbo(intSym + UTF8_STRING_TO_INT_SYMBOL("а") - UTF8_STRING_TO_INT_SYMBOL("А"));
+
+    switch (sym)
+    {
+    case       UTF8_STRING_TO_SYMBOL("Ü"):
+        return UTF8_STRING_TO_SYMBOL("ü");
+    case       UTF8_STRING_TO_SYMBOL("Ä"):
+        return UTF8_STRING_TO_SYMBOL("ä");
+    case       UTF8_STRING_TO_SYMBOL("Ö"):
+        return UTF8_STRING_TO_SYMBOL("ö");
+    case       UTF8_STRING_TO_SYMBOL("Ё"):
+        return UTF8_STRING_TO_SYMBOL("ё");
+    case 0:
+        return 0;
+    }
+    return sym;
+}
+
+bool AreaUtf8::findCase(const std::string str)
+{
+    if (str.empty())
+        return false;
+
+    const size_t startPos = tellg();
+    AreaUtf8 au8(str);
+    const SymbolType firstSym = tolowerU8(au8.getSymbol());
+    const size_t secondAu8Pos = au8.tellg();
+
+    while (find([firstSym](AreaUtf8::SymbolType sym) { return firstSym == AreaUtf8::tolowerU8(sym); })) {
+        au8.seekg(secondAu8Pos);
+        const size_t findPos = tellg();
+        getSymbol();
+        while(!au8.eof())
+        {
+            if (eof() || tolowerU8(getSymbol()) != tolowerU8(au8.getSymbol()))
+            {
+                seekg(startPos);
+                return false;
+            }
+        }
+        seekg(findPos);
+        return true;
+    }
+
+    seekg(startPos);
+    return false;
+}
+
 bool AreaUtf8::isSymbolDe(SymbolType sym)
 {
-    if (isSymbolEn(sym))
-        return true;
-
-    if (symbolDeUmlaut(sym))
+    if (isSymbolEn(sym) || symbolDeUmlaut(sym))
         return true;
 
     return false;
 }
 
-#define UTF8_SYMBOL_RU_A  0xD090
-#define UTF8_SYMBOL_RU_p  0xD0BF
-#define UTF8_SYMBOL_RU_r  0xD180
-#define UTF8_SYMBOL_RU_ja 0xD18F
-#define UTF8_SYMBOL_RU_JO 0xD081
-#define UTF8_SYMBOL_RU_jo 0xD191
-
 bool AreaUtf8::isSymbolRu(SymbolType sym)
 {
-    return (sym >= UTF8_SYMBOL_RU_A && sym <= UTF8_SYMBOL_RU_p) ||
-            (sym >= UTF8_SYMBOL_RU_r && sym <= UTF8_SYMBOL_RU_ja) ||
-            (sym == UTF8_SYMBOL_RU_JO || sym == UTF8_SYMBOL_RU_jo);
+    const int intSym = SymboToInt(sym);
+    return (intSym >= UTF8_STRING_TO_INT_SYMBOL("А") && intSym <= UTF8_STRING_TO_INT_SYMBOL("я"))
+            || intSym == UTF8_STRING_TO_INT_SYMBOL("Ё") || intSym == UTF8_STRING_TO_INT_SYMBOL("ё");
 }
-
 
 AreaUtf8::SymbolType AreaUtf8::getSymbol()
 {
@@ -275,46 +322,6 @@ void AreaUtf8::getAllTokens(std::vector<AreaUtf8> &tokens, const char *delimiter
     tokens.clear();
     while (AreaUtf8 tok = getToken(delimiters))
         tokens.push_back(tok);
-}
-
-bool isWortDe(const char ch)
-{
-    const unsigned char chU = ch;
-    return (chU > 127 || chU == '-' || ::isalpha(chU));
-}
-
-std::string substrWithoutSideSpaces(const std::string &str, size_type posBegin, size_type n)
-{
-    size_type posEnd = (n == std::string::npos || posBegin + n > str.size()) ?
-        str.size() : posBegin + n;
-    if (posBegin >= posEnd)
-        return std::string();
-    for (; posBegin < posEnd; ++posBegin)
-    {
-        if (!::isspace(str[posBegin]))
-            break;
-    }
-    for (; posBegin < posEnd; --posEnd)
-    {
-        if (!::isspace(str[posEnd - 1]))
-            break;
-    }
-    return str.substr(posBegin, posEnd - posBegin);
-}
-
-std::string getPrefix(const std::string &str, char &findedDelimiter)
-{
-    for (size_type idx = 0; idx < str.size(); ++idx)
-    {
-        if (!isWortDe(str[idx]))
-        {
-            if (idx < 1)
-                break;
-            findedDelimiter = str[idx];
-            return str.substr(0, idx);
-        }
-    }
-    return std::string();
 }
 
 /*  // search example

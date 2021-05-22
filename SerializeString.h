@@ -68,7 +68,7 @@ public:
     }
     void deserialize(const std::string &_str)
     {
-        str = substrWithoutSideSpaces(_str);
+        str = AreaUtf8(_str).trim().toString();
     }
 private:
     std::string &str;

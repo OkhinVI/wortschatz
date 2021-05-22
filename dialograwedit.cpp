@@ -209,14 +209,14 @@ void DialogRawEdit::on_pushButton_3_clicked()
         std::string str;
         std::string strTr;
         getline(is_raw, str);
-        str = substrWithoutSideSpaces(str);
+        str = AreaUtf8(str).trim().toString();
         if (!str.empty())
         {
-            size_type posTab = str.find('\t');
+            std::string::size_type posTab = str.find('\t');
             if (posTab != std::string::npos)
             {
-                strTr = substrWithoutSideSpaces(str, posTab);
-                str = substrWithoutSideSpaces(str, 0, posTab);
+                strTr = AreaUtf8(str).subArea(posTab).trim().toString();
+                str = AreaUtf8(str).subArea(0, posTab).trim().toString();
             }
         }
         deAll = deAll + str + '\n';

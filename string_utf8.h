@@ -56,6 +56,9 @@ public:
     static bool isSymbolRu(SymbolType sym);
     static bool isSymbolAnyWord(SymbolType sym) { return isSymbolDe(sym) || isSymbolRu(sym) || sym == '-'; }
     static char symbolDeUmlaut(SymbolType sym); // Umlaut or Eszett
+    static SymbolType tolowerU8(SymbolType sym);
+    static int SymboToInt(SymbolType sym);
+    static SymbolType IntToSymbo(int sym);
 
     SymbolType peek() const;
     SymbolType getSymbol();
@@ -71,6 +74,8 @@ public:
     AreaUtf8 subArea(size_t pos = 0, size_t len = std::numeric_limits<size_t>::max()) const { return AreaUtf8(AreaString::subArea(pos, len)); }
     AreaUtf8 getToken(const char *delimiters = defaulDelimiters);
     void getAllTokens(std::vector<AreaUtf8> &tokens, const char *delimiters = defaulDelimiters);
+
+    bool findCase(const std::string str);
 
     template< typename Func > bool find(Func func);
     bool findWordDe() { return find([](SymbolType sym) { return isSymbolDe(sym); }); }
@@ -101,13 +106,42 @@ template <typename Func> bool AreaUtf8::find(Func func)
     return false;
 }
 
-bool isWortDe(const char ch);
+#define UTF8_PREFIX2_MIN      uint8_t(0b11000000)
+#define UTF8_PREFIX2_MAX      uint8_t(0b11011111)
+#define UTF8_RAW_SYMBOL_MIN   uint8_t(0b10000000)
+#define UTF8_RAW_SYMBOL_MAX   uint8_t(0b10111111)
+#define UTF8_RAW_SYMBOL_COUNT (UTF8_RAW_SYMBOL_MAX - UTF8_RAW_SYMBOL_MIN + 1)
+#define UTF8_PREFIX2_COUNT    (UTF8_PREFIX2_MAX - UTF8_PREFIX2_MIN + 1)
+#define UTF8_MAX_INT_SYMBOL          (int(UTF8_PREFIX2_COUNT) * UTF8_RAW_SYMBOL_COUNT + 0x100)
 
-// use std::string
-typedef std::string::size_type size_type;
+#define UTF8_PREFIX2_TEST_MASK    uint8_t(0b11100000)
+#define UTF8_PREFIX2_TEST_VAL     uint8_t(0b11000000)
+#define UTF8_RAW_SYMBOL_TEST_MASK uint8_t(0b11000000)
+#define UTF8_RAW_SYMBOL_TEST_VAL  uint8_t(0b10000000)
+#define IS_UTF8_PREFIX2(sym_)     ((uint8_t(sym_) & UTF8_PREFIX2_TEST_MASK) == UTF8_PREFIX2_TEST_VAL)
+#define IS_UTF8_RAW_SYMBOL(sym_)  ((uint8_t(sym_) & UTF8_RAW_SYMBOL_TEST_MASK) == UTF8_RAW_SYMBOL_TEST_VAL)
 
-std::string substrWithoutSideSpaces(const std::string &str, size_type posBegin = 0, size_type n = std::string::npos);
-std::string getPrefix(const std::string &str, char &findedDelimiter);
+#define UTF8_SYMBOL_TEST_MASK ((AreaUtf8::SymbolType(UTF8_PREFIX2_TEST_MASK) << 8) + UTF8_RAW_SYMBOL_TEST_MASK)
+#define UTF8_SYMBOL_TEST_VAL  ((AreaUtf8::SymbolType(UTF8_PREFIX2_TEST_VAL) << 8) + UTF8_RAW_SYMBOL_TEST_VAL)
+#define IS_VALID_UTF8_2BYTE_SYMBOL(sym_) ((sym_ & UTF8_SYMBOL_TEST_MASK) == UTF8_SYMBOL_TEST_VAL)
+
+#define UTF8_2BYTE_SYMBOL_TO_INT(sym_) (((sym_ >> 8) - UTF8_PREFIX2_MIN) * UTF8_RAW_SYMBOL_COUNT + (sym_ & 0xFF) - UTF8_RAW_SYMBOL_MIN + 0x100)
+#define UTF8_INT_TO_2BYTE_SYMBOL(sym_) ((((sym_ - 0x100) / UTF8_RAW_SYMBOL_COUNT) + UTF8_PREFIX2_MIN) * 0x100 + (((sym_ - 0x100) % UTF8_RAW_SYMBOL_COUNT)) + UTF8_RAW_SYMBOL_MIN)
+
+#define UTF8_STRING_TO_SYMBOL(str_) \
+    (sizeof(str_) < 3 \
+    ? uint8_t(str_[0]) \
+    : ((IS_UTF8_PREFIX2(str_[0]) && IS_UTF8_RAW_SYMBOL(str_[1])) \
+      ? (AreaUtf8::SymbolType(uint8_t(str_[0])) << 8) + uint8_t(str_[1]) \
+      : 0) \
+    )
+#define UTF8_STRING_TO_INT_SYMBOL(str_) \
+    (sizeof(str_) < 3 \
+    ? uint8_t(str_[0]) \
+    : ((IS_UTF8_PREFIX2(str_[0]) && IS_UTF8_RAW_SYMBOL(str_[1])) \
+      ? ((uint8_t(str_[0]) - UTF8_PREFIX2_MIN) * UTF8_RAW_SYMBOL_COUNT + uint8_t(str_[1]) - UTF8_RAW_SYMBOL_MIN + 0x100) \
+      : 0) \
+    )
 
 
 #endif // STRING_UTF8_H
