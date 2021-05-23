@@ -200,7 +200,7 @@ void MainWindow::setWortDe(WortDe wd)
     ui->label->setText(QString::fromStdString(wd.blockToStr() + " = " + dicDe.tema(wd.block())));
 
     std::string options;
-    if (wd.type() == WortDe::TypeWort::Noun || currWd.type() == WortDe::TypeWort::Combination)
+    if (wd.type() == WortDe::TypeWort::Noun || wd.type() == WortDe::TypeWort::Combination)
     {
         options = wd.wortPl();
     }
