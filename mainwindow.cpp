@@ -167,9 +167,10 @@ void MainWindow::getWortDeToCurrWd()
     currWd.setNewTranslation(utilQt::lineEditToStdStr(ui->lineEdit_2));
     currWd.setNewWort(utilQt::lineEditToStdStr(ui->lineEdit));
     currWd.setNewExample(utilQt::lineEditToStdStr(ui->lineEdit_6));
+
     if (currWd.type() == WortDe::TypeWort::Noun || currWd.type() == WortDe::TypeWort::Combination)
         currWd.setNewPlural(utilQt::lineEditToStdStr(ui->lineEdit_5));
-
+    else
     if (currWd.type() == WortDe::TypeWort::Verb)
     {
         std::string str = utilQt::lineEditToStdStr(ui->lineEdit_5);
@@ -220,11 +221,11 @@ void MainWindow::setWortDe(WortDe wd)
 
 void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
 {
-    if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
-        return;
-
     getWortDeToCurrWd();
     if (currWd == origWd)
+        return;
+
+    if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
         return;
 
     if (ui->checkBox->checkState() != Qt::Checked && !saveWithoutAsk)
@@ -420,7 +421,8 @@ void MainWindow::on_pushButton_10_clicked()
 void MainWindow::on_pushButton_11_clicked()
 {
     getWortDeToCurrWd();
-    currWd.parseRawLine(currWd.raw(), currWd.translation(), currWd.block(), currWd.type());
+    std::string raw = utilQt::lineEditToStdStr(ui->lineEdit_4);
+    currWd.parseRawLine(raw, currWd.translation(), currWd.block(), currWd.type());
     setWortDe(currWd);
 }
 
@@ -640,6 +642,7 @@ void MainWindow::setButtonEnable(WortDe wd)
 
 void MainWindow::on_pushButton_27_clicked()
 {
+    getWortDeToCurrWd();
     std::string str = currWd.wort();
     AreaUtf8 au8(str);
     auto prfx = au8.getToken(" ");
@@ -654,6 +657,7 @@ void MainWindow::on_pushButton_27_clicked()
 
 void MainWindow::on_pushButton_28_clicked()
 {
+    getWortDeToCurrWd();
     std::string str = currWd.rawPrefix();
     AreaUtf8 au8(str);
     std::vector<AreaUtf8> tokens;
