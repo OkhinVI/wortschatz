@@ -7,6 +7,7 @@
 #include <QShortcut>
 
 class QListViewGlossaryDeModel;
+class TestWindow;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -96,6 +97,10 @@ private slots:
 
     void on_pushButton_28_clicked();
 
+    void on_actionSave_triggered();
+
+    void on_actionTest_words_triggered();
+
 private:
     void selectItem(int idx);
     void setButtonEnable(WortDe wd);
@@ -116,10 +121,11 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    QShortcut       *keyAltW;
-    QShortcut       *keyAltN;
-    QShortcut       *keyAltV;
-    QShortcut       *keyAltA;
+    QShortcut      *keyAltW;
+    QShortcut      *keyAltN;
+    QShortcut      *keyAltV;
+    QShortcut      *keyAltA;
+    TestWindow     *testWin;
 
 };
 #endif // MAINWINDOW_H

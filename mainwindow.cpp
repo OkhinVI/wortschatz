@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "testwindow.h"
 #include "dialograwedit.h"
 #include "dialogtypewort.h"
 #include "utility.h"
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    testWin = new TestWindow(dicDe);
 
     QSettings settings(SettingsFirma, SettingsApp);
     if (settings.contains(SettingsDictionaryPath))
@@ -53,6 +55,7 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     dicDe.save();
+    delete testWin;
     delete ui;
 }
 
@@ -669,4 +672,14 @@ void MainWindow::on_pushButton_28_clicked()
     currWd.setNewPrefix(au8.subArea(0, str.size() - prfxEnd.size()).trim().toString());
     currWd.setNewWort(prfxEnd.toString() + " " +  currWd.wort());
     setWortDe(currWd);
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    dicDe.save();
+}
+
+void MainWindow::on_actionTest_words_triggered()
+{
+    testWin->show();
 }

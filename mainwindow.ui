@@ -615,6 +615,7 @@
     </property>
     <addaction name="actionOpenDir"/>
     <addaction name="actionSave_as_raw"/>
+    <addaction name="actionSave"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -623,8 +624,15 @@
     <addaction name="actionRaw_Text"/>
     <addaction name="actionConvert"/>
    </widget>
+   <widget class="QMenu" name="menuLearning">
+    <property name="title">
+     <string>Learning</string>
+    </property>
+    <addaction name="actionTest_words"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuLearning"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionRaw_Text">
@@ -648,6 +656,16 @@
   <action name="actionSave_as_raw">
    <property name="text">
     <string>Save as raw</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionTest_words">
+   <property name="text">
+    <string>Test words</string>
    </property>
   </action>
  </widget>

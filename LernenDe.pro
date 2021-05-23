@@ -17,6 +17,7 @@ SOURCES += \
     mainwindow.cpp \
     qlistviewglossarydemodel.cpp \
     string_utf8.cpp \
+    testwindow.cpp \
     utilQtTypes.cpp \
     utility.cpp \
     wortde.cpp
@@ -30,6 +31,7 @@ HEADERS += \
     mainwindow.h \
     qlistviewglossarydemodel.h \
     string_utf8.h \
+    testwindow.h \
     utilQtTypes.h \
     utility.h \
     wortde.h
@@ -37,7 +39,8 @@ HEADERS += \
 FORMS += \
     dialograwedit.ui \
     dialogtypewort.ui \
-    mainwindow.ui
+    mainwindow.ui \
+    testwindow.ui
 
 TRANSLATIONS += \
     LernenDe_de_DE.ts
