@@ -187,16 +187,20 @@ bool AreaUtf8::findCase(const std::string str)
         au8.seekg(secondAu8Pos);
         const size_t findPos = tellg();
         getSymbol();
+        bool finded = true;
         while(!au8.eof())
         {
             if (eof() || tolowerU8(getSymbol()) != tolowerU8(au8.getSymbol()))
             {
-                seekg(startPos);
-                return false;
+                finded = false;
+                break;
             }
         }
-        seekg(findPos);
-        return true;
+        if (finded)
+        {
+            seekg(findPos);
+            return true;
+        }
     }
 
     seekg(startPos);
