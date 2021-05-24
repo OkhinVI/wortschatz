@@ -21,6 +21,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void setNewIndex(int idx);
+
 private slots:
     void on_actionRaw_Text_triggered();
 

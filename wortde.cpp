@@ -4,6 +4,7 @@
 #include <fstream>
 #include <limits>
 #include <stdexcept>
+#include <ctime>
 #include "SerializeString.h"
 #include "utility.h"
 #include "string_utf8.h"
@@ -569,4 +570,25 @@ std::string LearningWort::serialize() const
 void LearningWort::deserialize(const std::string &_str)
 {
     multiScanFromString(_str, LearningWortSerialize);
+}
+
+void WortDe::setAnswer(const bool ans)
+{
+    const auto currTie = time(nullptr);
+    if (ans)
+    {
+        ++l_statistic.numberCorrectAnswers;
+        l_statistic.lastCorrectAnswer = currTie;
+    } else {
+        ++l_statistic.numberWrongtAnswers;
+        l_statistic.lastWrongtAnswer = currTie;
+    }
+
+    if (l_statistic.startLearning == 0)
+        l_statistic.startLearning = currTie;
+
+     unsigned int mask = l_statistic.maskCorrectAndWrongtAnswers >> 1;
+     if (ans)
+         mask |= 0x80000000;
+     l_statistic.maskCorrectAndWrongtAnswers = mask;
 }

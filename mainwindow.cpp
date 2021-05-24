@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    testWin = new TestWindow(dicDe);
+    testWin = new TestWindow(dicDe, this);
 
     QSettings settings(SettingsFirma, SettingsApp);
     if (settings.contains(SettingsDictionaryPath))
@@ -496,11 +496,7 @@ void MainWindow::on_pushButton_17_clicked()
         return;
     }
 
-    QModelIndex index = model->creatNewIndex(idx);
-    if ( index.isValid() ) {
-        ui->listView->setCurrentIndex(index);
-        selectItem(idx);
-    }
+    setNewIndex(idx);
 }
 
 void MainWindow::on_lineEdit_7_textChanged(const QString &arg1)
@@ -518,6 +514,14 @@ void MainWindow::on_lineEdit_7_textChanged(const QString &arg1)
 
     ui->lineEdit_7->setStyleSheet("color: rgb(0, 0, 0)");
 
+    setNewIndex(idx);
+}
+
+void MainWindow::setNewIndex(int idx)
+{
+    if (idx < 0 || size_t(idx) >= dicDe.size())
+        return;
+
     QModelIndex index = model->creatNewIndex(idx);
     if ( index.isValid() ) {
         ui->listView->setCurrentIndex(index);
@@ -532,11 +536,7 @@ void MainWindow::on_pushButton_18_clicked()
     if (idx == dicDe.size())
         idx = 0;
 
-    QModelIndex index = model->creatNewIndex(idx);
-    if ( index.isValid() ) {
-        ui->listView->setCurrentIndex(index);
-        selectItem(idx);
-    }
+    setNewIndex(idx);
 }
 
 void MainWindow::on_pushButton_19_clicked()
@@ -676,10 +676,13 @@ void MainWindow::on_pushButton_28_clicked()
 
 void MainWindow::on_actionSave_triggered()
 {
+    checkChangesCurrWd();
     dicDe.save();
 }
 
 void MainWindow::on_actionTest_words_triggered()
 {
+    checkChangesCurrWd();
+    testWin->setNewWort();
     testWin->show();
 }

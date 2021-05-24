@@ -108,6 +108,8 @@ public:
     void setNewPrateritum(const std::string &str);
     void setNewPerfect(const std::string &str);
 
+    void setAnswer(const bool ans);
+
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);
     bool parseRawDeNoun();
