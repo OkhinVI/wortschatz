@@ -36,45 +36,76 @@ void TestWindow::on_pushButton_clicked()
     setNewWort();
 }
 
+void TestWindow::calcTestGlossaryIdx(std::vector<size_t> &selectionIdxs)
+{
+    selectionIdxs.clear();
+    for (size_t i = 0; i < dicDe.size(); ++i)
+    {
+        if (!dicDe[i].translation().empty())
+            selectionIdxs.push_back(i);
+    }
+    if (selectionIdxs.size() < vecButton.size())
+    {
+        currIdxCorrectTr = -1;
+        return;
+    }
+
+    size_t currTestIdxWithTr = genRandom() % selectionIdxs.size();
+    currTestGlossaryIdx = selectionIdxs[currTestIdxWithTr];
+}
+
+void TestWindow::selectFalshTr(std::vector<size_t> &selectionIdxs)
+{
+    vecIdxTr.resize(vecButton.size());
+
+    const WortDe &wd = dicDe[currTestGlossaryIdx];
+
+    bool needType = false;
+    if (wd.type() == WortDe::TypeWort::Noun ||
+        wd.type() == WortDe::TypeWort::Verb ||
+        wd.type() == WortDe::TypeWort::Adjective ||
+        wd.type() == WortDe::TypeWort::Combination)
+        needType = true;
+
+    size_t pos = 0;
+    for (size_t i = 0; i < selectionIdxs.size(); ++i)
+    {
+        if ((!needType || wd.type() == dicDe[selectionIdxs[i]].type()) &&
+            selectionIdxs[i] != currTestGlossaryIdx)
+            selectionIdxs[pos++] = selectionIdxs[i];
+    }
+    selectionIdxs.resize(pos);
+
+    if (selectionIdxs.size() < vecIdxTr.size())
+        return;
+
+    currIdxCorrectTr = genRandom() % vecIdxTr.size();
+
+    for (size_t i = 0; i < vecIdxTr.size(); ++i)
+    {
+        if (currIdxCorrectTr == int(i))
+        {
+            vecIdxTr[i] = currTestGlossaryIdx;
+        } else {
+            size_t nextIdx = genRandom() % (selectionIdxs.size() - 1);
+            vecIdxTr[i] = selectionIdxs[nextIdx];
+        }
+    }
+}
+
 void TestWindow::setNewWort()
 {
     ui->pushButton->setEnabled(false);
     for (size_t i = 0; i < vecButton.size(); ++i)
         vecButton[i]->setStyleSheet("text-align: left;");
 
-    vecIdxTr.resize(vecButton.size());
 
-    std::vector<size_t> idxsWithTr;
-    for (size_t i = 0; i < dicDe.size(); ++i)
-    {
-        if (!dicDe[i].translation().empty())
-            idxsWithTr.push_back(i);
-    }
-    if (idxsWithTr.size() < vecButton.size())
-    {
-        currIdxCorrectTr = -1;
-        return;
-    }
-
-    size_t currTestIdxWithTr = genRandom() % idxsWithTr.size();
-    currTestGlossaryIdx = idxsWithTr[currTestIdxWithTr];
-    WortDe &wd = dicDe.at(currTestGlossaryIdx);
-
-    currIdxCorrectTr = genRandom() % vecButton.size();
-    for (size_t i = 0; i < vecButton.size(); ++i)
-    {
-        if (currIdxCorrectTr == int(i))
-        {
-            vecIdxTr[i] = currTestGlossaryIdx;
-        } else {
-            size_t nextIdx = genRandom() % (idxsWithTr.size() - 1);
-            if (nextIdx >= currTestIdxWithTr)
-                ++nextIdx;
-            vecIdxTr[i] = idxsWithTr[nextIdx];
-        }
-    }
+    std::vector<size_t> selectionIdxs;
+    calcTestGlossaryIdx(selectionIdxs);
+    selectFalshTr(selectionIdxs);
 
     {
+        WortDe &wd = dicDe.at(currTestGlossaryIdx);
         const std::string prfx = wd.prefix();
         std::string wortStr = prfx.empty() ? wd.wort() : prfx + " " + wd.wort();
         const auto posWortNotEqul = wortStr.find("(≠");

@@ -25,6 +25,8 @@ public:
 
 private:
     void testSelectTr(size_t idx);
+    void selectFalshTr(std::vector<size_t> &selectionIdxs);
+    void calcTestGlossaryIdx(std::vector<size_t> &selectionIdxs);
 
 private slots:
     void on_pushButton_clicked();
