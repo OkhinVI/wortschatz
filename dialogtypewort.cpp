@@ -39,6 +39,8 @@ WortDe::TypeWort DialogTypeWort::getTypeWort()
         return WortDe::TypeWort::Artikel;
     if (ui->radioButton_12->isChecked()) // междометие      // die Interjektion
         return WortDe::TypeWort::Interjection;
+    if (ui->radioButton_13->isChecked()) // наречие         // Adverb
+        return WortDe::TypeWort::Adverb;
 
     return WortDe::TypeWort::None;
 }
@@ -81,6 +83,9 @@ void DialogTypeWort::setTypeWort(WortDe::TypeWort tw)
         break;
     case WortDe::TypeWort::Interjection: // междометие      // die Interjektion
         ui->radioButton_12->setChecked(true);
+        break;
+    case WortDe::TypeWort::Adverb:       // наречие         // Adverb
+        ui->radioButton_13->setChecked(true);
         break;
     case WortDe::TypeWort::_last_one:
         break;

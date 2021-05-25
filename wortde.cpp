@@ -483,6 +483,11 @@ std::string WortDe::TypeWortToString(TypeWort tw, const char *local)
         const char *tws[countLeng] = {"Interjection", "междометие", "Interjektion"};
         return tws[index];
     }
+    case WortDe::TypeWort::Adverb:       // наречие         // Adverb
+    {
+        const char *tws[countLeng] = {"Adverb", "наречие", "Adverb"};
+        return tws[index];
+    }
     case WortDe::TypeWort::_last_one:
         break;
     }

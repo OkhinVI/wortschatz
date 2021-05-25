@@ -64,6 +64,7 @@ void TestWindow::selectFalshTr(std::vector<size_t> &selectionIdxs)
     if (wd.type() == WortDe::TypeWort::Noun ||
         wd.type() == WortDe::TypeWort::Verb ||
         wd.type() == WortDe::TypeWort::Adjective ||
+        wd.type() == WortDe::TypeWort::Adverb ||
         wd.type() == WortDe::TypeWort::Combination)
         needType = true;
 

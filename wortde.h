@@ -38,6 +38,7 @@ public:
         Particle,     // частица         // die Partikel
         Artikel,      // артикль         // der Artikel
         Interjection, // междометие      // die Interjektion
+        Adverb,       // наречие         // Adverb
         _last_one
     };
 
