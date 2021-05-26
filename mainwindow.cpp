@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
     QSettings settings(SettingsFirma, SettingsApp);
     if (settings.contains(SettingsDictionaryPath))
         pathDic = settings.value(SettingsDictionaryPath).toString().toUtf8().toStdString();
+    else
+        pathDic = "../Line1_B2";
     dicDe.setPath(pathDic);
     dicDe.load();
 

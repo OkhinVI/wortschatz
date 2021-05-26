@@ -5,6 +5,9 @@
 #include <ctime>
 #include "utilQtTypes.h"
 
+static size_t RichteAntwort = 0;
+static size_t FalscheAntwort = 0;
+
 TestWindow::TestWindow(GlossaryDe &aDicDe, MainWindow *mw, QWidget *parent) :
     QMainWindow(parent),
     dicDe(aDicDe),
@@ -144,13 +147,17 @@ void TestWindow::testSelectTr(size_t idx)
     {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; background-color: yellow; color: blue;");
         wd.setAnswer(true);
+        ++RichteAntwort;
     } else {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; color: red;");
         vecButton[idx]->setStyleSheet("text-align: left; color: gray ;");
         wd.setAnswer(false);
+        ++FalscheAntwort;
     }
     mainWindow->setNewIndex(currTestGlossaryIdx);
     currIdxCorrectTr = -1;
+
+    ui->label->setText("richtige: " + QString::number(RichteAntwort) + " / falsche: "  + QString::number(FalscheAntwort));
 }
 
 void TestWindow::on_pushButton_2_clicked()
