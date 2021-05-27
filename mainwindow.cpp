@@ -688,3 +688,31 @@ void MainWindow::on_actionTest_words_triggered()
     testWin->setNewWort();
     testWin->show();
 }
+
+void MainWindow::on_pushButton_29_clicked()
+{
+    if (dicDe.empty())
+        return;
+
+    if (currIndex < 0)
+        setNewIndex(0);
+    else
+    if (currIndex >= int(dicDe.size()))
+        setNewIndex(dicDe.size() - 1);
+    else
+        setNewIndex(currIndex + 1);
+}
+
+void MainWindow::on_pushButton_30_clicked()
+{
+    if (dicDe.empty())
+        return;
+
+    if (currIndex < 1)
+        setNewIndex(0);
+    else
+    if (currIndex >= int(dicDe.size()))
+        setNewIndex(dicDe.size() - 1);
+    else
+        setNewIndex(currIndex - 1);
+}

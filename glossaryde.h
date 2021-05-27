@@ -24,6 +24,7 @@ public:
     WortDe &at(size_t idx);
     const WortDe &operator[] (size_t idx) { return at(idx); }
     size_t size() const { return dictionary.size(); }
+    bool empty() const { return dictionary.empty(); }
 
     size_t find(const std::string &str, size_t pos = 0);
 

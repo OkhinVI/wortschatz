@@ -188,6 +188,7 @@ void TestWindow::on_pushButton_6_clicked()
 void TestWindow::on_pushButton_7_clicked()
 {
     mainWindow->setNewIndex(currTestGlossaryIdx);
+    mainWindow->show();
     this->close();
 }
 

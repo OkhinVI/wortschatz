@@ -103,6 +103,10 @@ private slots:
 
     void on_actionTest_words_triggered();
 
+    void on_pushButton_29_clicked();
+
+    void on_pushButton_30_clicked();
+
 private:
     void selectItem(int idx);
     void setButtonEnable(WortDe wd);
