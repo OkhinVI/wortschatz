@@ -241,21 +241,21 @@ void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
     model->upDate(origIndex, origIndex);
 }
 
-void MainWindow::selectItem(int idx)
+void MainWindow::selectItem(const int idx)
 {
-    if (currIndex == idx)
+    if (idx == origIndex)
         return;
-    currIndex = idx;
+
     if (idx < 0 || static_cast<size_t>(idx) >= dicDe.size())
         return;
 
     checkChangesCurrWd();
 
-    WortDe wd = dicDe[idx];
-    setWortDe(wd);
-    currWd = wd;
-    origIndex = currIndex;
+    origIndex = idx;
+    const WortDe& wd = dicDe[origIndex];
     origWd = wd;
+    currWd = wd;
+    setWortDe(currWd);
 }
 
 
@@ -485,7 +485,7 @@ void MainWindow::on_pushButton_16_clicked()
 void MainWindow::on_pushButton_17_clicked()
 {
     const std::string str = utilQt::lineEditToStdStr(ui->lineEdit_7);
-    const size_t idx = dicDe.find(str, currIndex + 1);
+    const size_t idx = dicDe.find(str, origIndex + 1);
     if (idx == dicDe.size())
     {
         QMessageBox::information(this, utilQt::strToQt(str), "nicht finden", QMessageBox::Yes);
@@ -688,13 +688,13 @@ void MainWindow::on_pushButton_29_clicked()
     if (dicDe.empty())
         return;
 
-    if (currIndex < 0)
+    if (origIndex < 0)
         setNewIndex(0);
     else
-    if (currIndex >= int(dicDe.size()))
+    if (origIndex >= int(dicDe.size()))
         setNewIndex(dicDe.size() - 1);
     else
-        setNewIndex(currIndex + 1);
+        setNewIndex(origIndex + 1);
 }
 
 void MainWindow::on_pushButton_30_clicked()
@@ -702,13 +702,13 @@ void MainWindow::on_pushButton_30_clicked()
     if (dicDe.empty())
         return;
 
-    if (currIndex < 1)
+    if (origIndex < 1)
         setNewIndex(0);
     else
-    if (currIndex >= int(dicDe.size()))
+    if (origIndex >= int(dicDe.size()))
         setNewIndex(dicDe.size() - 1);
     else
-        setNewIndex(currIndex - 1);
+        setNewIndex(origIndex - 1);
 }
 
 void MainWindow::on_actionFix_triggered()

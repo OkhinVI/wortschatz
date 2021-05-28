@@ -108,7 +108,7 @@ private slots:
     void on_actionFix_triggered();
 
 private:
-    void selectItem(int idx);
+    void selectItem(const int idx);
     void setButtonEnable(WortDe wd);
     void setWortDe(WortDe wd);
     void getWortDeToCurrWd();
@@ -120,10 +120,9 @@ private:
     std::string pathDic;
     GlossaryDe dicDe;
     QListViewGlossaryDeModel *model;
-    int currIndex = -1;
-    WortDe currWd;
     int origIndex = -1;
     WortDe origWd;
+    WortDe currWd;
 
 private:
     Ui::MainWindow *ui;
