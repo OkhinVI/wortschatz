@@ -18,11 +18,13 @@ public:
     void loadThemes(const std::string &fileName);
     void save();
     void saveClear();
+    void fixMainDic();
 
     void add(const WortDe &wd);
     const WortDe &at(size_t idx) const;
     WortDe &at(size_t idx);
-    const WortDe &operator[] (size_t idx) { return at(idx); }
+    WortDe &operator[] (size_t idx) { return at(idx); }
+    const WortDe &operator[] (size_t idx) const { return at(idx); }
     size_t size() const { return dictionary.size(); }
     bool empty() const { return dictionary.empty(); }
 
@@ -36,6 +38,7 @@ private:
     std::string filePath;
     bool notLoaded = false;
     std::map<unsigned int, std::string> themes;
+    size_t beginUserWort = 0;
 };
 
 #endif // GLOSSARYDE_H

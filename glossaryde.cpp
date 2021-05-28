@@ -1,11 +1,13 @@
 #include "wortde.h"
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "glossaryde.h"
 #include "linesramstream.h"
 #include "string_utf8.h"
 
 static const std::string GlossaryDePrefix = "GlossaryDe:";
+static WortDe NullWortDe;
 
 GlossaryDe::GlossaryDe()
 {
@@ -66,10 +68,11 @@ void GlossaryDe::load()
     LinesRamIStream ils;
     const bool isOpened = ils.loadFromFile(filePath + fileName);
 
+    // TODO: add data and time into log
     std::ofstream logDebug;
     logDebug.open(filePath + "LoadWort.log"); // TODO: only for debug
     std::ofstream logError;
-    logError.open(filePath + "ErrorLoad.log"); // Open only if nead
+    logError.open(filePath + "ErrorLoad.log", std::ios_base::app); // TODO: open only if nead
 
     if (!isOpened)
     {
@@ -81,13 +84,24 @@ void GlossaryDe::load()
     const std::string headGlossary = ils.get();
 
     // check head file
-    AreaUtf8 au8(headGlossary);
-    const std::string prefix = au8.getToken().toString();
+    std::istringstream ss(headGlossary);
+    std::string prefix;
+    ss >> prefix;
     if (prefix != GlossaryDePrefix)
     {
         logError << "Error: file \"" << filePath + fileName << "\" is bad: '" << prefix << "' != '" << GlossaryDePrefix << "'" << std::endl;
         notLoaded = true;
         return;
+    }
+
+    size_t loadedCountWd = 0;
+    size_t loadedSizeWd = 0;
+    size_t loadedBeginUserWort = 0;
+    ss >> loadedCountWd >> loadedSizeWd >> loadedBeginUserWort;
+    if (loadedSizeWd != WortDe().countSaveLines())
+    {
+        logError << "Warning: file \"" << filePath + fileName << "\" the number of lines for a Wort has changed: '"
+                 << loadedSizeWd << "' != '" << WortDe().countSaveLines() << "'" << std::endl;
     }
 
     while(!ils.eof())
@@ -100,6 +114,20 @@ void GlossaryDe::load()
         }
     }
 
+    if (loadedCountWd != size())
+    {
+        logError << "Warning: file \"" << filePath + fileName << "\" count Wort changed: '"
+                 << loadedCountWd << "' != '" << size() << "'" << std::endl;
+    }
+
+    if (loadedBeginUserWort > size())
+    {
+        logError << "Warning: file \"" << filePath + fileName << "\" begin user Wort exceeds the size of the dictionary: '"
+                 << loadedBeginUserWort << "' > '" << size() << "'" << std::endl;
+        loadedBeginUserWort = size();
+    }
+    beginUserWort = loadedBeginUserWort;
+
     loadThemes(filePath + "logTema.txt");
 }
 
@@ -109,8 +137,7 @@ void GlossaryDe::save()
         return;
     std::ofstream os;
     os.open(filePath + fileName);
-    WortDe wd;
-    os <<GlossaryDePrefix << " " << dictionary.size() << " " << wd.countSaveLines() << std::endl;
+    os << GlossaryDePrefix << " " << dictionary.size() << " " << WortDe().countSaveLines() << " " << beginUserWort << std::endl;
     for (size_t i = 0; i < dictionary.size(); ++i)
         dictionary[i].save(os);
 }
@@ -122,6 +149,11 @@ void GlossaryDe::saveClear()
     notLoaded = true;
 }
 
+void GlossaryDe::fixMainDic()
+{
+    beginUserWort = dictionary.size();
+}
+
 void GlossaryDe::add(const WortDe &wd)
 {
     dictionary.push_back(wd);
@@ -130,14 +162,12 @@ void GlossaryDe::add(const WortDe &wd)
 
 const WortDe &GlossaryDe::at(size_t idx) const
 {
-    const static WortDe nullWortDe;
-    return idx < dictionary.size() ? dictionary[idx] : nullWortDe;
+    return idx < dictionary.size() ? dictionary[idx] : NullWortDe;
 }
 
 WortDe &GlossaryDe::at(size_t idx)
 {
-    static WortDe nullWortDe;
-    return idx < dictionary.size() ? dictionary[idx] : nullWortDe;
+    return idx < dictionary.size() ? dictionary[idx] : NullWortDe;
 }
 
 size_t GlossaryDe::find(const std::string &str, size_t pos)

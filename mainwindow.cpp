@@ -122,12 +122,6 @@ void MainWindow::on_actionRaw_Text_triggered()
     model->upDate();
 }
 
-
-void MainWindow::on_actionConvert_triggered()
-{
-// TODO:    ConvertFromTextFile();
-}
-
 void MainWindow::on_actionOpenDir_triggered()
 {
     std::string str = QFileDialog::getExistingDirectory(0, "Directory dictionary", QString::fromStdString(pathDic)).toUtf8().toStdString();
@@ -715,4 +709,9 @@ void MainWindow::on_pushButton_30_clicked()
         setNewIndex(dicDe.size() - 1);
     else
         setNewIndex(currIndex - 1);
+}
+
+void MainWindow::on_actionFix_triggered()
+{
+    dicDe.fixMainDic();
 }

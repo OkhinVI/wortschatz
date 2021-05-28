@@ -640,15 +640,15 @@
      <string>File</string>
     </property>
     <addaction name="actionOpenDir"/>
-    <addaction name="actionSave_as_raw"/>
     <addaction name="actionSave"/>
+    <addaction name="actionSave_as_raw"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
     <addaction name="actionRaw_Text"/>
-    <addaction name="actionConvert"/>
+    <addaction name="actionFix"/>
    </widget>
    <widget class="QMenu" name="menuLearning">
     <property name="title">
@@ -674,9 +674,12 @@
     <string>Open dictionary dir</string>
    </property>
   </action>
-  <action name="actionConvert">
+  <action name="actionFix">
    <property name="text">
-    <string>Add from file</string>
+    <string>Fix main Dic</string>
+   </property>
+   <property name="toolTip">
+    <string>Fix the main dictionary</string>
    </property>
   </action>
   <action name="actionSave_as_raw">

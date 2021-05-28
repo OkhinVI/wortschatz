@@ -26,8 +26,6 @@ public:
 private slots:
     void on_actionRaw_Text_triggered();
 
-    void on_actionConvert_triggered();
-
     void on_actionOpenDir_triggered();
 
     void on_listView_activated(const QModelIndex &index);
@@ -106,6 +104,8 @@ private slots:
     void on_pushButton_29_clicked();
 
     void on_pushButton_30_clicked();
+
+    void on_actionFix_triggered();
 
 private:
     void selectItem(int idx);
