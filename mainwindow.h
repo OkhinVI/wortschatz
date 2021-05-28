@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "glossaryde.h"
+#include "webtranslation.h"
 #include <QModelIndexList>
 #include <QShortcut>
 
@@ -116,8 +117,6 @@ private:
     void setButtonEnable(WortDe wd);
     void setWortDe(WortDe wd);
     void getWortDeToCurrWd();
-    void wortTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
-    void CombinationTranslate(const std::string &beginUrl, const std::string &endUrl);
     void checkChangesCurrWd(const bool saveWithoutAsk = false);
     void addNewWortFromSearch();
 
@@ -128,6 +127,8 @@ private:
     int origIndex = -1;
     WortDe origWd;
     WortDe currWd;
+
+    WebTranslation webTr;
 
 private:
     Ui::MainWindow *ui;

@@ -363,70 +363,22 @@ void MainWindow::slotShortcutAltA()
     setWortDe(currWd);
 }
 
-
-void MainWindow::wortTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str)
-{
-    if (str.empty())
-        return;
-    AreaUtf8 au8(str);
-    au8.trim();
-    AreaUtf8 wort = au8.getToken();
-    if (wort.empty())
-        return;
-    QString url = QString::fromStdString(beginUrl + wort.toString() + endUrl);
-    QDesktopServices::openUrl(QUrl(url));
-}
-
-void MainWindow::CombinationTranslate(const std::string &beginUrl, const std::string &endUrl)
-{
-    getWortDeToCurrWd();
-    std::string str;
-    if (ui->checkBox_2->checkState() == Qt::Checked)
-        str = currWd.raw();
-    else
-    {
-        const std::string prfx = currWd.prefix();
-        str = prfx.empty() ? currWd.wort() : prfx + " " + currWd.wort();
-    }
-
-    if (str.empty())
-        return;
-
-    std::stringstream ss;
-    for (size_t i = 0; i < str.size(); ++i)
-    {
-        const char sym = str[i];
-        if (sym >= 0x10 && sym < 0x30)
-            ss << "%" << std::hex << static_cast<int>(sym);
-        else
-            ss << sym;
-    }
-    QString url = QString::fromStdString(beginUrl + ss.str() + endUrl);
-    QDesktopServices::openUrl(QUrl(url));
-}
-
 void MainWindow::on_pushButton_8_clicked()
 {
-    const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
-    const std::string endUrl = "";
     getWortDeToCurrWd();
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
 }
 
 void MainWindow::on_pushButton_9_clicked()
 {
-    const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
-    const std::string endUrl = "&lang=de-ru";
     getWortDeToCurrWd();
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::yandex);
 }
 
 void MainWindow::on_pushButton_10_clicked()
 {
-    const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
-    const std::string endUrl = "&op=translate";
     getWortDeToCurrWd();
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::google);
 }
 
 void MainWindow::on_pushButton_11_clicked()
@@ -458,40 +410,32 @@ void MainWindow::on_actionSave_as_raw_triggered()
 
 void MainWindow::on_pushButton_12_clicked()
 {
-    const std::string beginUrl = "https://www.dwds.de/wb/";
-    const std::string endUrl = "";
     getWortDeToCurrWd();
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::dwds);
 }
 
 void MainWindow::on_pushButton_13_clicked()
 {
-    const std::string beginUrl = "https://www.verbformen.ru/sprjazhenie/";
-    const std::string endUrl = ".htm";
     getWortDeToCurrWd();
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::VebF);
 }
 
 void MainWindow::on_pushButton_14_clicked()
 {
-    const std::string beginUrl = "https://ru.pons.com/%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4/%D0%BD%D0%B5%D0%BC%D0%B5%D1%86%D0%BA%D0%B8%D0%B9-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9/";
-    const std::string endUrl = "";
     getWortDeToCurrWd();
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::pons);
 }
 
 void MainWindow::on_pushButton_15_clicked()
 {
-    const std::string beginUrl = "https://translate.yandex.ru/?utm_source=wizard&text=";
-    const std::string endUrl = "&lang=de-ru";
-    CombinationTranslate(beginUrl, endUrl);
+    getWortDeToCurrWd();
+    webTr.allTranslate(currWd.prefixAndWort(), WebTranslation::WebSite::yandex);
 }
 
 void MainWindow::on_pushButton_16_clicked()
 {
-    const std::string beginUrl = "https://translate.google.de/?hl=ru&tab=TT&sl=de&tl=ru&text=";
-    const std::string endUrl = "&op=translate";
-    CombinationTranslate(beginUrl, endUrl);
+    getWortDeToCurrWd();
+    webTr.allTranslate(currWd.prefixAndWort(), WebTranslation::WebSite::google);
 }
 
 void MainWindow::on_pushButton_17_clicked()
@@ -750,5 +694,5 @@ void MainWindow::on_pushButton_32_clicked()
     const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
     const std::string endUrl = "";
     getWortDeToCurrWd();
-    wortTranslate(beginUrl, endUrl, currWd.wort());
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
 }

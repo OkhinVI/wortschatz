@@ -84,6 +84,7 @@ public:
     std::string prefix() const;
     std::string blockToStr() const;
     unsigned int block() const { return w_block; }
+    std::string prefixAndWort() const;
 
     bool save(std::ostream &os);
     bool load(LinesRamIStream &ils, std::ostream &osErr);

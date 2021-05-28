@@ -410,6 +410,12 @@ std::string WortDe::prefix() const
     return str;
 }
 
+std::string WortDe::prefixAndWort() const
+{
+    const std::string prfx = prefix();
+    return prfx.empty() ? s_wort : prfx + " " + s_wort;
+}
+
 std::string WortDe::TypeWortToString(TypeWort tw, const char *local)
 {
     int index = 2; // de

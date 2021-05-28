@@ -20,6 +20,7 @@ SOURCES += \
     testwindow.cpp \
     utilQtTypes.cpp \
     utility.cpp \
+    webtranslation.cpp \
     wortde.cpp
 
 HEADERS += \
@@ -34,6 +35,7 @@ HEADERS += \
     testwindow.h \
     utilQtTypes.h \
     utility.h \
+    webtranslation.h \
     wortde.h
 
 FORMS += \
