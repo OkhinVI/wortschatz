@@ -224,20 +224,32 @@ void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
     if (currWd == origWd)
         return;
 
-    if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
+    if (origIndex < 0 || static_cast<size_t>(origIndex) > dicDe.size())
         return;
 
     if (ui->checkBox->checkState() != Qt::Checked && !saveWithoutAsk)
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Wortschatzkarte geändert", "Änderungen speichern?",
-        QMessageBox::Yes|QMessageBox::No);
-        if (reply != QMessageBox::Yes)
-            return;
+        if (origIndex == int(dicDe.size())) // add new Wort
+        {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Created new Wort", "Add new Wort into Dic?",
+            QMessageBox::Yes|QMessageBox::No);
+            if (reply != QMessageBox::Yes)
+                return;
+        } else {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this, "Wortschatzkarte geändert", "Änderungen speichern?",
+            QMessageBox::Yes|QMessageBox::No);
+            if (reply != QMessageBox::Yes)
+                return;
+        }
     }
 
     origWd = currWd;
-    dicDe.at(origIndex) = origWd;
+    if (origIndex >= int(dicDe.size()))
+        dicDe.add(origWd);
+    else
+        dicDe[origIndex] = origWd;
     model->upDate(origIndex, origIndex);
 }
 
@@ -289,7 +301,7 @@ void MainWindow::on_pushButton_2_clicked()
 
 void MainWindow::on_pushButton_3_clicked()
 {
-    if (origIndex < 0 || static_cast<size_t>(origIndex) >= dicDe.size())
+    if (origIndex < 0 || static_cast<size_t>(origIndex) > dicDe.size())
         return;
     currWd = origWd;
     setWortDe(currWd);
@@ -714,4 +726,29 @@ void MainWindow::on_pushButton_30_clicked()
 void MainWindow::on_actionFix_triggered()
 {
     dicDe.fixMainDic();
+}
+
+void MainWindow::addNewWortFromSearch()
+{
+    checkChangesCurrWd();
+    origIndex = dicDe.size();
+    origWd = WortDe();
+    currWd = origWd;
+    currWd.parseRawLine(utilQt::lineEditToStdStr(ui->lineEdit_7), "", 0x10000000 + origIndex);
+    setWortDe(currWd);
+}
+
+void MainWindow::on_pushButton_31_clicked()
+{
+    addNewWortFromSearch();
+}
+
+void MainWindow::on_pushButton_32_clicked()
+{
+    addNewWortFromSearch();
+
+    const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
+    const std::string endUrl = "";
+    getWortDeToCurrWd();
+    wortTranslate(beginUrl, endUrl, currWd.wort());
 }

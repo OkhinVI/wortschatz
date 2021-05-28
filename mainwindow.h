@@ -107,6 +107,10 @@ private slots:
 
     void on_actionFix_triggered();
 
+    void on_pushButton_31_clicked();
+
+    void on_pushButton_32_clicked();
+
 private:
     void selectItem(const int idx);
     void setButtonEnable(WortDe wd);
@@ -115,6 +119,7 @@ private:
     void wortTranslate(const std::string &beginUrl, const std::string &endUrl, const std::string &str);
     void CombinationTranslate(const std::string &beginUrl, const std::string &endUrl);
     void checkChangesCurrWd(const bool saveWithoutAsk = false);
+    void addNewWortFromSearch();
 
 private:
     std::string pathDic;
