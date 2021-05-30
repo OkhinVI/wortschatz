@@ -157,7 +157,8 @@ void TestWindow::testSelectTr(size_t idx)
     mainWindow->setNewIndex(currTestGlossaryIdx);
     currIdxCorrectTr = -1;
 
-    ui->label->setText("richtige: " + QString::number(RichteAntwort) + " / falsche: "  + QString::number(FalscheAntwort));
+    ui->label->setText("richtige: " + QString::number(RichteAntwort) + " / falsche: "  + QString::number(FalscheAntwort) +
+                       " = " + QString::number(RichteAntwort * 100 / (RichteAntwort + FalscheAntwort)) + "%");
 }
 
 void TestWindow::on_pushButton_2_clicked()
