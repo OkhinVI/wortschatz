@@ -265,6 +265,29 @@ bool WortDe::parseRawDeVerb()
     return true;
 }
 
+static void parseRawDeNounPl(AreaUtf8 &aRaw, std::string &s_wort, std::string &n_wortPl, WortDe::TypeArtikel &n_artikel);
+
+static bool IsPluralString(const AreaUtf8 &plural)
+{
+    return plural == "(PI.)" || plural == "(Pl.)" || plural == "(PL)" ||
+           plural == "Pl" || plural == "Pl." || plural == "pl";
+}
+
+static bool IsPluralDelimiter(const AreaUtf8 &delimiterPl)
+{
+    return (delimiterPl == " " || delimiterPl == ", " || delimiterPl == ",");
+}
+
+static bool HasSymbol(AreaUtf8 au8, AreaUtf8::SymbolType sym)
+{
+    while (!au8.eof())
+    {
+        if (au8.getSymbol() == sym)
+            return true;
+    }
+    return false;
+}
+
 bool WortDe::parseRawDeNoun()
 {
     AreaUtf8 aRaw(s_raw);
@@ -291,35 +314,58 @@ bool WortDe::parseRawDeNoun()
         return false;
     }
 
+    parseRawDeNounPl(aRaw, s_wort, n_wortPl, n_artikel);
+    return true;
+}
+
+static void parseRawDeNounPl(AreaUtf8 &aRaw, std::string &s_wort, std::string &n_wortPl, WortDe::TypeArtikel &n_artikel)
+{
     const size_t startWort = aRaw.tellg();
     const AreaUtf8 wort = aRaw.getToken();
-    const AreaUtf8 delimiter = aRaw.getToken();
-    const AreaUtf8 plural = aRaw.getToken();
+    const AreaUtf8 delimiter1 = aRaw.getToken();
+    const AreaUtf8 token1 = aRaw.getToken();
+    const AreaUtf8 delimiter2 = aRaw.getToken();
+    const AreaUtf8 token2 = aRaw.getToken();
 
-    if (aRaw)
+    const bool genetiv = !token2.empty();
+    const AreaUtf8 delimiterPl = genetiv ? delimiter2 : delimiter1;
+    const AreaUtf8 plural = genetiv ? token2 : token1;
+
+    if (aRaw || (token2.empty() && !delimiter2.empty()))
     {
         aRaw.seekg(startWort);
         s_wort = aRaw.getRestArea().toString();
+        return;
     }
-    else if (plural.empty() && delimiter == ",")
+
+    if (genetiv)
+    {
+        if ((token1 != "-en" && token1 != "-es" && token1 != "-s" && token1 != "-" && token1 != "=") ||
+             !HasSymbol(delimiter2, ',') ||
+             delimiter1 != " ")
+        {
+            aRaw.seekg(startWort);
+            s_wort = aRaw.getRestArea().toString();
+            return;
+        }
+    }
+
+    if (plural.empty() && delimiterPl == ",")
     {
         s_wort = AreaUtf8(wort).toString();
     }
-    else if ((plural == "(PI.)" || plural == "(Pl.)" || plural == "(PL)") &&
-             (delimiter == " " || delimiter == ", " || delimiter == ","))
+    else if (IsPluralString(plural) && IsPluralDelimiter(delimiterPl))
     {
         s_wort = AreaUtf8(wort).toString();
         n_wortPl = "Pl.";
-        n_artikel = TypeArtikel::Pl;
+        n_artikel = WortDe::TypeArtikel::Pl;
     }
-    else if ((plural == "(Sg.)") &&
-             (delimiter == " " || delimiter == ", " || delimiter == ","))
+    else if ((plural == "(Sg.)") && IsPluralDelimiter(delimiterPl))
     {
         s_wort = AreaUtf8(wort).toString();
         n_wortPl = "Sg.";
     }
-    else if (plural.hasSymbolDe() &&
-             (delimiter == ", " || delimiter == ","))
+    else if (plural.hasSymbolDe() && HasSymbol(delimiterPl, ','))
     {
         s_wort = AreaUtf8(wort).toString();
         n_wortPl = plural.toString();
@@ -333,7 +379,9 @@ bool WortDe::parseRawDeNoun()
             plural == "-n" ||
             plural == "-en" ||
             plural == "-s" ||
-            *plural == '-') && (delimiter == " " || delimiter == ", " || delimiter == ","))
+            plural == "=" ||
+            *plural == '-' ||
+            plural.subArea(0, 2) == "..") && IsPluralDelimiter(delimiterPl))
     {
         s_wort = AreaUtf8(wort).toString();
         n_wortPl = AreaUtf8(plural).toString();
@@ -342,8 +390,6 @@ bool WortDe::parseRawDeNoun()
         aRaw.seekg(startWort);
         s_wort = aRaw.getRestArea().toString();
     }
-
-    return true;
 }
 
 bool WortDe::setNewTypeWort(const TypeWort tw)

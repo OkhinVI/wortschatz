@@ -18,6 +18,11 @@ public:
     bool eof() const { return gPos >= vs.size(); }
     size_t tellg() const { return gPos; }
     void seekg(size_t pos);
+    const std::string &peek() const;
+
+    const std::string &operator[](size_t idx) const;
+    bool empty() const { return vs.empty(); }
+    bool size() const { return vs.size(); }
 
 protected:
     void clear() { vs.clear(); gPos = 0; }
@@ -33,6 +38,8 @@ class LinesRamStream: public LinesRamIStream
 {
 public:
     LinesRamStream();
+
+    std::string &operator[](size_t idx);
 
 protected:
     void clear() { LinesRamIStream::clear(); pPos = 0; }
