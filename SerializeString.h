@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <limits>
+#include <type_traits>
 #include <stdexcept>
 #include <sstream>
 #include "string_utf8.h"
@@ -75,20 +76,22 @@ private:
 };
 
 // can throw exceptions: std::invalid_argument and std::out_of_range
-template<class unsignedT>
-static inline void StdStringToUnsignedNum(const std::string &str, unsignedT &num)
+template <class unsignedT> static inline
+typename std::enable_if<std::is_unsigned<unsignedT>::value, unsignedT>::type
+StdStringToNum(const std::string &str, unsignedT &num)
 {
     const unsigned long long numLong = std::stoull(str);
     if (numLong > std::numeric_limits<unsignedT>::max())
         throw std::out_of_range ("argument exceeds the range");
     else
         num = numLong;
-
+    return num;
 }
 
 // can throw exceptions: std::invalid_argument and std::out_of_range
-template<class signedT>
-static inline void StdStringToSignedNum(const std::string &str, signedT &num)
+template <class signedT> static inline
+typename std::enable_if<std::is_signed<signedT>::value, signedT>::type
+StdStringToNum(const std::string &str, signedT &num)
 {
     const long long numLong = std::stoull(str);
     if (numLong > std::numeric_limits<signedT>::max())
@@ -97,21 +100,8 @@ static inline void StdStringToSignedNum(const std::string &str, signedT &num)
         throw std::out_of_range ("argument less the range");
     else
         num = numLong;
+    return num;
 }
-
-static inline void StdStringToNum(const std::string &str, signed char &num) { StdStringToSignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, short int &num) { StdStringToSignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, int &num) { StdStringToSignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, long &num) { StdStringToSignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, long long &num) { StdStringToSignedNum(str, num); }
-
-static inline void StdStringToNum(const std::string &str, bool &num) { StdStringToUnsignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, unsigned char &num) { StdStringToUnsignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, unsigned short &num) { StdStringToUnsignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, unsigned int &num) { StdStringToUnsignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, unsigned long &num) { StdStringToUnsignedNum(str, num); }
-static inline void StdStringToNum(const std::string &str, unsigned long long &num) { StdStringToUnsignedNum(str, num); }
-
 
 // can throw exceptions: std::invalid_argument and std::out_of_range
 template<class T>
