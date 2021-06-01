@@ -24,7 +24,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    testWin = new TestWindow(dicDe, this);
 
     QSettings settings(SettingsFirma, SettingsApp);
     if (settings.contains(SettingsDictionaryPath))
@@ -33,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
         pathDic = "../Line1_B2";
     dicDe.setPath(pathDic);
     dicDe.load();
+
+    testWin = new TestWindow(dicDe, this);
 
     this->model = new QListViewGlossaryDeModel(dicDe);
     this->ui->listView->setModel(model);

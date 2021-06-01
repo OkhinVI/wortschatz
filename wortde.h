@@ -24,6 +24,8 @@ public:
 class WortDe
 {
 public:
+    typedef unsigned int BlockNumType;
+
     enum class TypeWort : int // Wortarten
     {
         None = 0,
@@ -94,6 +96,7 @@ public:
 
     static std::string TypeWortToString(TypeWort tw, const char *local = "de");
     static std::string TypeArtikeltToString(TypeArtikel ta, const bool forLabel = false);
+    static std::string blockHeadToStr(BlockNumType block);
 
     void parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw = TypeWort::None);
     void debugPrint(std::ostream &os);
@@ -121,7 +124,7 @@ private:
 private:
     std::string s_wort; // только само слово в словарной форме (для TypeWort::None должно быть то же что и s_raw)
     TypeWort w_type = TypeWort::None;
-    unsigned int w_block = 0; // Указание на уровень слова: (A1, A2, B1, D2, C1, C2):8bit - (номер учебника):8bit - (номер главы):8bit - (номер раздела в главе):8bit
+    BlockNumType w_block = 0; // Указание на уровень слова: (A1, A2, B1, D2, C1, C2):8bit - (номер учебника):8bit - (номер главы):8bit - (номер раздела в главе):8bit
     unsigned int w_frequency = 0; // Как часто слово встречается в текстах.
     int w_accent = -1; // Позиция ударной буквы
     std::string s_raw; // как есть, но без перевода (он в s_translation)

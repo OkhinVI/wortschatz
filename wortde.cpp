@@ -571,9 +571,10 @@ std::string WortDe::TypeArtikeltToString(TypeArtikel ta, const bool forLabel)
     return "";
 }
 
-std::string WortDe::blockToStr() const
+std::string WortDe::blockHeadToStr(BlockNumType block)
 {
-    static const char *WKursStr[] =
+    const size_t WKursStrSize = 7;
+    static const char *WKursStr[WKursStrSize] =
     {
         "None",
         "A1",
@@ -584,13 +585,22 @@ std::string WortDe::blockToStr() const
         "C2"
     };
     std::string str;
-    const int headBlock = w_block >> 24;
-    if (headBlock > 0 && headBlock <= 6)
-        str = WKursStr[w_block >> 24];
+    const size_t headBlock = block >> 24;
+    if (headBlock > 0 && headBlock < WKursStrSize)
+        str = WKursStr[headBlock];
+    else if (headBlock == 0x10)
+        str = "Us";
     else
         str = std::to_string(headBlock);
-    str = str + "." + std::to_string((w_block >> 16) & 0xff) + ".k" + std::to_string((w_block >> 8) & 0xff) + ".t" + std::to_string(w_block & 0xff);
     return str;
+}
+
+std::string WortDe::blockToStr() const
+{
+    return blockHeadToStr(w_block) + "."
+           + std::to_string((w_block >> 16) & 0xff)
+           + ".k" + std::to_string((w_block >> 8) & 0xff) + ".t"
+           + std::to_string(w_block & 0xff);
 }
 
 void WortDe::debugPrint(std::ostream &os)

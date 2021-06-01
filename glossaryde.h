@@ -4,11 +4,40 @@
 #include "wortde.h"
 #include <vector>
 #include <map>
+#include <limits>
 
 class GlossaryDe
 {
 public:
     typedef std::vector<WortDe> DictionaryDe;
+
+    class Tema
+    {
+    public:
+        Tema(unsigned int aNum, const std::string &str): blockNum(aNum), blockStr(str) {}
+        std::string asString() const;
+
+    public:
+        unsigned int blockNum = 0;
+        std::string blockStr;
+    };
+
+    class SelectSettings
+    {
+    public:
+        explicit SelectSettings(const GlossaryDe &aGlDe);
+
+        size_t themesSize() const { return glDe.themesSize(); }
+        const Tema &getTemaByIndex(size_t idx) const { return glDe.getTemaByIndex(idx); }
+        bool testWort(const WortDe &wd) const;
+
+    public:
+        size_t startIdxTema = 0;
+        size_t lastIdxTema = 0;
+
+    private:
+        const GlossaryDe &glDe;
+    };
 
 public:
     GlossaryDe();
@@ -31,6 +60,11 @@ public:
     size_t find(const std::string &str, size_t pos = 0);
 
     std::string tema(const unsigned int blockNum);
+    const Tema &getTemaByIndex(size_t idx) const;
+    size_t themesSize() const { return themesVector.size(); }
+
+    template< typename Func >
+    size_t selectIdxFilter(Func func, std::vector<size_t> &selectionIdxs, const SelectSettings &selSet);
 
 private:
     DictionaryDe dictionary;
@@ -38,7 +72,20 @@ private:
     std::string filePath;
     bool notLoaded = false;
     std::map<unsigned int, std::string> themes;
+    std::vector<Tema> themesVector;
     size_t beginUserWort = 0;
 };
+
+template< typename Func >
+size_t GlossaryDe::selectIdxFilter(Func func, std::vector<size_t> &selectionIdxs, const SelectSettings &selSet)
+{
+    selectionIdxs.clear();
+    for (size_t i = 0; i < dictionary.size(); ++i)
+    {
+        if (func(dictionary[i], i) && selSet.testWort(dictionary[i]))
+            selectionIdxs.push_back(i);
+    }
+    return selectionIdxs.size();
+}
 
 #endif // GLOSSARYDE_H

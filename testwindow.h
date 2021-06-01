@@ -49,6 +49,8 @@ private slots:
 
     void on_pushButton_10_clicked();
 
+    void on_pushButton_11_clicked();
+
 private:
     GlossaryDe &dicDe;
     size_t currTestGlossaryIdx = 0;
@@ -56,6 +58,7 @@ private:
     std::vector<QPushButton *> vecButton;
     std::vector<size_t> vecIdxTr;
     std::mt19937 genRandom;
+    GlossaryDe::SelectSettings glSelSet;
 
 private:
     Ui::TestWindow *ui;

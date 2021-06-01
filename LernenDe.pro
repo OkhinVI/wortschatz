@@ -17,6 +17,7 @@ SOURCES += \
     mainwindow.cpp \
     qlistviewglossarydemodel.cpp \
     string_utf8.cpp \
+    testsettings.cpp \
     testwindow.cpp \
     utilQtTypes.cpp \
     utility.cpp \
@@ -32,6 +33,7 @@ HEADERS += \
     mainwindow.h \
     qlistviewglossarydemodel.h \
     string_utf8.h \
+    testsettings.h \
     testwindow.h \
     utilQtTypes.h \
     utility.h \
@@ -42,6 +44,7 @@ FORMS += \
     dialograwedit.ui \
     dialogtypewort.ui \
     mainwindow.ui \
+    testsettings.ui \
     testwindow.ui
 
 TRANSLATIONS += \

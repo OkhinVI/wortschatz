@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include "glossaryde.h"
 #include "linesramstream.h"
 #include "string_utf8.h"
@@ -35,6 +36,12 @@ std::string GlossaryDe::tema(const unsigned int blockNum)
     return it->second;
 }
 
+const GlossaryDe::Tema &GlossaryDe::getTemaByIndex(size_t idx) const
+{
+    static const Tema nullTema(0, "");
+    return idx < themesVector.size() ? themesVector[idx] : nullTema;
+}
+
 void GlossaryDe::loadThemes(const std::string &fileName)
 {
     std::ifstream is;
@@ -59,6 +66,10 @@ void GlossaryDe::loadThemes(const std::string &fileName)
         }
     }
     is.close();
+
+    themesVector.clear();
+    for (auto it = themes.begin(); it != themes.end(); it++)
+        themesVector.push_back(Tema(it->first, it->second));
 }
 
 
@@ -184,4 +195,33 @@ size_t GlossaryDe::find(const std::string &str, size_t pos)
             return pos;
     }
     return dictionary.size();
+}
+
+// class GlossaryDe::Tema
+
+std::string GlossaryDe::Tema::asString() const
+{
+    return WortDe::blockHeadToStr(blockNum) + "." +
+            std::to_string((blockNum >> 16) & 0xFF) + "  " +
+            std::to_string((blockNum >> 8) & 0xFF) + "." +
+            std::to_string(blockNum & 0xFF) + " - " +
+            blockStr;
+}
+
+// class GlossaryDe::WordTestSettings
+
+GlossaryDe::SelectSettings::SelectSettings(const GlossaryDe &aGlDe)
+    : lastIdxTema(aGlDe.themesSize() > 0 ? aGlDe.themesSize() - 1 : 0)
+    , glDe(aGlDe)
+{
+}
+
+bool GlossaryDe::SelectSettings::testWort(const WortDe &wd) const
+{
+    if (wd.block() < glDe.getTemaByIndex(startIdxTema).blockNum)
+        return false;
+    unsigned int last = glDe.getTemaByIndex(lastIdxTema).blockNum;
+    if ((last & 0xff))
+        last |= 0xff;
+    return wd.block() <= last;
 }

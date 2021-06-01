@@ -1,5 +1,5 @@
 #include "string_utf8.h"
-
+#include <cctype>
 
 // class AreaString
 
@@ -152,7 +152,7 @@ char AreaUtf8::symbolDeUmlaut(SymbolType sym)
 AreaUtf8::SymbolType AreaUtf8::tolowerU8(SymbolType sym)
 {
     if (sym <= 0x7F)
-        return ::towlower(static_cast<char>(sym));
+        return ::tolower(static_cast<char>(sym));
     const int intSym = SymboToInt(sym);
     if ((intSym >= UTF8_STRING_TO_INT_SYMBOL("А") && intSym <= UTF8_STRING_TO_INT_SYMBOL("Я")))
         return IntToSymbo(intSym + UTF8_STRING_TO_INT_SYMBOL("а") - UTF8_STRING_TO_INT_SYMBOL("А"));

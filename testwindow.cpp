@@ -1,6 +1,7 @@
 #include "testwindow.h"
 #include "ui_testwindow.h"
 #include "mainwindow.h"
+#include "testsettings.h"
 #include <vector>
 #include <ctime>
 #include "utilQtTypes.h"
@@ -11,6 +12,7 @@ static size_t FalscheAntwort = 0;
 TestWindow::TestWindow(GlossaryDe &aDicDe, MainWindow *mw, QWidget *parent) :
     QMainWindow(parent),
     dicDe(aDicDe),
+    glSelSet(aDicDe),
     ui(new Ui::TestWindow),
     mainWindow(mw)
 {
@@ -41,12 +43,7 @@ void TestWindow::on_pushButton_clicked()
 
 void TestWindow::calcTestGlossaryIdx(std::vector<size_t> &selectionIdxs)
 {
-    selectionIdxs.clear();
-    for (size_t i = 0; i < dicDe.size(); ++i)
-    {
-        if (!dicDe[i].translation().empty())
-            selectionIdxs.push_back(i);
-    }
+    dicDe.selectIdxFilter([](const WortDe &de, size_t) { return !de.translation().empty(); }, selectionIdxs, glSelSet);
     if (selectionIdxs.size() < vecButton.size())
     {
         currIdxCorrectTr = -1;
@@ -71,14 +68,23 @@ void TestWindow::selectFalshTr(std::vector<size_t> &selectionIdxs)
         wd.type() == WortDe::TypeWort::Combination)
         needType = true;
 
-    size_t pos = 0;
-    for (size_t i = 0; i < selectionIdxs.size(); ++i)
+    GlossaryDe::SelectSettings trSelSet(dicDe);
+    const size_t currIdx = currTestGlossaryIdx;
+    dicDe.selectIdxFilter([wd, needType, currIdx](const WortDe &aWd, size_t idx)
+        { return !aWd.translation().empty()
+                  && (!needType || wd.type() == aWd.type())
+                  && idx != currIdx
+        ; },
+        selectionIdxs, trSelSet);
+
+    if (selectionIdxs.size() < vecIdxTr.size())
     {
-        if ((!needType || wd.type() == dicDe[selectionIdxs[i]].type()) &&
-            selectionIdxs[i] != currTestGlossaryIdx)
-            selectionIdxs[pos++] = selectionIdxs[i];
+        dicDe.selectIdxFilter([wd, currIdx](const WortDe &aWd, size_t idx)
+            { return !aWd.translation().empty()
+                      && idx != currIdx
+            ; },
+            selectionIdxs, trSelSet);
     }
-    selectionIdxs.resize(pos);
 
     if (selectionIdxs.size() < vecIdxTr.size())
         return;
@@ -206,4 +212,13 @@ void TestWindow::on_pushButton_9_clicked()
 void TestWindow::on_pushButton_10_clicked()
 {
     testSelectTr(6);
+}
+
+void TestWindow::on_pushButton_11_clicked()
+{
+    TestSettings* pdlg = new TestSettings(glSelSet, this);
+    if (pdlg->exec() == QDialog::Accepted)
+    {
+
+    }
 }

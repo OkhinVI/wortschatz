@@ -1,6 +1,9 @@
 #include "qlistviewglossarydemodel.h"
 #include "glossaryde.h"
 
+//----------------------------------------------------------------------
+// class QListViewGlossaryDeModel
+
 QListViewGlossaryDeModel::QListViewGlossaryDeModel(GlossaryDe &aGlossary, QObject *parent)
     :QAbstractListModel(parent), glossary(&aGlossary)
 {
@@ -59,4 +62,37 @@ QModelIndex QListViewGlossaryDeModel::creatNewIndex(size_t idx)
 {
     QModelIndex index = createIndex(idx, 0);
     return index;
+}
+
+//----------------------------------------------------------------------
+// class QListViewGlossaryTemaModel
+
+QListViewGlossaryTemaModel::QListViewGlossaryTemaModel(GlossaryDe::SelectSettings &aSelectThemes, QObject *parent)
+    :QAbstractListModel(parent), selectThemes(aSelectThemes)
+{
+
+}
+
+int QListViewGlossaryTemaModel::rowCount(const QModelIndex &) const
+{
+    return selectThemes.themesSize();
+}
+
+QVariant QListViewGlossaryTemaModel::data(const QModelIndex &index, int role) const
+{
+    QVariant value;
+
+    switch ( role )
+    {
+        case Qt::DisplayRole: //string
+            value = QString::fromStdString(selectThemes.getTemaByIndex(index.row()).asString());
+            break;
+        case Qt::UserRole: //data
+            value = QString::fromStdString(selectThemes.getTemaByIndex(index.row()).asString());
+            break;
+        default:
+            break;
+    }
+
+    return value;
 }
