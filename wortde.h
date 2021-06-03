@@ -24,7 +24,7 @@ public:
 class WortDe
 {
 public:
-    typedef unsigned int BlockNumType;
+    typedef uint32_t BlockNumType;
 
     enum class TypeWort : int // Wortarten
     {
@@ -66,6 +66,19 @@ public:
         _last_one
     };
 
+    enum class TypeLevel: unsigned int
+    {
+        None = 0,
+        A1,
+        A2,
+        B1,
+        B2,
+        C1,
+        C2,
+        User,
+        _last_one
+    };
+
 public:
     WortDe();
     ~WortDe();
@@ -96,7 +109,10 @@ public:
 
     static std::string TypeWortToString(TypeWort tw, const char *local = "de");
     static std::string TypeArtikeltToString(TypeArtikel ta, const bool forLabel = false);
-    static std::string blockHeadToStr(BlockNumType block);
+    static std::string blockH1ToStr(unsigned int h1);
+    static void blockToUint_4(const BlockNumType block, unsigned int &h1, unsigned int &h2, unsigned int &h3, unsigned int &h4);
+    static BlockNumType creatBlock(unsigned int h1, unsigned int h2, unsigned int h3, unsigned int h4);
+    static BlockNumType &preIncrementBlock(BlockNumType &block);
 
     void parseRawLine(const std::string &rawDeStr, const std::string &rawTrStr, unsigned int _block, TypeWort tw = TypeWort::None);
     void debugPrint(std::ostream &os);
@@ -113,7 +129,7 @@ public:
     void setNewPrateritum(const std::string &str);
     void setNewPerfect(const std::string &str);
 
-    void setAnswer(const bool ans);
+    void addAnswer(const bool ans);
 
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);
@@ -125,7 +141,7 @@ private:
     std::string s_wort; // только само слово в словарной форме (для TypeWort::None должно быть то же что и s_raw)
     TypeWort w_type = TypeWort::None;
     BlockNumType w_block = 0; // Указание на уровень слова: (A1, A2, B1, D2, C1, C2):8bit - (номер учебника):8bit - (номер главы):8bit - (номер раздела в главе):8bit
-    unsigned int w_frequency = 0; // Как часто слово встречается в текстах.
+    uint32_t w_frequency = 0; // Как часто слово встречается в текстах.
     int w_accent = -1; // Позиция ударной буквы
     std::string s_raw; // как есть, но без перевода (он в s_translation)
     std::string s_translation; // перевод как есть

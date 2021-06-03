@@ -571,9 +571,51 @@ std::string WortDe::TypeArtikeltToString(TypeArtikel ta, const bool forLabel)
     return "";
 }
 
-std::string WortDe::blockHeadToStr(BlockNumType block)
+WortDe::BlockNumType WortDe::creatBlock(unsigned int h1, unsigned int h2, unsigned int h3, unsigned int h4)
 {
-    const size_t WKursStrSize = 7;
+    if (h1 > 0xff)
+        h1 = 0xff;
+    if (h2 > 0xff)
+        h2 = 0xff;
+    if (h3 > 0xff)
+        h3 = 0xff;
+    if (h4 > 0xff)
+        h4 = 0xff;
+    return (h1 << 24) + (h2 << 16) + (h3 << 8) + h4;
+}
+
+void WortDe::blockToUint_4(const BlockNumType block, unsigned int &h1, unsigned int &h2, unsigned int &h3, unsigned int &h4)
+{
+    h1 = block >> 24;
+    h2 = (block >> 16) & 0xff;
+    h3 = (block >> 8) & 0xff;
+    h4 = block & 0xff;
+}
+
+ WortDe::BlockNumType & WortDe::preIncrementBlock(BlockNumType &block)
+{
+     unsigned int h1, h2, h3, h4;
+     blockToUint_4(block, h1, h2, h3, h4);
+     if (++h4 > 0xff)
+     {
+         h4 = 1;
+         if (++h3 > 0xff)
+         {
+             h3 = 1;
+             if (++h2 > 0xff)
+             {
+                 h2 = 1;
+                 ++h1;
+             }
+         }
+     }
+     block = creatBlock(h1, h2, h3, h4);
+     return block;
+}
+
+std::string WortDe::blockH1ToStr(unsigned int h1)
+{
+    const size_t WKursStrSize = size_t(TypeLevel::_last_one);
     static const char *WKursStr[WKursStrSize] =
     {
         "None",
@@ -582,25 +624,25 @@ std::string WortDe::blockHeadToStr(BlockNumType block)
         "B1",
         "B2",
         "C1",
-        "C2"
+        "C2",
+        "Us"
     };
     std::string str;
-    const size_t headBlock = block >> 24;
-    if (headBlock > 0 && headBlock < WKursStrSize)
-        str = WKursStr[headBlock];
-    else if (headBlock == 0x10)
-        str = "Us";
+    if (h1 > 0 && h1 < WKursStrSize)
+        str = WKursStr[h1];
     else
-        str = std::to_string(headBlock);
+        str = std::to_string(h1);
     return str;
 }
 
 std::string WortDe::blockToStr() const
 {
-    return blockHeadToStr(w_block) + "."
-           + std::to_string((w_block >> 16) & 0xff)
-           + ".k" + std::to_string((w_block >> 8) & 0xff) + ".t"
-           + std::to_string(w_block & 0xff);
+    unsigned int h1, h2, h3, h4;
+    blockToUint_4(w_block, h1, h2, h3, h4);
+    return blockH1ToStr(h1) + "."
+           + std::to_string(h2)
+           + ".k" + std::to_string(h3) + ".t"
+           + std::to_string(h4);
 }
 
 void WortDe::debugPrint(std::ostream &os)
@@ -639,7 +681,7 @@ void LearningWort::deserialize(const std::string &_str)
     multiScanFromString(_str, LearningWortSerialize);
 }
 
-void WortDe::setAnswer(const bool ans)
+void WortDe::addAnswer(const bool ans)
 {
     const auto currTie = time(nullptr);
     if (ans)

@@ -72,6 +72,22 @@ void GlossaryDe::loadThemes(const std::string &fileName)
         themesVector.push_back(Tema(it->first, it->second));
 }
 
+void GlossaryDe::calcNextUserNumBlock()
+{
+    WortDe::BlockNumType maxUserNum = 0;
+    for (size_t i = 0; i < dictionary.size(); ++i)
+    {
+        if (dictionary[i].block() > maxUserNum)
+            maxUserNum = dictionary[i].block();
+    }
+
+    unsigned int h1, h2, h3, h4;
+    WortDe::blockToUint_4(maxUserNum, h1, h2, h3, h4);
+    if (h1 < uint32_t(WortDe::TypeLevel::User))
+        nextUserNumBlock = WortDe::creatBlock(uint32_t(WortDe::TypeLevel::User), 1, 1, 1);
+    else
+        nextUserNumBlock = WortDe::preIncrementBlock(maxUserNum);
+}
 
 void GlossaryDe::load()
 {
@@ -138,6 +154,7 @@ void GlossaryDe::load()
         loadedBeginUserWort = size();
     }
     beginUserWort = loadedBeginUserWort;
+    calcNextUserNumBlock();
 
     loadThemes(filePath + "logTema.txt");
 }
@@ -201,10 +218,12 @@ size_t GlossaryDe::find(const std::string &str, size_t pos)
 
 std::string GlossaryDe::Tema::asString() const
 {
-    return WortDe::blockHeadToStr(blockNum) + "." +
-            std::to_string((blockNum >> 16) & 0xFF) + "  " +
-            std::to_string((blockNum >> 8) & 0xFF) + "." +
-            std::to_string(blockNum & 0xFF) + " - " +
+    unsigned int h1, h2, h3, h4;
+    WortDe::blockToUint_4(blockNum, h1, h2, h3, h4);
+    return WortDe::blockH1ToStr(h1) + "." +
+            std::to_string(h2) + "  " +
+            std::to_string(h3) + "." +
+            std::to_string(h4) + " - " +
             blockStr;
 }
 

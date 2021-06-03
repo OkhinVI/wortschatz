@@ -93,13 +93,13 @@ void MainWindow::on_actionRaw_Text_triggered()
             if (str[0] == '#')
             {
                 str = AreaUtf8(str).subArea(1).trim().toString();
-                int A_C = 0;
-                int book = 0;
-                int kapitel = 0;
-                int teil = 0;
+                unsigned int A_C = 0;
+                unsigned int book = 0;
+                unsigned int kapitel = 0;
+                unsigned int teil = 0;
                 std::stringstream ss(str);
                 multiScanFromStream(ss, A_C, book, kapitel, teil);
-                block_Num = (A_C << 24) + (book << 16) + (kapitel << 8) + teil;
+                block_Num = WortDe::creatBlock(A_C, book, kapitel, teil);
                 std::getline(ss, tema);
                 osTema << std::hex << block_Num << "\t" << tema << std::endl;
                 block_Num_Old = block_Num;
@@ -401,7 +401,9 @@ void MainWindow::on_actionSave_as_raw_triggered()
         const WortDe &wd = dicDe[i];
         if (wd.block() != lastBlockNum)
         {
-            os << "\n#" << (wd.block() >> 24) << " " << ((wd.block() >> 16) & 0xFF) << " " << ((wd.block() >> 8) & 0xFF) << " " << (wd.block() & 0xFF) << " "
+            unsigned int h1, h2, h3, h4;
+            WortDe::blockToUint_4(wd.block(), h1, h2, h3, h4);
+            os << "\n#" << h1 << " " << h2 << " " << h3 << " " << h4 << " "
                 << dicDe.tema(wd.block()) << "\n" << std::endl;
             lastBlockNum = wd.block();
         }
@@ -679,7 +681,7 @@ void MainWindow::addNewWortFromSearch()
     origIndex = dicDe.size();
     origWd = WortDe();
     currWd = origWd;
-    currWd.parseRawLine(utilQt::lineEditToStdStr(ui->lineEdit_7), "", 0x10000000 + origIndex);
+    currWd.parseRawLine(utilQt::lineEditToStdStr(ui->lineEdit_7), "", dicDe.userBlockNum());
     setWortDe(currWd);
 }
 

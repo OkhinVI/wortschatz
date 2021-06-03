@@ -11,14 +11,14 @@
 #include "linesramstream.h"
 #include "utility.h"
 
-static unsigned int CurrBlock = 0;
+static WortDe::BlockNumType CurrBlock = WortDe::creatBlock(1, 1, 1, 0);
 
 DialogRawEdit::DialogRawEdit(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DialogRawEdit)
 {
     ui->setupUi(this);
-    setBlockNum(CurrBlock + 1);
+    setBlockNum(WortDe::preIncrementBlock(CurrBlock));
 }
 
 DialogRawEdit::~DialogRawEdit()
@@ -133,30 +133,24 @@ QString DialogRawEdit::getTranslationText()
     return ui->plainTextEdit_2->toPlainText();
 }
 
-void DialogRawEdit::setBlockNum(unsigned int num)
+void DialogRawEdit::setBlockNum(WortDe::BlockNumType num)
 {
-    ui->lineEdit_4->setText(QString::number(num >> 24));
-    ui->lineEdit_5->setText(QString::number((num >> 16) & 0xFF));
-    ui->lineEdit_6->setText(QString::number((num >> 8) & 0xFF));
-    ui->lineEdit_7->setText(QString::number(num & 0xFF));
+    unsigned int h1, h2, h3, h4;
+    WortDe::blockToUint_4(num, h1, h2, h3, h4);
+    ui->lineEdit_4->setText(QString::number(h1));
+    ui->lineEdit_5->setText(QString::number(h2));
+    ui->lineEdit_6->setText(QString::number(h3));
+    ui->lineEdit_7->setText(QString::number(h4));
 }
 
-unsigned int DialogRawEdit::getBlockNum(std::string &tema)
+WortDe::BlockNumType DialogRawEdit::getBlockNum(std::string &tema)
 {
     unsigned int num1 = ui->lineEdit_4->text().toInt();
     unsigned int num2 = ui->lineEdit_5->text().toInt();
     unsigned int num3 = ui->lineEdit_6->text().toInt();
     unsigned int num4 = ui->lineEdit_7->text().toInt();
-    if (num1 > 0xFF)
-        num1 = 0xFF;
-    if (num2 > 0xFF)
-        num2 = 0xFF;
-    if (num3 > 0xFF)
-        num3 = 0xFF;
-    if (num4 > 0xFF)
-        num4 = 0xFF;
 
-    CurrBlock = (num1 << 24) + (num2 << 16) + (num3 << 8) + num4;
+    CurrBlock = WortDe::creatBlock(num1, num2, num3, num4);
     tema = utilQt::lineEditToStdStr(ui->lineEdit_8);
 
     return CurrBlock;

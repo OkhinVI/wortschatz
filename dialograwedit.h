@@ -19,8 +19,8 @@ public:
     ~DialogRawEdit();
     QString getDeText();
     QString getTranslationText();
-    void setBlockNum(unsigned int num);
-    unsigned int getBlockNum(std::string &tema);
+    void setBlockNum(WortDe::BlockNumType num);
+    WortDe::BlockNumType getBlockNum(std::string &tema);
 
     WortDe::TypeWort getTypeWort();
     void setTypeWort(WortDe::TypeWort tw);

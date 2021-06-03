@@ -62,9 +62,13 @@ public:
     std::string tema(const unsigned int blockNum);
     const Tema &getTemaByIndex(size_t idx) const;
     size_t themesSize() const { return themesVector.size(); }
+    WortDe::BlockNumType userBlockNum() const { return nextUserNumBlock; }
 
     template< typename Func >
     size_t selectIdxFilter(Func func, std::vector<size_t> &selectionIdxs, const SelectSettings &selSet);
+
+private:
+    void calcNextUserNumBlock();
 
 private:
     DictionaryDe dictionary;
@@ -74,6 +78,7 @@ private:
     std::map<unsigned int, std::string> themes;
     std::vector<Tema> themesVector;
     size_t beginUserWort = 0;
+    WortDe::BlockNumType nextUserNumBlock = 0;
 };
 
 template< typename Func >

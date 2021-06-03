@@ -152,12 +152,12 @@ void TestWindow::testSelectTr(size_t idx)
     if (int(idx) == currIdxCorrectTr)
     {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; background-color: yellow; color: blue;");
-        wd.setAnswer(true);
+        wd.addAnswer(true);
         ++RichteAntwort;
     } else {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; color: red;");
         vecButton[idx]->setStyleSheet("text-align: left; color: gray ;");
-        wd.setAnswer(false);
+        wd.addAnswer(false);
         ++FalscheAntwort;
     }
     mainWindow->setNewIndex(currTestGlossaryIdx);
