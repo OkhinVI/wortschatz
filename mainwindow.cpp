@@ -53,6 +53,10 @@ MainWindow::MainWindow(QWidget *parent)
     keyAltA = new QShortcut(this);
     keyAltA->setKey(Qt::ALT + Qt::Key_A);
     connect(keyAltA, SIGNAL(activated()), this, SLOT(slotShortcutAltA()));
+
+    keyAltL = new QShortcut(this);
+    keyAltL->setKey(Qt::ALT + Qt::Key_L);
+    connect(keyAltL, SIGNAL(activated()), this, SLOT(slotShortcutAltL()));
 }
 
 MainWindow::~MainWindow()
@@ -368,6 +372,12 @@ void MainWindow::slotShortcutAltA()
     setWortDe(currWd);
 }
 
+void MainWindow::slotShortcutAltL()
+{
+    checkChangesCurrWd();
+    testWin->show();
+}
+
 void MainWindow::on_pushButton_8_clicked()
 {
     getWortDeToCurrWd();
@@ -394,7 +404,7 @@ void MainWindow::on_pushButton_11_clicked()
     setWortDe(currWd);
 }
 
-void MainWindow::on_actionSave_as_raw_triggered()
+void MainWindow::on_actionToRaw_triggered()
 {
     // TODO: add file selection
     std::ofstream os;
@@ -672,11 +682,6 @@ void MainWindow::on_pushButton_30_clicked()
         setNewIndex(dicDe.size() - 1);
     else
         setNewIndex(origIndex - 1);
-}
-
-void MainWindow::on_actionFix_triggered()
-{
-    dicDe.fixMainDic();
 }
 
 void MainWindow::addNewWortFromSearch()

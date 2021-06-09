@@ -51,6 +51,7 @@ private slots:
     void slotShortcutAltN();
     void slotShortcutAltV();
     void slotShortcutAltA();
+    void slotShortcutAltL();
 
     void on_pushButton_8_clicked();
 
@@ -59,8 +60,6 @@ private slots:
     void on_pushButton_10_clicked();
 
     void on_pushButton_11_clicked();
-
-    void on_actionSave_as_raw_triggered();
 
     void on_pushButton_12_clicked();
 
@@ -106,11 +105,11 @@ private slots:
 
     void on_pushButton_30_clicked();
 
-    void on_actionFix_triggered();
-
     void on_pushButton_31_clicked();
 
     void on_pushButton_32_clicked();
+
+    void on_actionToRaw_triggered();
 
 private:
     void selectItem(const int idx);
@@ -136,6 +135,7 @@ private:
     QShortcut      *keyAltN;
     QShortcut      *keyAltV;
     QShortcut      *keyAltA;
+    QShortcut      *keyAltL;
     TestWindow     *testWin;
 
 };

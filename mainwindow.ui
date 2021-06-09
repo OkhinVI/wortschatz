@@ -658,7 +658,7 @@
      <x>0</x>
      <y>0</y>
      <width>1138</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -666,15 +666,16 @@
      <string>File</string>
     </property>
     <addaction name="actionOpenDir"/>
+    <addaction name="separator"/>
     <addaction name="actionSave"/>
-    <addaction name="actionSave_as_raw"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
      <string>Edit</string>
     </property>
     <addaction name="actionRaw_Text"/>
-    <addaction name="actionFix"/>
+    <addaction name="separator"/>
+    <addaction name="actionToRaw"/>
    </widget>
    <widget class="QMenu" name="menuLearning">
     <property name="title">
@@ -700,17 +701,12 @@
     <string>Open dictionary dir</string>
    </property>
   </action>
-  <action name="actionFix">
+  <action name="actionToRaw">
    <property name="text">
-    <string>Fix main Dic</string>
+    <string>To raw text</string>
    </property>
    <property name="toolTip">
-    <string>Fix the main dictionary</string>
-   </property>
-  </action>
-  <action name="actionSave_as_raw">
-   <property name="text">
-    <string>Save as raw</string>
+    <string>Convert to raw text</string>
    </property>
   </action>
   <action name="actionSave">
