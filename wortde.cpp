@@ -340,7 +340,9 @@ static void parseRawDeNounPl(AreaUtf8 &aRaw, std::string &s_wort, std::string &n
 
     if (genetiv)
     {
-        if ((token1 != "-en" && token1 != "-es" && token1 != "-s" && token1 != "-" && token1 != "=") ||
+        if ((token1 != "-en" && token1 != "-es" && token1 != "-s"
+             && token1 != "-ns" && token1 != "-n" && token1 != "-ens"
+             && token1 != "-ses" && token1 != "-" && token1 != "=") ||
              !HasSymbol(delimiter2, ',') ||
              delimiter1 != " ")
         {
