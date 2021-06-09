@@ -44,6 +44,7 @@ const GlossaryDe::Tema &GlossaryDe::getTemaByIndex(size_t idx) const
 
 void GlossaryDe::loadThemes(const std::string &fileName)
 {
+    themes.clear();
     std::ifstream is;
     is.open(fileName);
 

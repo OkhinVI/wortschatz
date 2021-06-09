@@ -125,15 +125,19 @@ void MainWindow::on_actionRaw_Text_triggered()
 
 void MainWindow::on_actionOpenDir_triggered()
 {
+    checkChangesCurrWd();
     std::string str = QFileDialog::getExistingDirectory(0, "Directory dictionary", QString::fromStdString(pathDic)).toUtf8().toStdString();
     if (str.empty())
         return;
+    origIndex = -1; // clear index for new glossary
 
     pathDic = str;
     dicDe.saveClear();
     dicDe.setPath(pathDic);
     dicDe.load();
-    // TODO: show
+    model->upDate();
+    if (dicDe.size() > 0)
+        setNewIndex(0);
 
     QSettings settings(SettingsFirma, SettingsApp);
     settings.setValue(SettingsDictionaryPath, QString::fromStdString(pathDic));
