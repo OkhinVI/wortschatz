@@ -104,7 +104,7 @@ void MainWindow::on_actionRaw_Text_triggered()
                 std::stringstream ss(str);
                 multiScanFromStream(ss, A_C, book, kapitel, teil);
                 block_Num = WortDe::creatBlock(A_C, book, kapitel, teil);
-                std::getline(ss, tema);
+                tema = util::getline(ss);
                 osTema << std::hex << block_Num << "\t" << tema << std::endl;
                 block_Num_Old = block_Num;
                 continue;

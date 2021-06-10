@@ -1,4 +1,5 @@
 #include "utility.h"
+#include <iostream>
 
 void util::VectorFromString(VectorString &vec, const std::string &str)
 {
@@ -30,4 +31,20 @@ void util::replaceEndLines(std::string &str)
         if (str[i] == '\n' || str[i] == '\r')
             str[i] = ' ';
     }
+}
+
+std::string util::getline(std::istream &is)
+{
+    std::string line;
+    std::getline(is, line);
+    size_t pos;
+    for (pos = line.size(); pos > 0; --pos)
+    {
+        const char sym = line[pos - 1];
+        if (sym != '\n' && sym != '\r')  // fix DOS endline "\r\n" for *unix systems
+            break;
+    }
+    if (pos < line.size())
+        line.resize(pos);
+    return line;
 }

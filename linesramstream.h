@@ -4,12 +4,10 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include "utility.h"
 
 class LinesRamIStream
 {
-public:
-    typedef std::vector<std::string> VectorStrings;
-
 public:
     void load(std::istream &is, size_t maxLines = std::numeric_limits<size_t>::max());
     bool loadFromFile(const std::string &fileName, size_t maxLines = std::numeric_limits<size_t>::max());
@@ -28,7 +26,7 @@ protected:
     void clear() { vs.clear(); gPos = 0; }
 
 protected:
-    VectorStrings vs;
+    util::VectorString vs;
     size_t gPos = 0;
 };
 

@@ -9,11 +9,10 @@ static const std::string NullConstString;
 
 void LinesRamIStream::load(std::istream &is, size_t maxLines)
 {
-    std::string str;
     clear();
     while(!is.eof() && vs.size() < maxLines)
     {
-        getline(is, str);
+        std::string str = util::getline(is);
         if (!is.eof() || !str.empty())
             vs.push_back(str);
     }

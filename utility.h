@@ -22,6 +22,8 @@ size_t NumberOfFunctionArguments(Types... args)
 
 void replaceEndLines(std::string &str);
 
+std::string getline(std::istream &is);
+
 } // namespace util
 
 #endif // UTILITY_H

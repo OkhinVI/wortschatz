@@ -6,6 +6,7 @@
 #include "glossaryde.h"
 #include "linesramstream.h"
 #include "string_utf8.h"
+#include "utility.h"
 
 static const std::string GlossaryDePrefix = "GlossaryDe:";
 static WortDe NullWortDe;
@@ -48,11 +49,10 @@ void GlossaryDe::loadThemes(const std::string &fileName)
     std::ifstream is;
     is.open(fileName);
 
-    std::string str;
     unsigned int blockNum = 0;
     while (!is.eof())
     {
-        std::getline(is, str);
+        std::string str = util::getline(is);
         if (str.empty())
             continue;
         AreaUtf8 ut8(str);
