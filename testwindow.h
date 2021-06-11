@@ -8,6 +8,7 @@
 
 class QPushButton;
 class MainWindow;
+class TestSettings;
 
 namespace Ui {
 class TestWindow;
@@ -63,6 +64,7 @@ private:
 private:
     Ui::TestWindow *ui;
     MainWindow *mainWindow;
+    TestSettings* settingsWin;
 };
 
 #endif // TESTWINDOW_H

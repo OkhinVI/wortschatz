@@ -17,6 +17,7 @@ TestWindow::TestWindow(GlossaryDe &aDicDe, MainWindow *mw, QWidget *parent) :
     mainWindow(mw)
 {
     ui->setupUi(this);
+    settingsWin = new TestSettings(glSelSet, this);
 
     vecButton.push_back(ui->pushButton_2);
     vecButton.push_back(ui->pushButton_3);
@@ -216,8 +217,7 @@ void TestWindow::on_pushButton_10_clicked()
 
 void TestWindow::on_pushButton_11_clicked()
 {
-    TestSettings* pdlg = new TestSettings(glSelSet, this);
-    if (pdlg->exec() == QDialog::Accepted)
+    if (settingsWin->exec() == QDialog::Accepted)
     {
 
     }

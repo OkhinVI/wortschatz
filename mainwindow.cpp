@@ -33,9 +33,9 @@ MainWindow::MainWindow(QWidget *parent)
     dicDe.setPath(pathDic);
     dicDe.load();
 
-    testWin = new TestWindow(dicDe, this);
+    testWin = new TestWindow(dicDe, this, this);
 
-    this->model = new QListViewGlossaryDeModel(dicDe);
+    model = new QListViewGlossaryDeModel(dicDe, this);
     this->ui->listView->setModel(model);
 
     keyAltW = new QShortcut(this);
@@ -62,7 +62,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     dicDe.save();
-    delete testWin;
     delete ui;
 }
 

@@ -12,6 +12,7 @@ class QListViewGlossaryDeModel: public QAbstractListModel
 {
 public:
     QListViewGlossaryDeModel(GlossaryDe &aGlossary, QObject *parent=nullptr);
+    virtual ~QListViewGlossaryDeModel() {}
     int rowCount(const QModelIndex &) const;
     QVariant data(const QModelIndex &index, int role) const;
 
@@ -27,6 +28,7 @@ class QListViewGlossaryTemaModel: public QAbstractListModel
 {
 public:
     QListViewGlossaryTemaModel(GlossaryDe::SelectSettings &aSelectThemes, QObject *parent=nullptr);
+    virtual ~QListViewGlossaryTemaModel() {}
     int rowCount(const QModelIndex &) const;
     QVariant data(const QModelIndex &index, int role) const;
 

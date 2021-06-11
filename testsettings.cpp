@@ -8,11 +8,11 @@ TestSettings::TestSettings(GlossaryDe::SelectSettings &aGlSelSet, QWidget *paren
     glSelSet(aGlSelSet)
 {
     ui->setupUi(this);
-    modelFirst = new QListViewGlossaryTemaModel(glSelSet);
+    modelFirst = new QListViewGlossaryTemaModel(glSelSet, this);
     ui->comboBox->setModel(modelFirst);
     ui->comboBox->setCurrentIndex(glSelSet.startIdxTema);
 
-    modelLast = new QListViewGlossaryTemaModel(glSelSet);
+    modelLast = new QListViewGlossaryTemaModel(glSelSet, this);
     ui->comboBox_2->setModel(modelLast);
     ui->comboBox_2->setCurrentIndex(glSelSet.lastIdxTema);
 }
