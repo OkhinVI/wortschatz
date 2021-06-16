@@ -701,9 +701,44 @@ void MainWindow::on_pushButton_31_clicked()
 void MainWindow::on_pushButton_32_clicked()
 {
     addNewWortFromSearch();
-
-    const std::string beginUrl = "https://www.lingvolive.com/ru-ru/translate/de-ru/";
-    const std::string endUrl = "";
-    getWortDeToCurrWd();
     webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
+}
+
+void MainWindow::on_actionExport_to_text_triggered()
+{
+    // TODO: add file selection
+    std::ofstream os;
+    os.open(pathDic + "/" + "dic_tab.txt");
+    for (size_t i = 0; i < dicDe.size(); ++i)
+        os << dicDe[i].exportToStr(true)  << std::endl;
+    os.close();
+
+    /*
+    // search for duplicate words
+    os.open(pathDic + "/" + "dic_doubles.txt");
+    std::vector<WortDe> newGloss;
+    for (size_t i = 0; i < dicDe.size(); ++i)
+        newGloss.push_back(dicDe[i]);
+
+    std::string lastWord;
+    for (size_t pos = 0; pos < newGloss.size(); ++pos)
+    {
+        std::string dupl;
+        const std::string firstWort = AreaUtf8(newGloss[pos].wort()).getToken().toString();
+        for (size_t i = pos + 1; i < newGloss.size(); ++i)
+        {
+            const std::string nextWort = AreaUtf8(newGloss[i].wort()).getToken().toString();
+            if (firstWort == nextWort)
+            {
+                dupl += newGloss[i].exportToStr(true) + "\n";
+                newGloss.erase(newGloss.begin() + i);
+                --i;
+            }
+        }
+        if (!dupl.empty())
+        {
+            os << newGloss[pos].exportToStr(true) << "\n" << dupl;
+        }
+    }
+    */
 }

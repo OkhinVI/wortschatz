@@ -11,14 +11,15 @@ class LearningWort
 public:
     std::string serialize() const;
     void deserialize(const std::string &_str);
+    void clear() { *this = LearningWort(); }
 
 public:
-    unsigned int startLearning = 0; // Начало изучения слова
-    unsigned int lastCorrectAnswer = 0; // Время в секундах последнего правильного ответа
-    unsigned int lastWrongtAnswer = 0; // Время в секундах последнего неправильного ответа
-    unsigned int numberCorrectAnswers = 0; // количество правильных ответов
-    unsigned int numberWrongtAnswers = 0; // количество неправильных ответов
-    unsigned int maskCorrectAndWrongtAnswers = 0; // битовая маска последних 32-х ответов (старший бит - последний ответ)
+    uint32_t startLearning = 0; // Начало изучения слова
+    uint32_t lastCorrectAnswer = 0; // Время в секундах последнего правильного ответа
+    uint32_t lastWrongtAnswer = 0; // Время в секундах последнего неправильного ответа
+    uint32_t numberCorrectAnswers = 0; // количество правильных ответов
+    uint32_t numberWrongtAnswers = 0; // количество неправильных ответов
+    uint32_t maskCorrectAndWrongtAnswers = 0; // битовая маска последних 32-х ответов (старший бит - последний ответ)
 };
 
 class WortDe
@@ -101,7 +102,8 @@ public:
     unsigned int block() const { return w_block; }
     std::string prefixAndWort() const;
 
-    bool save(std::ostream &os);
+    bool save(std::ostream &os, const bool clearStat = false);
+    std::string exportToStr(const bool clearStat = false);
     bool load(LinesRamIStream &ils, std::ostream &osErr);
     size_t countSaveLines();
 

@@ -137,8 +137,10 @@ void GlossaryDe::load()
         WortDe wd;
         if (wd.load(ils, logError))
         {
+            // if (wd.wort().substr(0, 3) != "---") { // delete Wort with "---" prefix
             wd.debugPrint(logDebug);
             add(wd);
+            // }
         }
     }
 

@@ -5,6 +5,7 @@
 #include <limits>
 #include <stdexcept>
 #include <ctime>
+#include <sstream>
 #include "SerializeString.h"
 #include "utility.h"
 #include "string_utf8.h"
@@ -17,24 +18,22 @@ static inline SerializeWrapperString SerializeWrapper(std::string &_str) { retur
 static inline SerializeWrapperNum<int> SerializeWrapper(int &_num) { return SerializeWrapperNum<int>(_num); }
 static inline SerializeWrapperNum<unsigned int> SerializeWrapper(unsigned int &_num) { return SerializeWrapperNum<unsigned int>(_num); }
 static inline SerializeWrapperNum<bool> SerializeWrapper(bool &_num) { return SerializeWrapperNum<bool>(_num); }
-static inline SerializeWrapperAny<LearningWort> SerializeWrapper(LearningWort &_val) { return SerializeWrapperAny<LearningWort>(_val); }
 
-
-static inline void saveLines(std::ostream &) {}
+static inline void saveLines(std::ostream &, const char *) {}
 
 template<typename T, typename ... Types>
-static inline void saveLines(std::ostream &os, T value, const Types&... args)
+static inline void saveLines(std::ostream &os, const char *delimiter, T value, const Types&... args)
 {
-    os << value.serialize() << '\n';
-    saveLines(os, args...);
+    os << value.serialize() << delimiter;
+    saveLines(os, delimiter, args...);
 }
 
 template<typename ... Types>
-static inline void saveBlockLines(std::ostream &os, const Types&... args)
+static inline void saveBlockLines(std::ostream &os, const char *delimiter, const Types&... args)
 {
     const size_t number = sizeof...(args);
-    os << number << '\n';
-    saveLines(os, args...);
+    os << number << delimiter;
+    saveLines(os, delimiter, args...);
 }
 
 // Serialize options for s_wort (without s_wort)
@@ -57,19 +56,36 @@ static inline void saveBlockLines(std::ostream &os, const Types&... args)
                    SerializeWrapper(v_trennbar),\
                    SerializeWrapper(v_Pretexts),\
                    SerializeWrapper(v_Cases),\
-                   SerializeWrapper(v_TypePerfect),\
-                   SerializeWrapper(l_statistic)
+                   SerializeWrapper(v_TypePerfect)
 
-bool WortDe::save(std::ostream &os)
+bool WortDe::save(std::ostream &os, const bool clearStat)
 {
-    os << '@' << s_wort << '\n'; // start block
-    saveBlockLines(os, WortDeOptionsSerialize);
+    const char * const delimiter = "\n";
+    os << '@' << s_wort << delimiter; // start block
+    saveBlockLines(os, delimiter, WortDeOptionsSerialize);
+    if (clearStat)
+        os << LearningWort().serialize() << delimiter;
+    else
+        os << l_statistic.serialize() << delimiter;
     return true;
+}
+
+std::string WortDe::exportToStr(const bool clearStat)
+{
+    const char * const delimiter = "\t";
+    std::stringstream ss;
+    ss << s_wort << delimiter; // start block
+    saveBlockLines(ss, delimiter, WortDeOptionsSerialize);
+    if (clearStat)
+        ss << LearningWort().serialize();
+    else
+        ss << l_statistic.serialize();
+    return ss.str();
 }
 
 size_t WortDe::countSaveLines()
 {
-    return 1 + util::NumberOfFunctionArguments(WortDeOptionsSerialize);
+    return 2 + util::NumberOfFunctionArguments(WortDeOptionsSerialize);
 }
 
 // load
@@ -109,15 +125,17 @@ bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
     const size_t countLines = std::stoul(str);
     const size_t neadCountLines = util::NumberOfFunctionArguments(WortDeOptionsSerialize);
     const size_t parseCount = std::min(countLines, neadCountLines);
+    const size_t countWithStat = parseCount + 1;
     const size_t startPos = ils.tellg();
 
     try {
         loadLines(ils, parseCount, WortDeOptionsSerialize);
+        l_statistic.deserialize(ils.get());
     }  catch (...) {
-        if (ils.tellg() < startPos + parseCount)
+        if (ils.tellg() < startPos + countWithStat)
         {
-            osErr << ils.tellg() << " skiped " << startPos + parseCount - ils.tellg() << " lines (throw)" << str << std::endl;
-            ils.seekg(startPos + parseCount);
+            osErr << ils.tellg() << " skiped " << startPos + countWithStat - ils.tellg() << " lines (throw)" << str << std::endl;
+            ils.seekg(startPos + countWithStat);
         }
         throw;
     }

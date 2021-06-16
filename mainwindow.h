@@ -111,6 +111,8 @@ private slots:
 
     void on_actionToRaw_triggered();
 
+    void on_actionExport_to_text_triggered();
+
 private:
     void selectItem(const int idx);
     void setButtonEnable(WortDe wd);
