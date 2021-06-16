@@ -20,7 +20,9 @@ public:
 
     const std::string &operator[](size_t idx) const;
     bool empty() const { return vs.empty(); }
-    bool size() const { return vs.size(); }
+    size_t size() const { return vs.size(); }
+    const std::string* begin() const { return &vs[0]; }
+    const std::string* end() const { return &vs[vs.size()]; }
 
 protected:
     void clear() { vs.clear(); gPos = 0; }
@@ -31,13 +33,14 @@ protected:
 };
 
 
-
 class LinesRamStream: public LinesRamIStream
 {
 public:
     LinesRamStream();
 
     std::string &operator[](size_t idx);
+    std::string* begin() { return &vs[0]; }
+    std::string* end() { return &vs[vs.size()]; }
 
 protected:
     void clear() { LinesRamIStream::clear(); pPos = 0; }

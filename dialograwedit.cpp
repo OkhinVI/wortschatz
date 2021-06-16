@@ -248,8 +248,8 @@ void DialogRawEdit::on_pushButton_4_clicked()
     std::ofstream osLog;
     osLog.open(file + ".err.log");
 
-    for (size_t i = 0; i < ls.size(); ++i)
-        ls[i] = AreaUtf8(ls[i]).trim().toString();
+    for (auto& line : ls)
+        line = AreaUtf8(line).trim().toString();
 
     unsigned int num1 = ui->lineEdit_4->text().toInt();
     unsigned int num2 = ui->lineEdit_5->text().toInt();
