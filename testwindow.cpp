@@ -6,6 +6,12 @@
 #include <ctime>
 #include "utilQtTypes.h"
 
+#ifdef _WIN32
+#include <intrin.h>
+#else
+#include <x86intrin.h>
+#endif
+
 static size_t RichteAntwort = 0;
 static size_t FalscheAntwort = 0;
 
@@ -29,7 +35,7 @@ TestWindow::TestWindow(GlossaryDe &aDicDe, MainWindow *mw, QWidget *parent) :
 
     ui->lineEdit->setStyleSheet("background-color: yellow; color: blue;");
 
-    genRandom.seed(time(nullptr));
+    genRandom.seed(time(nullptr) + __rdtsc());
 }
 
 TestWindow::~TestWindow()
@@ -51,7 +57,9 @@ void TestWindow::calcTestGlossaryIdx(std::vector<size_t> &selectionIdxs)
         return;
     }
 
-    size_t currTestIdxWithTr = genRandom() % selectionIdxs.size();
+    uint64_t taktCPU = __rdtsc();
+    uint64_t randNum = genRandom();
+    size_t currTestIdxWithTr = (taktCPU + randNum) % selectionIdxs.size();
     currTestGlossaryIdx = selectionIdxs[currTestIdxWithTr];
 }
 
