@@ -6,12 +6,6 @@
 #include <ctime>
 #include "utilQtTypes.h"
 
-#ifdef _WIN32
-#include <intrin.h>
-#else
-#include <x86intrin.h>
-#endif
-
 static size_t RichteAntwort = 0;
 static size_t FalscheAntwort = 0;
 
@@ -34,8 +28,6 @@ TestWindow::TestWindow(GlossaryDe &aDicDe, MainWindow *mw, QWidget *parent) :
     vecButton.push_back(ui->pushButton_10);
 
     ui->lineEdit->setStyleSheet("background-color: yellow; color: blue;");
-
-    genRandom.seed(time(nullptr) + __rdtsc());
 }
 
 TestWindow::~TestWindow()
@@ -48,80 +40,17 @@ void TestWindow::on_pushButton_clicked()
     setNewWort();
 }
 
-void TestWindow::calcTestGlossaryIdx(std::vector<size_t> &selectionIdxs)
-{
-    dicDe.selectIdxFilter([](const WortDe &de, size_t) { return !de.translation().empty(); }, selectionIdxs, glSelSet);
-    if (selectionIdxs.size() < vecButton.size())
-    {
-        currIdxCorrectTr = -1;
-        return;
-    }
-
-    uint64_t taktCPU = __rdtsc();
-    uint64_t randNum = genRandom();
-    size_t currTestIdxWithTr = (taktCPU + randNum) % selectionIdxs.size();
-    currTestGlossaryIdx = selectionIdxs[currTestIdxWithTr];
-}
-
-void TestWindow::selectFalshTr(std::vector<size_t> &selectionIdxs)
-{
-    vecIdxTr.resize(vecButton.size());
-
-    const WortDe &wd = dicDe[currTestGlossaryIdx];
-
-    bool needType = false;
-    if (wd.type() == WortDe::TypeWort::Noun ||
-        wd.type() == WortDe::TypeWort::Verb ||
-        wd.type() == WortDe::TypeWort::Adjective ||
-        wd.type() == WortDe::TypeWort::Adverb ||
-        wd.type() == WortDe::TypeWort::Combination)
-        needType = true;
-
-    GlossaryDe::SelectSettings trSelSet(dicDe);
-    const size_t currIdx = currTestGlossaryIdx;
-    dicDe.selectIdxFilter([wd, needType, currIdx](const WortDe &aWd, size_t idx)
-        { return !aWd.translation().empty()
-                  && (!needType || wd.type() == aWd.type())
-                  && idx != currIdx
-        ; },
-        selectionIdxs, trSelSet);
-
-    if (selectionIdxs.size() < vecIdxTr.size())
-    {
-        dicDe.selectIdxFilter([wd, currIdx](const WortDe &aWd, size_t idx)
-            { return !aWd.translation().empty()
-                      && idx != currIdx
-            ; },
-            selectionIdxs, trSelSet);
-    }
-
-    if (selectionIdxs.size() < vecIdxTr.size())
-        return;
-
-    currIdxCorrectTr = genRandom() % vecIdxTr.size();
-
-    for (size_t i = 0; i < vecIdxTr.size(); ++i)
-    {
-        if (currIdxCorrectTr == int(i))
-        {
-            vecIdxTr[i] = currTestGlossaryIdx;
-        } else {
-            size_t nextIdx = genRandom() % (selectionIdxs.size() - 1);
-            vecIdxTr[i] = selectionIdxs[nextIdx];
-        }
-    }
-}
-
 void TestWindow::setNewWort()
 {
     ui->pushButton->setEnabled(false);
     for (size_t i = 0; i < vecButton.size(); ++i)
         vecButton[i]->setStyleSheet("text-align: left;");
 
-
-    std::vector<size_t> selectionIdxs;
-    calcTestGlossaryIdx(selectionIdxs);
-    selectFalshTr(selectionIdxs);
+    currTestGlossaryIdx = dicDe.calcTestWortIdx(glSelSet);
+    vecIdxTr.resize(vecButton.size());
+    currIdxCorrectTr = dicDe.selectVariantsTr(vecIdxTr);
+    if (currIdxCorrectTr < 0)
+        return;
 
     {
         WortDe &wd = dicDe.at(currTestGlossaryIdx);

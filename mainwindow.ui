@@ -677,6 +677,8 @@
     <addaction name="separator"/>
     <addaction name="actionToRaw"/>
     <addaction name="actionExport_to_text"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_statistic"/>
    </widget>
    <widget class="QMenu" name="menuLearning">
     <property name="title">
@@ -723,6 +725,11 @@
   <action name="actionExport_to_text">
    <property name="text">
     <string>Export to text</string>
+   </property>
+  </action>
+  <action name="actionClear_statistic">
+   <property name="text">
+    <string>Clear statistic</string>
    </property>
   </action>
  </widget>

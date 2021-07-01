@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <limits>
+#include <random>
 
 class GlossaryDe
 {
@@ -49,6 +50,10 @@ public:
     void saveClear();
     void fixMainDic();
 
+    void clearAllStatistic();
+    size_t calcTestWortIdx(const SelectSettings &selSet); // returns the index of the next word to learn
+    int selectVariantsTr(std::vector<size_t> &vecIdxTr);
+
     void add(const WortDe &wd);
     const WortDe &at(size_t idx) const;
     WortDe &at(size_t idx);
@@ -79,6 +84,9 @@ private:
     std::vector<Tema> themesVector;
     size_t beginUserWort = 0;
     WortDe::BlockNumType nextUserNumBlock = 0;
+
+    size_t currIdxLearnWordDe = 0;
+    std::mt19937 genRandom;
 };
 
 template< typename Func >

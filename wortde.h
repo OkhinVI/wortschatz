@@ -132,6 +132,8 @@ public:
     void setNewPerfect(const std::string &str);
 
     void addAnswer(const bool ans);
+    void clearStatistic() { l_statistic.clear(); }
+    const LearningWort& getStatistic() { return l_statistic; }
 
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);

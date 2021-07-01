@@ -8,6 +8,12 @@
 #include "string_utf8.h"
 #include "utility.h"
 
+#ifdef _WIN32
+#include <intrin.h>
+#else
+#include <x86intrin.h>
+#endif
+
 static const std::string GlossaryDePrefix = "GlossaryDe:";
 static WortDe NullWortDe;
 
@@ -15,6 +21,8 @@ GlossaryDe::GlossaryDe()
 {
     filePath = "";
     fileName = "main_dic_de.dic";
+
+    genRandom.seed(time(nullptr) + __rdtsc());
 }
 
 void GlossaryDe::setPath(const std::string &aPath)
@@ -185,6 +193,12 @@ void GlossaryDe::fixMainDic()
     beginUserWort = dictionary.size();
 }
 
+void GlossaryDe::clearAllStatistic()
+{
+    for (WortDe &wd : dictionary)
+        wd.clearStatistic();
+}
+
 void GlossaryDe::add(const WortDe &wd)
 {
     dictionary.push_back(wd);
@@ -217,6 +231,79 @@ size_t GlossaryDe::find(const std::string &str, size_t pos)
     return dictionary.size();
 }
 
+size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
+{
+    std::vector<size_t> selectionIdxs;
+    selectIdxFilter([](const WortDe &de, size_t) { return !de.translation().empty(); }, selectionIdxs, selSet);
+    if (selectionIdxs.empty())
+    {
+        currIdxLearnWordDe = dictionary.size();
+        return dictionary.size();
+    }
+
+    uint64_t taktCPU = __rdtsc();
+    uint64_t randNum = genRandom();
+    size_t currTestIdxWithTr = (taktCPU + randNum) % selectionIdxs.size();
+    currIdxLearnWordDe = selectionIdxs[currTestIdxWithTr];
+    return currIdxLearnWordDe;
+}
+
+int GlossaryDe::selectVariantsTr(std::vector<size_t> &vecIdxTr)
+{
+    if (currIdxLearnWordDe >= dictionary.size())
+        return -1;
+
+    std::vector<size_t> selectionIdxs;
+    const WortDe &wd = dictionary[currIdxLearnWordDe];
+
+    bool needType = false;
+    if (wd.type() == WortDe::TypeWort::Noun ||
+        wd.type() == WortDe::TypeWort::Verb ||
+        wd.type() == WortDe::TypeWort::Adjective ||
+        wd.type() == WortDe::TypeWort::Adverb ||
+        wd.type() == WortDe::TypeWort::Combination)
+        needType = true;
+
+    SelectSettings trSelSet(*this);
+    const size_t currIdx = currIdxLearnWordDe;
+    selectIdxFilter([wd, needType, currIdx](const WortDe &aWd, size_t idx)
+        { return !aWd.translation().empty()
+                  && (!needType || wd.type() == aWd.type())
+                  && idx != currIdx
+        ; },
+        selectionIdxs, trSelSet);
+
+    if (selectionIdxs.size() < vecIdxTr.size())
+    {
+        selectIdxFilter([wd, currIdx](const WortDe &aWd, size_t idx)
+            { return !aWd.translation().empty()
+                      && idx != currIdx
+            ; },
+            selectionIdxs, trSelSet);
+    }
+
+    if (selectionIdxs.size() < vecIdxTr.size())
+        return -1;
+
+    int currIdxCorrectTr = genRandom() % vecIdxTr.size();
+
+    for (size_t i = 0; i < vecIdxTr.size(); ++i)
+    {
+        if (currIdxCorrectTr == int(i))
+        {
+            vecIdxTr[i] = currIdxLearnWordDe;
+        } else {
+            size_t nextIdx = genRandom() % (selectionIdxs.size() - 1);
+            vecIdxTr[i] = selectionIdxs[nextIdx];
+            if (nextIdx + 1 < selectionIdxs.size())
+                selectionIdxs[nextIdx] = selectionIdxs.back();
+            selectionIdxs.pop_back();
+        }
+    }
+    return currIdxCorrectTr;
+}
+
+
 // class GlossaryDe::Tema
 
 std::string GlossaryDe::Tema::asString() const
@@ -243,7 +330,7 @@ bool GlossaryDe::SelectSettings::testWort(const WortDe &wd) const
     if (wd.block() < glDe.getTemaByIndex(startIdxTema).blockNum)
         return false;
     unsigned int last = glDe.getTemaByIndex(lastIdxTema).blockNum;
-    if ((last & 0xff))
+    if ((last & 0xff) == 0)
         last |= 0xff;
     return wd.block() <= last;
 }

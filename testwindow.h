@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include "glossaryde.h"
 #include <vector>
-#include <random>
 
 class QPushButton;
 class MainWindow;
@@ -26,8 +25,6 @@ public:
 
 private:
     void testSelectTr(size_t idx);
-    void selectFalshTr(std::vector<size_t> &selectionIdxs);
-    void calcTestGlossaryIdx(std::vector<size_t> &selectionIdxs);
 
 private slots:
     void on_pushButton_clicked();
@@ -58,7 +55,6 @@ private:
     int currIdxCorrectTr = -1;
     std::vector<QPushButton *> vecButton;
     std::vector<size_t> vecIdxTr;
-    std::mt19937 genRandom;
     GlossaryDe::SelectSettings glSelSet;
 
 private:

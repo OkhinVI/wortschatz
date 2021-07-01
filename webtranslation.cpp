@@ -120,3 +120,9 @@ bool WebTranslation::setLanguage(const std::string &lg)
     }
     return false;
 }
+
+// TODO: add:
+// https://de.wiktionary.org/wiki/Wort
+// https://www.duden.de/rechtschreibung/Wort
+// https://corpora.uni-leipzig.de/de/res?corpusId=deu_newscrawl_2011&word=Wort
+// https://de.thefreedictionary.com/Wort

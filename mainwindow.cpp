@@ -742,3 +742,12 @@ void MainWindow::on_actionExport_to_text_triggered()
     }
     */
 }
+
+void MainWindow::on_actionClear_statistic_triggered()
+{
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "Clearing statistics.", "Clear word learning statistic?",
+    QMessageBox::Yes|QMessageBox::No);
+    if (reply == QMessageBox::Yes)
+        dicDe.clearAllStatistic();
+}

@@ -113,6 +113,8 @@ private slots:
 
     void on_actionExport_to_text_triggered();
 
+    void on_actionClear_statistic_triggered();
+
 private:
     void selectItem(const int idx);
     void setButtonEnable(WortDe wd);
