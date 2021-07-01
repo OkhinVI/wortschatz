@@ -241,6 +241,29 @@ size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
         return dictionary.size();
     }
 
+    // TODO: make ignore percentage optional (in SelectSettings)
+    if (genRandom() % 10 != 0) // in 10% of cases, we ignore the frequency of correct answers.
+    {
+        // select words with minimum correct answers
+        uint32_t minCorrectAnswers = std::numeric_limits<uint32_t>::max();
+        uint32_t countMinCorrectAnswers = 0;
+        for (size_t i = 0; i < selectionIdxs.size(); ++i)
+        {
+            const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
+            if (minCorrectAnswers > lw.numberCorrectAnswers)
+            {
+                minCorrectAnswers = lw.numberCorrectAnswers;
+                selectionIdxs[0] = selectionIdxs[i];
+                countMinCorrectAnswers = 1;
+            } else if (minCorrectAnswers == lw.numberCorrectAnswers)
+            {
+                selectionIdxs[countMinCorrectAnswers++] = selectionIdxs[i];
+            }
+        }
+        if (countMinCorrectAnswers > 0)
+            selectionIdxs.resize(countMinCorrectAnswers);
+    }
+
     uint64_t taktCPU = __rdtsc();
     uint64_t randNum = genRandom();
     size_t currTestIdxWithTr = (taktCPU + randNum) % selectionIdxs.size();
