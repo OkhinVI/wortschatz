@@ -293,6 +293,7 @@ int GlossaryDe::selectVariantsTr(std::vector<size_t> &vecIdxTr)
         { return !aWd.translation().empty()
                   && (!needType || wd.type() == aWd.type())
                   && idx != currIdx
+                  && wd.translation() != aWd.translation()
         ; },
         selectionIdxs, trSelSet);
 
