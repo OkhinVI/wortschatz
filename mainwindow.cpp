@@ -433,7 +433,7 @@ void MainWindow::on_pushButton_12_clicked()
 void MainWindow::on_pushButton_13_clicked()
 {
     getWortDeToCurrWd();
-    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::VebF);
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::VerbF);
 }
 
 void MainWindow::on_pushButton_14_clicked()
@@ -751,3 +751,31 @@ void MainWindow::on_actionClear_statistic_triggered()
     if (reply == QMessageBox::Yes)
         dicDe.clearAllStatistic();
 }
+
+void MainWindow::on_dudenButton_33_clicked()
+{
+    getWortDeToCurrWd();
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::duden);
+}
+
+
+void MainWindow::on_wiktionaryButton_33_clicked()
+{
+    getWortDeToCurrWd();
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::wiktionary);
+}
+
+
+void MainWindow::on_leipzigButton_clicked()
+{
+    getWortDeToCurrWd();
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::leipzig);
+}
+
+
+void MainWindow::on_thefreeDicButton_clicked()
+{
+    getWortDeToCurrWd();
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::thefreeDic);
+}
+

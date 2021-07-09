@@ -3,17 +3,23 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 class WebTranslation
 {
 public:
     enum class WebSite
     {
-        lingvo = 0,
+        None = 0,
+        duden,
+        dwds,
+        wiktionary,
+        leipzig,
+        thefreeDic,
+        lingvo,
         yandex,
         google,
-        dwds,
-        VebF,
+        VerbF,
         pons,
         _last_one
     };
@@ -30,12 +36,22 @@ private:
 public:
     WebTranslation();
 
-    void wortTranslate(const std::string &str, WebSite ws);
-    void allTranslate(const std::string &str, WebSite ws);
+    bool wortTranslate(const std::string &str, WebSite ws);
+    bool allTranslate(const std::string &str, WebSite ws);
     bool setLanguage(const std::string &lg);
+    const std::string& nameAsString(WebSite ws);
+
+private:
+    void setDeWebSites();
+    void setDeWebSitesFromLines(const std::vector<std::string> &lines);
+
+public:
+    const char* const LangRU = "ru";
+    const char* const LangEN = "en";
 
 private:
     std::vector<UrlSite> urls;
+    std::map<std::string, WebSite> mapWebSite;
 };
 
 #endif // WEBTRANSLATION_H

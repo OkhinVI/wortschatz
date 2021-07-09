@@ -115,6 +115,14 @@ private slots:
 
     void on_actionClear_statistic_triggered();
 
+    void on_dudenButton_33_clicked();
+
+    void on_wiktionaryButton_33_clicked();
+
+    void on_leipzigButton_clicked();
+
+    void on_thefreeDicButton_clicked();
+
 private:
     void selectItem(const int idx);
     void setButtonEnable(WortDe wd);
