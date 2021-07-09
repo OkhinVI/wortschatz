@@ -40,7 +40,7 @@ static inline void saveBlockLines(std::ostream &os, const char *delimiter, const
 #define WortDeOptionsSerialize \
                    SerializeWrapper(w_type),\
                    SerializeWrapper(w_block),\
-                   SerializeWrapper(w_frequency),\
+                   SerializeWrapper(w_freqIdx),\
                    SerializeWrapper(w_accent),\
                    SerializeWrapper(s_raw),\
                    SerializeWrapper(s_translation),\
@@ -161,7 +161,7 @@ bool WortDe::operator==(const WortDe& wd2) const
     return  s_wort == wd2.s_wort &&
             w_type == wd2.w_type &&
             w_block == wd2.w_block &&
-            w_frequency == wd2.w_frequency &&
+            w_freqIdx == wd2.w_freqIdx &&
             w_accent == wd2.w_accent &&
             s_raw == wd2.s_raw &&
             s_translation == wd2.s_translation &&
@@ -245,7 +245,7 @@ void WortDe::clearOptions()
 {
     s_wort.clear();
     w_type = TypeWort::None;
-    w_frequency = 0;
+    w_freqIdx = 0;
     w_accent = -1;
     s_phrasePrefix.clear();
     s_phraseEnd.clear();

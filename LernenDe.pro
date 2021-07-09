@@ -16,6 +16,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     qlistviewglossarydemodel.cpp \
+    statwords.cpp \
     string_utf8.cpp \
     testsettings.cpp \
     testwindow.cpp \
@@ -32,6 +33,7 @@ HEADERS += \
     linesramstream.h \
     mainwindow.h \
     qlistviewglossarydemodel.h \
+    statwords.h \
     string_utf8.h \
     testsettings.h \
     testwindow.h \

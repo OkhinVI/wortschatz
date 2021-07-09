@@ -130,6 +130,7 @@ public:
     void setNewPrasens3f(const std::string &str);
     void setNewPrateritum(const std::string &str);
     void setNewPerfect(const std::string &str);
+    void setNewFreqIdx(uint32_t fIdx) { w_freqIdx = fIdx; }
 
     void addAnswer(const bool ans);
     void clearStatistic() { l_statistic.clear(); }
@@ -145,7 +146,7 @@ private:
     std::string s_wort; // только само слово в словарной форме (для TypeWort::None должно быть то же что и s_raw)
     TypeWort w_type = TypeWort::None;
     BlockNumType w_block = 0; // Указание на уровень слова: (A1, A2, B1, D2, C1, C2):8bit - (номер учебника):8bit - (номер главы):8bit - (номер раздела в главе):8bit
-    uint32_t w_frequency = 0; // Как часто слово встречается в текстах.
+    uint32_t w_freqIdx = 0; // Как часто слово встречается в текстах: позиция 1 - самое используемое слово.
     int w_accent = -1; // Позиция ударной буквы
     std::string s_raw; // как есть, но без перевода (он в s_translation)
     std::string s_translation; // перевод как есть
