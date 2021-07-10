@@ -204,7 +204,12 @@ void MainWindow::setWortDe(WortDe wd)
     utilQt::strToLineEdit(ui->lineEdit_4, wd.raw());
     utilQt::strToLineEdit(ui->lineEdit_6, wd.example());
 
-    ui->label->setText(QString::fromStdString(wd.blockToStr() + " = " + dicDe.tema(wd.block())));
+    std::string labelWort;
+    if (wd.freqIdx() > 0)
+        labelWort = std::to_string(wd.freqIdx());
+
+    ui->label->setText(QString::fromStdString(wd.blockToStr() + " = " + dicDe.tema(wd.block())
+        + (wd.freqIdx() > 0 ? " [" + std::to_string(wd.freqIdx()) + "]" : "") ));
 
     std::string options;
     if (wd.type() == WortDe::TypeWort::Noun || wd.type() == WortDe::TypeWort::Combination)
@@ -258,7 +263,9 @@ void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
         dicDe.add(origWd);
     else
         dicDe[origIndex] = origWd;
+#ifndef _WIN32
     model->upDate(origIndex, origIndex);
+#endif
 }
 
 void MainWindow::selectItem(const int idx)
@@ -777,5 +784,21 @@ void MainWindow::on_thefreeDicButton_clicked()
 {
     getWortDeToCurrWd();
     webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::thefreeDic);
+}
+
+
+void MainWindow::on_actionimport_options_triggered()
+{
+    checkChangesCurrWd();
+    std::string pathImportDir = QFileDialog::getExistingDirectory(0, "Import dictionary directory", "").toUtf8().toStdString();
+    if (pathImportDir.empty())
+        return;
+
+    GlossaryDe impDicDe;
+    impDicDe.setPath(pathImportDir);
+    impDicDe.load();
+    dicDe.import(impDicDe);
+
+    model->upDate();
 }
 

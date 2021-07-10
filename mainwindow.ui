@@ -726,6 +726,7 @@
      <string>Edit</string>
     </property>
     <addaction name="actionRaw_Text"/>
+    <addaction name="actionimport_options"/>
     <addaction name="separator"/>
     <addaction name="actionToRaw"/>
     <addaction name="actionExport_to_text"/>
@@ -782,6 +783,14 @@
   <action name="actionClear_statistic">
    <property name="text">
     <string>Clear statistic</string>
+   </property>
+  </action>
+  <action name="actionimport_options">
+   <property name="text">
+    <string>Import options</string>
+   </property>
+   <property name="toolTip">
+    <string>Import of translations and attributes from another dictionary.</string>
    </property>
   </action>
  </widget>

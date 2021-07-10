@@ -95,6 +95,7 @@ public:
     TypeArtikel artikel() const { return n_artikel; }
     TypeWort type() const { return w_type; }
     bool hasSich() const { return v_sich; }
+    uint32_t freqIdx() const { return w_freqIdx; }
 
     std::string rawPrefix() const { return s_phrasePrefix; }
     std::string prefix() const;
@@ -131,6 +132,7 @@ public:
     void setNewPrateritum(const std::string &str);
     void setNewPerfect(const std::string &str);
     void setNewFreqIdx(uint32_t fIdx) { w_freqIdx = fIdx; }
+    void setNewBlock(const BlockNumType aBlock) { w_block = aBlock; }
 
     void addAnswer(const bool ans);
     void clearStatistic() { l_statistic.clear(); }

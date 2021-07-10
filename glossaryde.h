@@ -55,6 +55,8 @@ public:
     int selectVariantsTr(std::vector<size_t> &vecIdxTr);
 
     void add(const WortDe &wd);
+    void import(const GlossaryDe &impGloss);
+
     const WortDe &at(size_t idx) const;
     WortDe &at(size_t idx);
     WortDe &operator[] (size_t idx) { return at(idx); }

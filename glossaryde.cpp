@@ -327,6 +327,128 @@ int GlossaryDe::selectVariantsTr(std::vector<size_t> &vecIdxTr)
     return currIdxCorrectTr;
 }
 
+void GlossaryDe::import(const GlossaryDe &impGloss)
+{
+    std::ofstream osLog;
+    osLog.open(filePath + "logImport.txt");
+
+    std::vector<std::string> impWort; // first word from import WordDe.
+    std::vector<uint32_t> idxImpWort;
+    std::vector<uint32_t> outIdxImpWort;
+    impWort.reserve(impGloss.dictionary.size());
+    idxImpWort.reserve(impGloss.dictionary.size());
+    outIdxImpWort.reserve(impGloss.dictionary.size());
+
+    for (size_t i = 0; i < impGloss.dictionary.size(); ++i)
+    {
+        idxImpWort.push_back(i);
+        const WortDe &impWd = impGloss.dictionary[i];
+        std::string impWord = impWd.type() == WortDe::TypeWort::Combination
+                ? impWd.wort()
+                : AreaUtf8(impWd.wort()).getToken().toString();
+        impWort.push_back(impWord);
+    }
+
+    for (size_t idx = 0; idx < dictionary.size(); ++idx)
+    {
+        WortDe &wd = dictionary[idx];
+        if (!wd.translation().empty())
+            continue;
+        for (size_t i = 0; i < idxImpWort.size(); ++i)
+        {
+            const auto idxInImpDic = idxImpWort[i];
+            const WortDe &impWd = impGloss.dictionary[idxInImpDic];
+            if (wd.wort() != impWort[idxInImpDic] || impWd.translation().empty())
+                continue;
+
+            if (wd.type() == WortDe::TypeWort::None)
+                wd.setNewTypeWort(impWd.type());
+
+            if (wd.type() != impWd.type())
+            {
+                osLog << "Skip:\t'" << wd.wort() << "', type " << WortDe::TypeWortToString(wd.type())
+                      << " != " <<  WortDe::TypeWortToString(impWd.type()) << "\t" << impWd.translation() << "\n";
+                continue;
+            }
+
+            wd.setNewTranslation(impWd.translation());
+            wd.setNewWort(impWd.wort());
+            if (wd.rawPrefix().empty())
+                wd.setNewPrefix(impWd.rawPrefix());
+            if (wd.example().empty())
+                wd.setNewExample(impWd.example());
+
+            if (wd.block() == 0 && impWd.block() != 0)
+            {
+                wd.setNewBlock(impWd.block());
+                auto it = themes.find(wd.block());
+                if (it == themes.end())
+                {
+                    auto itImp = impGloss.themes.find(wd.block());
+                    if (itImp != impGloss.themes.end())
+                    {
+                        themes[wd.block()] = itImp->second;
+                        osLog << "Add tema: " << std::hex << wd.block()
+                              << std::dec << "\t'" << itImp->second << "'\n";
+                    }
+                }
+            }
+
+            if (wd.type() == WortDe::TypeWort::Noun)
+            {
+                if (wd.wortPl().empty())
+                    wd.setNewPlural(impWd.wortPl());
+                if (wd.artikel() == WortDe::TypeArtikel::None)
+                    wd.setNewArtikel(impWd.artikel());
+            } else if (wd.type() == WortDe::TypeWort::Verb)
+            {
+                if (wd.vPerfect().empty() && wd.vPrasens3f().empty() && wd.vPrateritum().empty())
+                {
+                    wd.setNewPerfect(impWd.vPerfect());
+                    wd.setNewPrasens3f(impWd.vPrasens3f());
+                    wd.setNewPrateritum(impWd.vPrateritum());
+                }
+                if (!wd.hasSich())
+                    wd.setNewSich(impWd.hasSich());
+            }
+
+            outIdxImpWort.push_back(idxImpWort[i]);
+            idxImpWort.erase(idxImpWort.begin() + i);
+            break;
+        }
+    }
+
+    osLog << "\n\n";
+    osLog << "Import:\t" << outIdxImpWort.size() << "\n";
+    osLog << "Ignore:\t" << idxImpWort.size() << "\n";
+
+    std::ofstream osIgn;
+    osIgn.open(filePath + "IgnoreImport.dic");
+    osIgn << GlossaryDePrefix << " " << idxImpWort.size() << " " << WortDe().countSaveLines() << " " << 0 << std::endl;
+    for (size_t i = 0; i < idxImpWort.size(); ++i)
+    {
+        const auto idxInImpDic = idxImpWort[i];
+        WortDe impWd = impGloss.dictionary[idxInImpDic];
+        impWd.save(osIgn);
+        const std::string &currFindWord = impWort[idxInImpDic];
+        if (impWd.type() != WortDe::TypeWort::Combination && impWd.type() != WortDe::TypeWort::None)
+        {
+            bool finded = false;
+            for (size_t idxFind = 0; idxFind < outIdxImpWort.size(); ++idxFind)
+            {
+                auto idxInOutImpDic = outIdxImpWort[idxFind];
+                if (currFindWord == impWort[idxInOutImpDic])
+                {
+                    finded = true;
+                    break;
+                }
+            }
+            if (!finded)
+                osLog << impWd.wort() << "\t" << impWd.translation() << "\t" << "\n";
+        }
+    }
+}
+
 
 // class GlossaryDe::Tema
 
