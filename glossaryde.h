@@ -33,8 +33,14 @@ public:
         bool testWort(const WortDe &wd) const;
 
     public:
+        bool useRangeTema = false;
         size_t startIdxTema = 0;
         size_t lastIdxTema = 0;
+
+        bool useRangeFreq = false;
+        uint32_t startFreqIdx = 0;
+        uint32_t endFreqIdx = 100;
+
         size_t posIgnoringStatistics = 10;
 
     private:

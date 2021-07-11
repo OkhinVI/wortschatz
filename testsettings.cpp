@@ -19,8 +19,14 @@ TestSettings::TestSettings(GlossaryDe::SelectSettings &aGlSelSet, QWidget *paren
 
 void TestSettings::resetVals()
 {
+    ui->checkBoxThemes->setCheckState(glSelSet.useRangeTema ? Qt::Checked : Qt::Unchecked);
     ui->comboBox->setCurrentIndex(glSelSet.startIdxTema);
     ui->comboBox_2->setCurrentIndex(glSelSet.lastIdxTema);
+
+    ui->checkBoxFreqIdx->setCheckState(glSelSet.useRangeFreq ? Qt::Checked : Qt::Unchecked);
+    ui->spinBoxStartFreq->setValue(glSelSet.startFreqIdx);
+    ui->spinBoxEndFreq->setValue(glSelSet.endFreqIdx);
+
     ui->horizontalSlider->setValue(glSelSet.posIgnoringStatistics);
 }
 
@@ -31,8 +37,14 @@ TestSettings::~TestSettings()
 
 void TestSettings::on_buttonBox_accepted()
 {
+    glSelSet.useRangeTema = ui->checkBoxThemes->checkState() == Qt::Checked;
     glSelSet.startIdxTema = ui->comboBox->currentIndex();
     glSelSet.lastIdxTema = ui->comboBox_2->currentIndex();
+
+    glSelSet.useRangeFreq = ui->checkBoxFreqIdx->checkState() == Qt::Checked;
+    glSelSet.startFreqIdx = ui->spinBoxStartFreq->value();
+    glSelSet.endFreqIdx = ui->spinBoxEndFreq->value();
+
     glSelSet.posIgnoringStatistics = ui->horizontalSlider->value();
 }
 
@@ -51,5 +63,11 @@ void TestSettings::on_horizontalSlider_valueChanged(int value)
 void TestSettings::on_pushButton_clicked()
 {
     resetVals();
+}
+
+
+void TestSettings::on_spinBoxStartFreq_editingFinished()
+{
+
 }
 

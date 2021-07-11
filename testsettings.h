@@ -25,6 +25,8 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_spinBoxStartFreq_editingFinished();
+
 private:
     Ui::TestSettings *ui;
     QListViewGlossaryTemaModel *modelFirst;

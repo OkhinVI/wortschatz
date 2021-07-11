@@ -479,10 +479,19 @@ GlossaryDe::SelectSettings::SelectSettings(const GlossaryDe &aGlDe)
 
 bool GlossaryDe::SelectSettings::testWort(const WortDe &wd) const
 {
-    if (wd.block() < glDe.getTemaByIndex(startIdxTema).blockNum)
+    if (useRangeTema)
+    {
+        if (wd.block() < glDe.getTemaByIndex(startIdxTema).blockNum)
+            return false;
+        unsigned int last = glDe.getTemaByIndex(lastIdxTema).blockNum;
+        if ((last & 0xff) == 0)
+            last |= 0xff;
+        if (wd.block() > last)
+            return false;
+    }
+
+    if (useRangeFreq && (wd.freqIdx() < startFreqIdx || wd.freqIdx() > endFreqIdx))
         return false;
-    unsigned int last = glDe.getTemaByIndex(lastIdxTema).blockNum;
-    if ((last & 0xff) == 0)
-        last |= 0xff;
-    return wd.block() <= last;
+
+    return true;
 }
