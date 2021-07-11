@@ -241,8 +241,14 @@ size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
         return dictionary.size();
     }
 
-    // TODO: make ignore percentage optional (in SelectSettings)
-    if (genRandom() % 10 != 0) // in 10% of cases, we ignore the frequency of correct answers.
+    // in selSet.posIgnoringStatistics % of cases, we ignore the frequency of correct answers.
+    bool useStatistic = true;
+    if (selSet.posIgnoringStatistics >= 100)
+        useStatistic = false;
+    else if (selSet.posIgnoringStatistics > 0)
+        useStatistic = (genRandom() % 100) >= selSet.posIgnoringStatistics;
+
+    if (useStatistic)
     {
         // select words with minimum correct answers
         uint32_t minCorrectAnswers = std::numeric_limits<uint32_t>::max();

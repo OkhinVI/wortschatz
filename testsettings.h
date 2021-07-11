@@ -16,8 +16,14 @@ public:
     explicit TestSettings(GlossaryDe::SelectSettings &aGlSelSet, QWidget *parent = nullptr);
     ~TestSettings();
 
+    void resetVals();
+
 private slots:
     void on_buttonBox_accepted();
+
+    void on_horizontalSlider_valueChanged(int value);
+
+    void on_pushButton_clicked();
 
 private:
     Ui::TestSettings *ui;

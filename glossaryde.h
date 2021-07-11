@@ -35,6 +35,7 @@ public:
     public:
         size_t startIdxTema = 0;
         size_t lastIdxTema = 0;
+        size_t posIgnoringStatistics = 10;
 
     private:
         const GlossaryDe &glDe;
