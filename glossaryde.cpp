@@ -285,19 +285,11 @@ int GlossaryDe::selectVariantsTr(std::vector<size_t> &vecIdxTr)
     std::vector<size_t> selectionIdxs;
     const WortDe &wd = dictionary[currIdxLearnWordDe];
 
-    bool needType = false;
-    if (wd.type() == WortDe::TypeWort::Noun ||
-        wd.type() == WortDe::TypeWort::Verb ||
-        wd.type() == WortDe::TypeWort::Adjective ||
-        wd.type() == WortDe::TypeWort::Adverb ||
-        wd.type() == WortDe::TypeWort::Combination)
-        needType = true;
-
     SelectSettings trSelSet(*this);
     const size_t currIdx = currIdxLearnWordDe;
-    selectIdxFilter([wd, needType, currIdx](const WortDe &aWd, size_t idx)
+    selectIdxFilter([wd, currIdx](const WortDe &aWd, size_t idx)
         { return !aWd.translation().empty()
-                  && (!needType || wd.type() == aWd.type())
+                  && (wd.type() == aWd.type())
                   && idx != currIdx
                   && wd.translation() != aWd.translation()
         ; },
