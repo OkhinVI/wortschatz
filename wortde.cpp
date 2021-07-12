@@ -245,8 +245,8 @@ void WortDe::clearOptions()
 {
     s_wort.clear();
     w_type = TypeWort::None;
-    w_freqIdx = 0;
-    w_accent = -1;
+    //w_freqIdx = 0;
+    //w_accent = -1;
     s_phrasePrefix.clear();
     s_phraseEnd.clear();
     n_wortPl.clear();
