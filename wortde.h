@@ -105,7 +105,7 @@ public:
 
     bool save(std::ostream &os, const bool clearStat = false);
     std::string exportToStr(const bool clearStat = false);
-    bool load(LinesRamIStream &ils, std::ostream &osErr);
+    bool load(LinesRamIStream &ils, std::ostream *osErr);
     size_t countSaveLines();
 
     bool operator==(const WortDe& wd2) const;
@@ -136,7 +136,8 @@ public:
 
     void addAnswer(const bool ans);
     void clearStatistic() { l_statistic.clear(); }
-    const LearningWort& getStatistic() { return l_statistic; }
+    const LearningWort& getStatistic() const { return l_statistic; }
+    void copyStatistic(const WortDe& wd2) { l_statistic = wd2.l_statistic; }
 
 private:
     void parseRawDe(TypeWort tw = TypeWort::None);

@@ -103,7 +103,7 @@ static inline void loadLines(LinesRamIStream &ils, size_t countLines, T value, T
 }
 
 
-bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
+bool WortDe::load(LinesRamIStream &ils, std::ostream *osErr)
 {
     while(1)
     {
@@ -112,7 +112,7 @@ bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
         const std::string &str = ils.get();
         if (str.empty() || str[0] != '@')
         {
-            osErr << ils.tellg() << " skiped line: " << str << std::endl;
+            if (osErr) *osErr << ils.tellg() << " skiped line: " << str << std::endl;
             continue;
         }
         s_wort = str.substr(1); // removing the key '@'
@@ -134,7 +134,7 @@ bool WortDe::load(LinesRamIStream &ils, std::ostream &osErr)
     }  catch (...) {
         if (ils.tellg() < startPos + countWithStat)
         {
-            osErr << ils.tellg() << " skiped " << startPos + countWithStat - ils.tellg() << " lines (throw)" << str << std::endl;
+            if (osErr) *osErr << ils.tellg() << " skiped " << startPos + countWithStat - ils.tellg() << " lines (throw)" << str << std::endl;
             ils.seekg(startPos + countWithStat);
         }
         throw;

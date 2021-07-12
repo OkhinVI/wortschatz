@@ -731,6 +731,7 @@
     <addaction name="actionToRaw"/>
     <addaction name="actionExport_to_text"/>
     <addaction name="separator"/>
+    <addaction name="actionImport_statistic"/>
     <addaction name="actionClear_statistic"/>
    </widget>
    <widget class="QMenu" name="menuLearning">
@@ -787,10 +788,15 @@
   </action>
   <action name="actionimport_options">
    <property name="text">
-    <string>Import options</string>
+    <string>Import translations</string>
    </property>
    <property name="toolTip">
     <string>Import of translations and attributes from another dictionary.</string>
+   </property>
+  </action>
+  <action name="actionImport_statistic">
+   <property name="text">
+    <string>Import statistic</string>
    </property>
   </action>
  </widget>

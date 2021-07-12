@@ -790,15 +790,29 @@ void MainWindow::on_thefreeDicButton_clicked()
 void MainWindow::on_actionimport_options_triggered()
 {
     checkChangesCurrWd();
-    std::string pathImportDir = QFileDialog::getExistingDirectory(0, "Import dictionary directory", "").toUtf8().toStdString();
+    std::string pathImportDir = QFileDialog::getExistingDirectory(0, "Dictionary directory for importing translations", "").toUtf8().toStdString();
     if (pathImportDir.empty())
         return;
 
     GlossaryDe impDicDe;
     impDicDe.setPath(pathImportDir);
-    impDicDe.load();
-    dicDe.import(impDicDe);
+    impDicDe.load(false);
+    dicDe.importTr(impDicDe);
 
     model->upDate();
+}
+
+
+void MainWindow::on_actionImport_statistic_triggered()
+{
+    checkChangesCurrWd();
+    std::string pathImportDir = QFileDialog::getExistingDirectory(0, "Dictionary directory for importing statistics", "").toUtf8().toStdString();
+    if (pathImportDir.empty())
+        return;
+
+    GlossaryDe impDicDe;
+    impDicDe.setPath(pathImportDir);
+    impDicDe.load(false);
+    dicDe.importStat(impDicDe);
 }
 

@@ -51,7 +51,7 @@ public:
     GlossaryDe();
     void setPath(const std::string &path);
     void setFile(const std::string &name);
-    void load();
+    void load(const bool saveDbg = true);
     void loadThemes(const std::string &fileName);
     void save();
     void saveClear();
@@ -62,7 +62,8 @@ public:
     int selectVariantsTr(std::vector<size_t> &vecIdxTr);
 
     void add(const WortDe &wd);
-    void import(const GlossaryDe &impGloss);
+    void importTr(const GlossaryDe &impGloss);
+    void importStat(const GlossaryDe &impGloss);
 
     const WortDe &at(size_t idx) const;
     WortDe &at(size_t idx);

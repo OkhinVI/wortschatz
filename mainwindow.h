@@ -125,6 +125,8 @@ private slots:
 
     void on_actionimport_options_triggered();
 
+    void on_actionImport_statistic_triggered();
+
 private:
     void selectItem(const int idx);
     void setButtonEnable(WortDe wd);

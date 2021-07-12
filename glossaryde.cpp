@@ -58,7 +58,7 @@ void GlossaryDe::loadThemes(const std::string &fileName)
     is.open(fileName);
 
     unsigned int blockNum = 0;
-    while (!is.eof())
+    while (is.good())
     {
         std::string str = util::getline(is);
         if (str.empty())
@@ -98,7 +98,7 @@ void GlossaryDe::calcNextUserNumBlock()
         nextUserNumBlock = WortDe::preIncrementBlock(maxUserNum);
 }
 
-void GlossaryDe::load()
+void GlossaryDe::load(const bool saveDbg)
 {
     notLoaded = false;
     LinesRamIStream ils;
@@ -106,13 +106,13 @@ void GlossaryDe::load()
 
     // TODO: add data and time into log
     std::ofstream logDebug;
-    logDebug.open(filePath + "LoadWort.log"); // TODO: only for debug
+    if(saveDbg) logDebug.open(filePath + "LoadWort.log"); // TODO: only for debug
     std::ofstream logError;
-    logError.open(filePath + "ErrorLoad.log", std::ios_base::app); // TODO: open only if nead
+    if(saveDbg) logError.open(filePath + "ErrorLoad.log", std::ios_base::app); // TODO: open only if nead
 
     if (!isOpened)
     {
-        logError << "Error open file: " << filePath + fileName << std::endl;
+        if(saveDbg) logError << "Error open file: " << filePath + fileName << std::endl;
         notLoaded = true;
         return;
     }
@@ -125,7 +125,7 @@ void GlossaryDe::load()
     ss >> prefix;
     if (prefix != GlossaryDePrefix)
     {
-        logError << "Error: file \"" << filePath + fileName << "\" is bad: '" << prefix << "' != '" << GlossaryDePrefix << "'" << std::endl;
+        if(saveDbg) logError << "Error: file \"" << filePath + fileName << "\" is bad: '" << prefix << "' != '" << GlossaryDePrefix << "'" << std::endl;
         notLoaded = true;
         return;
     }
@@ -136,17 +136,17 @@ void GlossaryDe::load()
     ss >> loadedCountWd >> loadedSizeWd >> loadedBeginUserWort;
     if (loadedSizeWd != WortDe().countSaveLines())
     {
-        logError << "Warning: file \"" << filePath + fileName << "\" the number of lines for a Wort has changed: '"
+        if(saveDbg) logError << "Warning: file \"" << filePath + fileName << "\" the number of lines for a Wort has changed: '"
                  << loadedSizeWd << "' != '" << WortDe().countSaveLines() << "'" << std::endl;
     }
 
     while(!ils.eof())
     {
         WortDe wd;
-        if (wd.load(ils, logError))
+        if (wd.load(ils, saveDbg ? &logError : nullptr))
         {
             // if (wd.wort().substr(0, 3) != "---") { // delete Wort with "---" prefix
-            wd.debugPrint(logDebug);
+            if(saveDbg) wd.debugPrint(logDebug);
             add(wd);
             // }
         }
@@ -154,13 +154,13 @@ void GlossaryDe::load()
 
     if (loadedCountWd != size())
     {
-        logError << "Warning: file \"" << filePath + fileName << "\" count Wort changed: '"
+        if(saveDbg) logError << "Warning: file \"" << filePath + fileName << "\" count Wort changed: '"
                  << loadedCountWd << "' != '" << size() << "'" << std::endl;
     }
 
     if (loadedBeginUserWort > size())
     {
-        logError << "Warning: file \"" << filePath + fileName << "\" begin user Wort exceeds the size of the dictionary: '"
+        if(saveDbg) logError << "Warning: file \"" << filePath + fileName << "\" begin user Wort exceeds the size of the dictionary: '"
                  << loadedBeginUserWort << "' > '" << size() << "'" << std::endl;
         loadedBeginUserWort = size();
     }
@@ -325,7 +325,7 @@ int GlossaryDe::selectVariantsTr(std::vector<size_t> &vecIdxTr)
     return currIdxCorrectTr;
 }
 
-void GlossaryDe::import(const GlossaryDe &impGloss)
+void GlossaryDe::importTr(const GlossaryDe &impGloss)
 {
     std::ofstream osLog;
     osLog.open(filePath + "logImport.txt");
@@ -339,12 +339,16 @@ void GlossaryDe::import(const GlossaryDe &impGloss)
 
     for (size_t i = 0; i < impGloss.dictionary.size(); ++i)
     {
-        idxImpWort.push_back(i);
         const WortDe &impWd = impGloss.dictionary[i];
-        std::string impWord = impWd.type() == WortDe::TypeWort::Combination
-                ? impWd.wort()
-                : AreaUtf8(impWd.wort()).getToken().toString();
-        impWort.push_back(impWord);
+        if (!impWd.translation().empty())
+        {
+            idxImpWort.push_back(i);
+            std::string impWord = impWd.type() == WortDe::TypeWort::Combination
+                    ? impWd.wort()
+                    : AreaUtf8(impWd.wort()).getToken().toString();
+            impWort.push_back(impWord);
+        } else
+            impWort.push_back(std::string());
     }
 
     for (size_t idx = 0; idx < dictionary.size(); ++idx)
@@ -356,7 +360,7 @@ void GlossaryDe::import(const GlossaryDe &impGloss)
         {
             const auto idxInImpDic = idxImpWort[i];
             const WortDe &impWd = impGloss.dictionary[idxInImpDic];
-            if (wd.wort() != impWort[idxInImpDic] || impWd.translation().empty())
+            if (wd.wort() != impWort[idxInImpDic])
                 continue;
 
             if (wd.type() == WortDe::TypeWort::None)
@@ -443,6 +447,42 @@ void GlossaryDe::import(const GlossaryDe &impGloss)
             }
             if (!finded)
                 osLog << impWd.wort() << "\t" << impWd.translation() << "\t" << "\n";
+        }
+    }
+}
+
+void GlossaryDe::importStat(const GlossaryDe &impGloss)
+{
+    std::vector<uint32_t> idxImpWort;
+    std::vector<uint32_t> outIdxImpWort;
+    idxImpWort.reserve(impGloss.dictionary.size());
+    outIdxImpWort.reserve(impGloss.dictionary.size());
+
+    for (size_t i = 0; i < impGloss.dictionary.size(); ++i)
+    {
+        const WortDe &impWd = impGloss.dictionary[i];
+        if (!impWd.translation().empty() && impWd.getStatistic().startLearning != 0)
+            idxImpWort.push_back(i);
+    }
+
+    for (size_t idx = 0; idx < dictionary.size(); ++idx)
+    {
+        WortDe &wd = dictionary[idx];
+        if (wd.translation().empty())
+            continue;
+        for (size_t i = 0; i < idxImpWort.size(); ++i)
+        {
+            const auto idxInImpDic = idxImpWort[i];
+            const WortDe &impWd = impGloss.dictionary[idxInImpDic];
+
+            if (wd.wort() != impWd.wort() || wd.type() != impWd.type())
+                continue;
+
+            wd.copyStatistic(impWd);
+
+            outIdxImpWort.push_back(idxImpWort[i]);
+            idxImpWort.erase(idxImpWort.begin() + i);
+            break;
         }
     }
 }
