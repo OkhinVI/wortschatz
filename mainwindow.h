@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(const char *aAccName, QWidget *parent = nullptr);
     ~MainWindow();
 
     void setNewIndex(int idx);
@@ -136,6 +136,8 @@ private:
     void addNewWortFromSearch();
 
 private:
+    std::string accName;
+    std::string settingsDictionaryPath;
     std::string pathDic;
     GlossaryDe dicDe;
     QListViewGlossaryDeModel *model;

@@ -17,21 +17,24 @@
 
 static const char *SettingsFirma = "OchinWassili";
 static const char *SettingsApp = "LernenDe";
-static const char *SettingsDictionaryPath = "LernenDe/dictionaryPath";
+static const char *SettingsDictionaryPathSfx = "/dictionaryPath";
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     : QMainWindow(parent)
+    , accName(aAccName)
+    , settingsDictionaryPath(accName + SettingsDictionaryPathSfx)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
     QSettings settings(SettingsFirma, SettingsApp);
-    if (settings.contains(SettingsDictionaryPath))
-        pathDic = settings.value(SettingsDictionaryPath).toString().toUtf8().toStdString();
+    if (settings.contains(QString::fromStdString(settingsDictionaryPath)))
+        pathDic = settings.value(QString::fromStdString(settingsDictionaryPath)).toString().toUtf8().toStdString();
     else
         pathDic = "../Line1_B2";
     dicDe.setPath(pathDic);
     dicDe.load();
+    this->setWindowTitle(QString::fromStdString(accName + " - " + pathDic + " - " + SettingsApp));
 
     testWin = new TestWindow(dicDe, this, this);
 
@@ -143,7 +146,8 @@ void MainWindow::on_actionOpenDir_triggered()
         setNewIndex(0);
 
     QSettings settings(SettingsFirma, SettingsApp);
-    settings.setValue(SettingsDictionaryPath, QString::fromStdString(pathDic));
+    settings.setValue(QString::fromStdString(settingsDictionaryPath), QString::fromStdString(pathDic));
+    this->setWindowTitle(QString::fromStdString(accName + " - " + pathDic + " - " + SettingsApp));
 }
 
 static bool FingVerbOpt(WortDe &wd, AreaUtf8 &au8, const AreaUtf8::SymbolType symDelimeter)
