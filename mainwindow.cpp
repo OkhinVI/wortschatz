@@ -60,6 +60,8 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     keyAltL = new QShortcut(this);
     keyAltL->setKey(Qt::ALT + Qt::Key_L);
     connect(keyAltL, SIGNAL(activated()), this, SLOT(slotShortcutAltL()));
+
+    ui->lineEdit_8->setStyleSheet("color: rgb(0, 0, 255)");
 }
 
 MainWindow::~MainWindow()
@@ -264,9 +266,55 @@ void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
 
     origWd = currWd;
     if (origIndex >= int(dicDe.size()))
-        dicDe.add(origWd);
+    {
+        const uint32_t freqIdx = origWd.freqIdx();
+        if (freqIdx == 0)
+            dicDe.add(origWd);
+        else
+        {
+            uint32_t minFr = 0;
+            uint32_t minIdx = 0;
+            uint32_t maxFr = 0;
+            uint32_t maxIdx = 0;
+            for (size_t idx = 0; idx < dicDe.size(); ++idx)
+            {
+                const WortDe &wd = dicDe.at(idx);
+                if (wd.freqIdx() > freqIdx)
+                {
+                    if (wd.freqIdx() < maxFr || maxFr == 0)
+                    {
+                        maxFr = wd.freqIdx();
+                        maxIdx = idx;
+                    }
+                } else {
+                    if (wd.freqIdx() > minFr)
+                    {
+                        minFr = wd.freqIdx();
+                        minIdx = idx;
+                    }
+                }
+            }
+
+            if (minFr > 0)
+            {
+                origIndex = minIdx + 1;
+                dicDe.insert(origIndex, origWd);
+            }
+            else if (maxFr > 0)
+            {
+                origIndex = maxIdx;
+                dicDe.insert(origIndex, origWd);
+            }
+            else
+            {
+                dicDe.add(origWd);
+            }
+        }
+    }
     else
+    {
         dicDe[origIndex] = origWd;
+    }
 #ifndef _WIN32
     model->upDate(origIndex, origIndex);
 #endif
@@ -471,35 +519,100 @@ void MainWindow::on_pushButton_17_clicked()
     const size_t idx = dicDe.find(str, origIndex + 1);
     if (idx == dicDe.size())
     {
-        QMessageBox::information(this, utilQt::strToQt(str), "nicht finden", QMessageBox::Yes);
+        clearCurrWord();
+        // QMessageBox::information(this, utilQt::strToQt(str), "nicht finden", QMessageBox::Yes);
         return;
     }
 
     setNewIndex(idx);
+}
+
+void MainWindow::statWordClear()
+{
+    ui->lineEdit_8->setText("");
+    ui->label_OptionStat->setText("");
+    ui->label_OptionStat_2->setText("");
+    statFound.clear();
+}
+
+void MainWindow::findStatWord(const std::string &str)
+{
+    if (str.empty())
+    {
+        statWordClear();
+        return;
+    }
+
+    statFound.clear();
+    uint32_t lastPos = 0;
+    for (int i = 0; i < 100; ++i)
+    {
+        uint8_t option = 0;
+        String255Iterator it = dicDe.findStatDic(str, lastPos, option);
+        if (!it->valid())
+            break;
+        statFound.add(it.getIdx(), option, it->c_str());
+        lastPos = it.getIdx() + 1;
+    }
+
+    showFoundStatWord();
+}
+
+void MainWindow::showFoundStatWord()
+{
+    if (statFound.empty())
+    {
+        statWordClear();
+        return;
+    }
+
+    ui->lineEdit_8->setText(QString::fromStdString(statFound.getStr()));
+    std::string strOption = std::to_string(statFound.getPos() + 1) + '/'
+            + (statFound.size() > 99 ? "99+" : std::to_string(statFound.size())) + " = "
+            + std::to_string(statFound.getWordIdx()) + " - "
+            + WortDe::TypeWortToString(static_cast<WortDe::TypeWort>(statFound.getType()));
+    ui->label_OptionStat->setText(QString::fromStdString(strOption));
+
+    const size_t idx = dicDe.findByWordIdx(statFound.getWordIdx(), 0);
+    statFound.setDicIndex(idx == dicDe.size() ? -1 : idx);
+
+    if (ui->checkBox_AutoSearch->checkState() == Qt::Checked) {
+        if (statFound.getDicIndex() < 0)
+            clearCurrWord();
+        else
+            setNewIndex(statFound.getDicIndex());
+    }
 }
 
 void MainWindow::on_lineEdit_7_textChanged(const QString &arg1)
 {
     const std::string str = utilQt::strToStd(arg1);
     if (str.empty())
+    {
+        statWordClear();
         return;
+    }
 
     const size_t idx = dicDe.find(str, 0);
     if (idx == dicDe.size())
     {
         ui->lineEdit_7->setStyleSheet("color: rgb(255, 0, 0)");
-        return;
+    } else {
+        ui->lineEdit_7->setStyleSheet("color: rgb(0, 0, 0)");
+        if (ui->checkBox_AutoSearch->checkState() != Qt::Checked)
+            setNewIndex(idx);
     }
 
-    ui->lineEdit_7->setStyleSheet("color: rgb(0, 0, 0)");
-
-    setNewIndex(idx);
+    findStatWord(str);
 }
 
 void MainWindow::setNewIndex(int idx)
 {
     if (idx < 0 || size_t(idx) >= dicDe.size())
+    {
+        clearCurrWord();
         return;
+    }
 
     QModelIndex index = model->creatNewIndex(idx);
     if ( index.isValid() ) {
@@ -516,6 +629,8 @@ void MainWindow::on_pushButton_18_clicked()
         idx = 0;
 
     setNewIndex(idx);
+
+    findStatWord(str);
 }
 
 void MainWindow::on_pushButton_19_clicked()
@@ -694,6 +809,15 @@ void MainWindow::on_pushButton_30_clicked()
         setNewIndex(origIndex - 1);
 }
 
+void MainWindow::clearCurrWord()
+{
+    checkChangesCurrWd();
+    origIndex = dicDe.size();
+    origWd = WortDe();
+    currWd = origWd;
+    setWortDe(currWd);
+}
+
 void MainWindow::addNewWortFromSearch()
 {
     checkChangesCurrWd();
@@ -704,15 +828,45 @@ void MainWindow::addNewWortFromSearch()
     setWortDe(currWd);
 }
 
+void MainWindow::addNewWortFromStatSearch()
+{
+    if (statFound.empty())
+        return;
+
+    checkChangesCurrWd();
+    origIndex = dicDe.size();
+    origWd = WortDe();
+    currWd = origWd;
+
+    WortDe::TypeWort tw = statFound.getType() > uint8_t(WortDe::TypeWort::None)
+                       && statFound.getType() < uint8_t(WortDe::TypeWort::_last_one)
+                       ? WortDe::TypeWort(statFound.getType()) : WortDe::TypeWort::None;
+    currWd.parseRawLine(statFound.getStr(), "", dicDe.userBlockNum(), tw);
+    currWd.setNewFreqIdx(statFound.getWordIdx());
+    setWortDe(currWd);
+}
+
 void MainWindow::on_pushButton_31_clicked()
 {
     addNewWortFromSearch();
+    if (ui->checkBox_NeedTr->checkState() == Qt::Checked)
+        webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
 }
 
 void MainWindow::on_pushButton_32_clicked()
 {
-    addNewWortFromSearch();
-    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
+    if (statFound.empty())
+        return;
+
+    if (statFound.getDicIndex() >= 0)
+    {
+        QMessageBox::information(this, utilQt::strToQt(statFound.getStr()), "Already in the dictionary", QMessageBox::Yes);
+        return;
+    }
+
+    addNewWortFromStatSearch();
+    if (ui->checkBox_NeedTr->checkState() == Qt::Checked)
+        webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
 }
 
 void MainWindow::on_actionExport_to_text_triggered()
@@ -818,5 +972,44 @@ void MainWindow::on_actionImport_statistic_triggered()
     impDicDe.setPath(pathImportDir);
     impDicDe.load(false);
     dicDe.importStat(impDicDe);
+}
+
+
+void MainWindow::on_pushButtonStatRight_clicked()
+{
+    nextFoundStatWord(+1);
+}
+
+void MainWindow::nextFoundStatWord(int delta)
+{
+    if (statFound.empty())
+        return;
+
+    if (delta < 0)
+        --statFound;
+    else
+        ++statFound;
+    showFoundStatWord();
+}
+
+void MainWindow::on_pushButtonStatLeft_clicked()
+{
+    nextFoundStatWord(-1);
+}
+
+
+void MainWindow::on_pushButtonStatToEdit_clicked()
+{
+    if (statFound.empty())
+        return;
+
+    ui->lineEdit_7->setText(QString::fromStdString(statFound.getStr()));
+}
+
+
+void MainWindow::on_checkBox_AutoSearch_stateChanged(int arg1)
+{
+    if (arg1 == Qt::Checked)
+        showFoundStatWord();
 }
 

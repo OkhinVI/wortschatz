@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>69</y>
+      <y>99</y>
       <width>321</width>
-      <height>501</height>
+      <height>471</height>
      </rect>
     </property>
    </widget>
@@ -437,7 +437,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>40</y>
+      <y>70</y>
       <width>171</width>
       <height>20</height>
      </rect>
@@ -446,27 +446,27 @@
    <widget class="QPushButton" name="pushButton_17">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>38</y>
-      <width>91</width>
+      <x>185</x>
+      <y>70</y>
+      <width>31</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>suchen weiter</string>
+     <string>next</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_18">
     <property name="geometry">
      <rect>
-      <x>190</x>
-      <y>9</y>
-      <width>91</width>
+      <x>223</x>
+      <y>70</y>
+      <width>31</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start</string>
+     <string>first</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_19">
@@ -628,27 +628,27 @@
    <widget class="QPushButton" name="pushButton_31">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>9</y>
-      <width>80</width>
+      <x>260</x>
+      <y>70</y>
+      <width>71</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>add into Dic</string>
+     <string>add users</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_32">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>9</y>
-      <width>81</width>
+      <x>290</x>
+      <y>40</y>
+      <width>41</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>add and Tr</string>
+     <string>add</string>
     </property>
    </widget>
    <widget class="QPushButton" name="dudenButton_33">
@@ -701,6 +701,116 @@
     </property>
     <property name="text">
      <string>thefreeDic</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_8">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>171</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_OptionStat">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_OptionStat_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>2</y>
+      <width>171</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonStatLeft">
+    <property name="geometry">
+     <rect>
+      <x>184</x>
+      <y>39</y>
+      <width>21</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonStatRight">
+    <property name="geometry">
+     <rect>
+      <x>206</x>
+      <y>39</y>
+      <width>21</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButtonStatToEdit">
+    <property name="geometry">
+     <rect>
+      <x>232</x>
+      <y>40</y>
+      <width>51</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>to Edit</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_AutoSearch">
+    <property name="geometry">
+     <rect>
+      <x>185</x>
+      <y>19</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>find in Dic</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_NeedTr">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>51</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>+Tr</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

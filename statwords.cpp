@@ -2,34 +2,70 @@
 #include <fstream>
 #include <iostream>
 #include "string_utf8.h"
+#include <string.h>
+
+
+// class String255
+
+bool String255::operator==(const String255 &aStr) const
+{
+    if (size()!= aStr.size())
+        return false;
+
+    return strcmp(c_str(), aStr.c_str()) == 0;
+}
+
+bool String255::operator==(const char *aCStr) const
+{
+    return strcmp(c_str(), aCStr) == 0;
+}
+
+bool String255::operator==(const std::string &aStr) const
+{
+    if (size()!= aStr.size())
+        return false;
+
+    return aStr == c_str();
+}
+
+String255 String255::nextString() const
+{
+    return buf ? String255(buf + 1 + size() + 1) : *this;
+}
+
+
+// class String255Iterator
+
+String255Iterator &String255Iterator::operator++()
+{
+    ++idx;
+    str = str.nextString();
+    return *this;
+}
 
 
 // class WordsStore
 
-WordsStore::PosStringType WordsStore::addString(const std::string &str, uint8_t option)
+uint32_t WordsStore::addString(const std::string &str, uint8_t option)
 {
-    const auto currIdx = idxsStore.size();
+    const uint8_t maxStringSize = 0xff - 1;
+    const uint32_t currIdx = idxsStore.size();
     auto curOffset = stringStore.size();
     idxsStore.push_back(curOffset);
     optionsStore.push_back(option);
-    const size_t prfSize = str.size() < 0xff ? sizeof(uint8_t) : sizeof(uint8_t) + sizeof(uint32_t);
-    const auto currEntrySize = prfSize + str.size() + 1; // prefix + chars + '\0'
-    stringStore.resize(stringStore.size() + currEntrySize);
-
-    if (prfSize == sizeof(uint8_t))
+    const size_t prfSize = sizeof(uint8_t);
+    size_t strSize = str.size();
+    if (strSize > maxStringSize)
     {
-        stringStore[curOffset++] = str.size();
-    } else {
-        stringStore[curOffset++] = 0xff;
-        const uint32_t sizeStr = str.size();
-        stringStore[curOffset++] = (sizeStr) & 0xff;
-        stringStore[curOffset++] = (sizeStr >> 8) & 0xff;
-        stringStore[curOffset++] = (sizeStr >> 16) & 0xff;
-        stringStore[curOffset++] = (sizeStr >> 24) & 0xff;
+        strSize = maxStringSize;
+        std::cout << "warning: string size > " << maxStringSize << " = (" << str << "), str: '" << str << "'" << std::endl;
     }
+    const auto currEntrySize = prfSize + strSize + 1; // prefix + chars + '\0'
+    stringStore.resize(stringStore.size() + currEntrySize);
+    stringStore[curOffset++] = strSize;
 
-    for (char sym : str)
-        stringStore[curOffset++] = sym;
+    for (size_t i = 0; i < strSize; ++i)
+        stringStore[curOffset++] = str[i];
 
     stringStore[curOffset++] = '\0';
 
@@ -95,65 +131,48 @@ void WordsStore::save(const std::string &fileName)
     }
 }
 
-const char *WordsStore::get(const uint32_t idx, uint32_t &strSize, uint8_t &option) const
+String255 WordsStore::get(const uint32_t idx, uint8_t &option) const
 {
     if (idx >= idxsStore.size())
     {
-        strSize = 0;
         option = 0;
-        return nullptr;
+        return String255(nullptr);
     }
     option = optionsStore[idx];
-    auto curOffset = idxsStore[idx];
-    strSize = getStrSize(curOffset);
-    return reinterpret_cast<const char *>(&stringStore[curOffset]);
+    return String255(&stringStore[idxsStore[idx]]);
 }
 
-uint32_t WordsStore::getStrSize(PosStringType &offset) const
-{
-    uint32_t strSize = stringStore[offset++];
-    if (strSize == 0xff)
-    {
-        strSize = stringStore[offset + 3];
-        strSize <<= 8;
-        strSize |= stringStore[offset + 2];
-        strSize <<= 8;
-        strSize |= stringStore[offset + 1];
-        strSize <<= 8;
-        strSize |= stringStore[offset];
-        offset += 4;
-    }
-    return strSize;
-}
-
-uint32_t WordsStore::findIdx(const std::string &str, uint32_t startIdx) const
+String255Iterator WordsStore::findIdx(const std::string &str, uint32_t startIdx) const
 {
     for (uint32_t idx = startIdx; idx < idxsStore.size(); ++idx)
     {
-        PosStringType offset = idxsStore[idx];
-        const auto currStrSize = getStrSize(offset);
-        if (currStrSize != str.size())
-            continue;
-        if (str == reinterpret_cast<const char *>(&stringStore[offset]))
-            return idx;
+        if (String255(&stringStore[idxsStore[idx]]) == str)
+            return getIterator(idx);
     }
-    return endIdx();
+    return String255Iterator(String255(nullptr), 0);
 }
 
-uint32_t WordsStore::findFirstPartStrIdx(const std::string &str, uint32_t startIdx) const
+String255Iterator WordsStore::findFirstPartStrIdx(const std::string &str, uint32_t startIdx) const
 {
     for (uint32_t idx = startIdx; idx < idxsStore.size(); ++idx)
     {
-        PosStringType offset = idxsStore[idx];
-        const auto currStrSize = getStrSize(offset);
-        if (currStrSize < str.size())
-            continue;
-        const char *currCStr = reinterpret_cast<const char *>(&stringStore[offset]);
-        if (str.compare(0, str.size(), currCStr, str.size()) == 0)
-            return idx;
+        String255 currStr(&stringStore[idxsStore[idx]]);
+        const char * const c_str = currStr.c_str();
+        const size_t len = str.size();
+        if (currStr.size() >= str.size()
+            && str.compare(0, len, c_str, len) == 0)
+            return getIterator(idx);
     }
-    return endIdx();
+    return String255Iterator(String255(nullptr), 0);
 }
+
+String255Iterator WordsStore::getIterator(size_t idx) const
+{
+    return (idx < idxsStore.size())
+            ? String255Iterator(String255(&stringStore[idxsStore[idx]]), idx)
+            : String255Iterator(String255(nullptr), 0);
+}
+
 
 // class DicWordIdx
 
@@ -161,12 +180,24 @@ DicWordIdx::DicWordIdx()
 {
 }
 
+bool DicWordIdx::load(const std::string &path)
+{
+    changed = false;
+    const bool result = dicWortIdx.load(path + "dwi.dat");
+    if (!result)
+        dicWortIdx.clear();
+    return result;
+}
+
 void DicWordIdx::exportFromFileIdx(const std::string &fileName)
 {
+    changed = false;
     dicWortIdx.clear();
     dicWortIdx.addString("", 0); // position from 1
     std::ifstream is;
     is.open(fileName);
+    if (!is.good())
+        return;
     std::string line;
     while(!is.eof())
     {
@@ -185,7 +216,18 @@ void DicWordIdx::exportFromFileIdx(const std::string &fileName)
         if (newIdx != idxWord)
             std::cout << "Error: " << newIdx << " != " << idxWord << ", word = " << word << ", frenc = " << frenc << std::endl;
     }
+    if (dicWortIdx.size() > 1)
+        changed = true;
 }
+
+String255Iterator DicWordIdx::findStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option)
+{
+    String255Iterator it = firstPart ? dicWortIdx.findFirstPartStrIdx(str, pos) : dicWortIdx.findIdx(str, pos);
+    if (it->valid())
+        option = dicWortIdx.getOption(it.getIdx());
+    return it;
+}
+
 
 // class FormWordIdx
 
@@ -193,12 +235,24 @@ FormWordIdx::FormWordIdx()
 {
 }
 
+bool FormWordIdx::load(const std::string &path)
+{
+    changed = false;
+    const bool result = formWortIdx.load(path + "fwi.dat");
+    if (!result)
+        formWortIdx.clear();
+    return result;
+}
+
 void FormWordIdx::exportFromFileIdx(const std::string &fileName)
 {
+    changed = false;
     formWortIdx.clear();
     formWortIdx.addString("", 0); // position from 1
     std::ifstream is;
     is.open(fileName);
+    if (!is.good())
+        return;
     std::string line;
     while(!is.eof())
     {
@@ -226,6 +280,8 @@ void FormWordIdx::exportFromFileIdx(const std::string &fileName)
                 << ", sourWordIdx = " << sourWordIdx << std::endl;
         }
     }
+    if (formWortIdx.size() > 1)
+        changed = true;
 }
 
 // class StatWords
@@ -233,4 +289,18 @@ void FormWordIdx::exportFromFileIdx(const std::string &fileName)
 StatWords::StatWords()
 {
 
+}
+
+bool StatWords::load(const std::string &path)
+{
+    if (!dicWorts.load(path))
+        return false;
+    formWords.load(path);
+
+    return true;
+}
+
+String255Iterator StatWords::findDicStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option)
+{
+    return dicWorts.findStrIdx(str, pos, firstPart, option);
 }

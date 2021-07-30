@@ -127,6 +127,14 @@ private slots:
 
     void on_actionImport_statistic_triggered();
 
+    void on_pushButtonStatRight_clicked();
+
+    void on_pushButtonStatLeft_clicked();
+
+    void on_pushButtonStatToEdit_clicked();
+
+    void on_checkBox_AutoSearch_stateChanged(int arg1);
+
 private:
     void selectItem(const int idx);
     void setButtonEnable(WortDe wd);
@@ -134,6 +142,12 @@ private:
     void getWortDeToCurrWd();
     void checkChangesCurrWd(const bool saveWithoutAsk = false);
     void addNewWortFromSearch();
+    void addNewWortFromStatSearch();
+    void clearCurrWord();
+    void findStatWord(const std::string &str);
+    void showFoundStatWord();
+    void statWordClear();
+    void nextFoundStatWord(int delta);
 
 private:
     std::string accName;
@@ -144,6 +158,8 @@ private:
     int origIndex = -1;
     WortDe origWd;
     WortDe currWd;
+
+    FoundItemsIdx statFound;
 
     WebTranslation webTr;
 

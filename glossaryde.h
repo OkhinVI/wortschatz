@@ -2,10 +2,42 @@
 #define GLOSSARYDE_H
 
 #include "wortde.h"
+#include "statwords.h"
 #include <vector>
 #include <map>
 #include <limits>
 #include <random>
+
+class FoundItemsIdx
+{
+public:
+    void clear() { wordIdxs.clear(); types.clear(); strings.clear(); pos = 0; dicIndex = -1; }
+    void add(uint32_t wordIdx, uint8_t type, const std::string str)
+    {
+        wordIdxs.push_back(wordIdx);
+        types.push_back(type);
+        strings.push_back(str);
+    }
+    size_t size() const { return wordIdxs.size(); }
+    bool empty() const { return wordIdxs.empty(); }
+
+    const std::string &getStr() const { return strings[pos]; };
+    uint32_t getWordIdx() const { return wordIdxs[pos]; }
+    uint8_t getType() const { return types[pos]; }
+    size_t getPos() const { return pos; }
+    void setPos(size_t aPos) { pos = aPos < size() ? aPos : (!empty() ? size() - 1 : 0);  dicIndex = -1;}
+    FoundItemsIdx &operator++() { if (pos + 1 < size()) {++pos; dicIndex = -1;} return *this; }
+    FoundItemsIdx &operator--() { if (pos > 0) {--pos; dicIndex = -1;} return *this; }
+    void setDicIndex(int aDicIndex) { dicIndex = aDicIndex; }
+    int getDicIndex() const { return dicIndex; }
+
+private:
+    std::vector<uint32_t> wordIdxs;
+    std::vector<uint8_t> types;
+    std::vector<std::string> strings;
+    size_t pos = 0;
+    int dicIndex = -1;
+};
 
 class GlossaryDe
 {
@@ -62,6 +94,7 @@ public:
     int selectVariantsTr(std::vector<size_t> &vecIdxTr);
 
     void add(const WortDe &wd);
+    void insert(size_t idx, const WortDe &wd);
     void importTr(const GlossaryDe &impGloss);
     void importStat(const GlossaryDe &impGloss);
 
@@ -73,6 +106,8 @@ public:
     bool empty() const { return dictionary.empty(); }
 
     size_t find(const std::string &str, size_t pos = 0);
+    size_t findByWordIdx(const uint32_t wordIdx, size_t pos = 0);
+    String255Iterator findStatDic(const std::string &str, size_t pos, uint8_t &option);
 
     std::string tema(const unsigned int blockNum);
     const Tema &getTemaByIndex(size_t idx) const;
@@ -87,6 +122,7 @@ private:
 
 private:
     DictionaryDe dictionary;
+    StatWords statWords;
     std::string fileName;
     std::string filePath;
     bool notLoaded = false;

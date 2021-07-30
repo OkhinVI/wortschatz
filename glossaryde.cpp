@@ -168,6 +168,7 @@ void GlossaryDe::load(const bool saveDbg)
     calcNextUserNumBlock();
 
     loadThemes(filePath + "logTema.txt");
+    statWords.load(filePath);
 }
 
 void GlossaryDe::save()
@@ -205,6 +206,15 @@ void GlossaryDe::add(const WortDe &wd)
     notLoaded = false;
 }
 
+void GlossaryDe::insert(size_t idx, const WortDe &wd)
+{
+    if (idx < dictionary.size())
+        dictionary.insert(dictionary.begin() + idx, wd);
+    else
+        dictionary.push_back(wd);
+    notLoaded = false;
+}
+
 const WortDe &GlossaryDe::at(size_t idx) const
 {
     return idx < dictionary.size() ? dictionary[idx] : NullWortDe;
@@ -229,6 +239,21 @@ size_t GlossaryDe::find(const std::string &str, size_t pos)
             return pos;
     }
     return dictionary.size();
+}
+
+size_t GlossaryDe::findByWordIdx(const uint32_t wordIdx, size_t pos)
+{
+    for (; pos < dictionary.size(); ++pos)
+    {
+        if (dictionary[pos].freqIdx() == wordIdx)
+            return pos;
+    }
+    return dictionary.size();
+}
+
+String255Iterator GlossaryDe::findStatDic(const std::string &str, size_t pos, uint8_t &option)
+{
+    return statWords.findDicStrIdx(str, pos, true, option);
 }
 
 size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
