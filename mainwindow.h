@@ -135,6 +135,8 @@ private slots:
 
     void on_checkBox_AutoSearch_stateChanged(int arg1);
 
+    bool eventFilter(QObject *target, QEvent *event);
+
 private:
     void selectItem(const int idx);
     void setButtonEnable(WortDe wd);

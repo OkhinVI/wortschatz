@@ -9,6 +9,7 @@
 #include <QSettings>
 #include <QDesktopServices>
 #include <QMessageBox>
+#include <QKeyEvent>
 #include "qlistviewglossarydemodel.h"
 #include "string_utf8.h"
 #include <sstream>
@@ -62,6 +63,7 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     connect(keyAltL, SIGNAL(activated()), this, SLOT(slotShortcutAltL()));
 
     ui->lineEdit_8->setStyleSheet("color: rgb(0, 0, 255)");
+    ui->lineEdit_7->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -1011,5 +1013,32 @@ void MainWindow::on_checkBox_AutoSearch_stateChanged(int arg1)
 {
     if (arg1 == Qt::Checked)
         showFoundStatWord();
+}
+
+
+bool MainWindow::eventFilter(QObject *target, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent = (QKeyEvent *)event;
+        const auto key = keyEvent->key();
+        // const auto mod = keyEvent->modifiers();
+        if (target == ui->lineEdit_7)
+        {
+            if (key == Qt::Key_Return || key == Qt::Key_Enter)
+            {
+                if (!statFound.empty())
+                    ui->lineEdit_7->setText(QString::fromStdString(statFound.getStr()));
+            }
+            else if (key == Qt::Key_Up)
+                nextFoundStatWord(-1);
+            else if (key == Qt::Key_Down)
+                nextFoundStatWord(+1);
+            else
+                return QMainWindow::eventFilter(target, event);
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter(target, event);
 }
 
