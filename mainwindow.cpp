@@ -10,6 +10,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QKeyEvent>
+#include <QWheelEvent>
 #include "qlistviewglossarydemodel.h"
 #include "string_utf8.h"
 #include <sstream>
@@ -65,6 +66,7 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     ui->lineEdit_8->setStyleSheet("color: rgb(0, 0, 255)");
 
     ui->lineEdit_7->installEventFilter(this);
+    ui->lineEdit_8->installEventFilter(this);
     ui->listView->installEventFilter(this);
 }
 
@@ -580,6 +582,8 @@ void MainWindow::showFoundStatWord()
     const size_t idx = dicDe.findByWordIdx(statFound.getWordIdx(), 0);
     statFound.setDicIndex(idx == dicDe.size() ? -1 : idx);
 
+    ui->lineEdit_8->setStyleSheet(statFound.getDicIndex() < 0 ? "color: rgb(0, 0, 255)" : "color: rgb(50, 50, 50)");
+
     if (ui->checkBox_AutoSearch->checkState() == Qt::Checked) {
         if (statFound.getDicIndex() < 0)
             clearCurrWord();
@@ -1033,6 +1037,23 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
             return true;
         }
     }
+    else if (event->type() == QEvent::Wheel)
+    {
+        QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
+        auto delta = wheelEvent->angleDelta() / 8;
+
+        if (target == ui->lineEdit_8)
+        {
+            if (delta.y() > 0)
+                nextFoundStatWord(-1);
+            else if (delta.y() < 0)
+                nextFoundStatWord(+1);
+            else
+                return QMainWindow::eventFilter(target, event);
+            return true;
+        }
+    }
+
     return QMainWindow::eventFilter(target, event);
 }
 
