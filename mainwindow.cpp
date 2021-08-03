@@ -63,7 +63,9 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     connect(keyAltL, SIGNAL(activated()), this, SLOT(slotShortcutAltL()));
 
     ui->lineEdit_8->setStyleSheet("color: rgb(0, 0, 255)");
+
     ui->lineEdit_7->installEventFilter(this);
+    ui->listView->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -610,11 +612,16 @@ void MainWindow::on_lineEdit_7_textChanged(const QString &arg1)
 
 void MainWindow::setNewIndex(int idx)
 {
-    if (idx < 0 || size_t(idx) >= dicDe.size())
+    if (dicDe.empty())
     {
         clearCurrWord();
         return;
     }
+
+    if (idx < 0)
+        idx = 0;
+    else if (idx >= int(dicDe.size()))
+        idx = dicDe.size() - 1;
 
     QModelIndex index = model->creatNewIndex(idx);
     if ( index.isValid() ) {
@@ -785,30 +792,12 @@ void MainWindow::on_actionTest_words_triggered()
 
 void MainWindow::on_pushButton_29_clicked()
 {
-    if (dicDe.empty())
-        return;
-
-    if (origIndex < 0)
-        setNewIndex(0);
-    else
-    if (origIndex >= int(dicDe.size()))
-        setNewIndex(dicDe.size() - 1);
-    else
-        setNewIndex(origIndex + 1);
+    setNewIndex(origIndex + 1);
 }
 
 void MainWindow::on_pushButton_30_clicked()
 {
-    if (dicDe.empty())
-        return;
-
-    if (origIndex < 1)
-        setNewIndex(0);
-    else
-    if (origIndex >= int(dicDe.size()))
-        setNewIndex(dicDe.size() - 1);
-    else
-        setNewIndex(origIndex - 1);
+    setNewIndex(origIndex - 1);
 }
 
 void MainWindow::clearCurrWord()
@@ -977,11 +966,6 @@ void MainWindow::on_actionImport_statistic_triggered()
 }
 
 
-void MainWindow::on_pushButtonStatRight_clicked()
-{
-    nextFoundStatWord(+1);
-}
-
 void MainWindow::nextFoundStatWord(int delta)
 {
     if (statFound.empty())
@@ -994,25 +978,20 @@ void MainWindow::nextFoundStatWord(int delta)
     showFoundStatWord();
 }
 
-void MainWindow::on_pushButtonStatLeft_clicked()
-{
-    nextFoundStatWord(-1);
-}
-
-
-void MainWindow::on_pushButtonStatToEdit_clicked()
-{
-    if (statFound.empty())
-        return;
-
-    ui->lineEdit_7->setText(QString::fromStdString(statFound.getStr()));
-}
-
 
 void MainWindow::on_checkBox_AutoSearch_stateChanged(int arg1)
 {
     if (arg1 == Qt::Checked)
+    {
         showFoundStatWord();
+        ui->pushButton_32->setEnabled(true);
+        ui->pushButton_31->setEnabled(false);
+        ui->pushButton_17->setEnabled(false);
+    } else {
+        ui->pushButton_32->setEnabled(false);
+        ui->pushButton_31->setEnabled(true);
+        ui->pushButton_17->setEnabled(true);
+    }
 }
 
 
@@ -1022,7 +1001,8 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
     {
         QKeyEvent *keyEvent = (QKeyEvent *)event;
         const auto key = keyEvent->key();
-        // const auto mod = keyEvent->modifiers();
+        const auto mod = keyEvent->modifiers();
+        const auto maskCtrlAltShift = Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier;
         if (target == ui->lineEdit_7)
         {
             if (key == Qt::Key_Return || key == Qt::Key_Enter)
@@ -1030,10 +1010,24 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
                 if (!statFound.empty())
                     ui->lineEdit_7->setText(QString::fromStdString(statFound.getStr()));
             }
-            else if (key == Qt::Key_Up)
+            else if (key == Qt::Key_Up && (mod & maskCtrlAltShift) == Qt::NoModifier)
                 nextFoundStatWord(-1);
-            else if (key == Qt::Key_Down)
+            else if (key == Qt::Key_Down && (mod & maskCtrlAltShift) == Qt::NoModifier)
                 nextFoundStatWord(+1);
+            else
+                return QMainWindow::eventFilter(target, event);
+            return true;
+        }
+        else if (target == ui->listView)
+        {
+            if (key == Qt::Key_Up && (mod & maskCtrlAltShift) == Qt::NoModifier)
+                setNewIndex(origIndex - 1);
+            else if (key == Qt::Key_Down && (mod & maskCtrlAltShift) == Qt::NoModifier)
+                setNewIndex(origIndex + 1);
+            else if (key == Qt::Key_Home && (mod & maskCtrlAltShift) == Qt::NoModifier)
+                setNewIndex(0);
+            else if (key == Qt::Key_End && (mod & maskCtrlAltShift) == Qt::NoModifier)
+                setNewIndex(dicDe.empty() ? 0 : dicDe.size() - 1);
             else
                 return QMainWindow::eventFilter(target, event);
             return true;

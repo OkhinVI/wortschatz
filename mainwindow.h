@@ -127,12 +127,6 @@ private slots:
 
     void on_actionImport_statistic_triggered();
 
-    void on_pushButtonStatRight_clicked();
-
-    void on_pushButtonStatLeft_clicked();
-
-    void on_pushButtonStatToEdit_clicked();
-
     void on_checkBox_AutoSearch_stateChanged(int arg1);
 
     bool eventFilter(QObject *target, QEvent *event);

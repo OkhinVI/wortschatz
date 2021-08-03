@@ -444,6 +444,9 @@
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_17">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>185</x>
@@ -461,12 +464,12 @@
      <rect>
       <x>223</x>
       <y>70</y>
-      <width>31</width>
+      <width>51</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>first</string>
+     <string>refind</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_19">
@@ -626,24 +629,27 @@
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_31">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>280</x>
       <y>70</y>
-      <width>71</width>
+      <width>51</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>add users</string>
+     <string>add</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_32">
     <property name="geometry">
      <rect>
-      <x>290</x>
+      <x>280</x>
       <y>40</y>
-      <width>41</width>
+      <width>51</width>
       <height>23</height>
      </rect>
     </property>
@@ -742,56 +748,17 @@
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButtonStatLeft">
-    <property name="geometry">
-     <rect>
-      <x>184</x>
-      <y>39</y>
-      <width>21</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&lt;</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButtonStatRight">
-    <property name="geometry">
-     <rect>
-      <x>206</x>
-      <y>39</y>
-      <width>21</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>&gt;</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="pushButtonStatToEdit">
-    <property name="geometry">
-     <rect>
-      <x>232</x>
-      <y>40</y>
-      <width>51</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>to Edit</string>
-    </property>
-   </widget>
    <widget class="QCheckBox" name="checkBox_AutoSearch">
     <property name="geometry">
      <rect>
       <x>185</x>
-      <y>19</y>
+      <y>40</y>
       <width>91</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>find in Dic</string>
+     <string>-&gt;Glossary</string>
     </property>
     <property name="checked">
      <bool>true</bool>
@@ -800,7 +767,7 @@
    <widget class="QCheckBox" name="checkBox_NeedTr">
     <property name="geometry">
      <rect>
-      <x>280</x>
+      <x>282</x>
       <y>20</y>
       <width>51</width>
       <height>20</height>
