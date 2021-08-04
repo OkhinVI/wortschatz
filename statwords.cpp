@@ -284,6 +284,15 @@ void FormWordIdx::exportFromFileIdx(const std::string &fileName)
         changed = true;
 }
 
+String255Iterator FormWordIdx::findStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option)
+{
+    String255Iterator it = firstPart ? formWortIdx.findFirstPartStrIdx(str, pos) : formWortIdx.findIdx(str, pos);
+    if (it->valid())
+        option = formWortIdx.getOption(it.getIdx());
+    return it;
+}
+
+
 // class StatWords
 
 StatWords::StatWords()
@@ -303,4 +312,9 @@ bool StatWords::load(const std::string &path)
 String255Iterator StatWords::findDicStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option)
 {
     return dicWorts.findStrIdx(str, pos, firstPart, option);
+}
+
+String255Iterator StatWords::findFormStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option)
+{
+    return formWords.findStrIdx(str, pos, firstPart, option);
 }

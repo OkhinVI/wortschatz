@@ -64,9 +64,11 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     connect(keyAltL, SIGNAL(activated()), this, SLOT(slotShortcutAltL()));
 
     ui->lineEdit_8->setStyleSheet("color: rgb(0, 0, 255)");
+    ui->label_OptionStat_2->setStyleSheet("color: rgb(0, 0, 255)");
 
     ui->lineEdit_7->installEventFilter(this);
     ui->lineEdit_8->installEventFilter(this);
+    ui->label_OptionStat_2->installEventFilter(this);
     ui->listView->installEventFilter(this);
 }
 
@@ -539,6 +541,7 @@ void MainWindow::statWordClear()
     ui->label_OptionStat->setText("");
     ui->label_OptionStat_2->setText("");
     statFound.clear();
+    statFoundForm.clear();
 }
 
 void MainWindow::findStatWord(const std::string &str)
@@ -561,34 +564,63 @@ void MainWindow::findStatWord(const std::string &str)
         lastPos = it.getIdx() + 1;
     }
 
+    statFoundForm.clear();
+    lastPos = 0;
+    for (int i = 0; i < 100; ++i)
+    {
+        uint8_t option = 0;
+        String255Iterator it = dicDe.findStatForm(str, lastPos, option);
+        if (!it->valid())
+            break;
+        statFoundForm.add(it.getIdx(), option, it->c_str());
+        lastPos = it.getIdx() + 1;
+    }
+
     showFoundStatWord();
 }
 
 void MainWindow::showFoundStatWord()
 {
-    if (statFound.empty())
+    if (statFound.empty() && statFoundForm.empty())
     {
         statWordClear();
         return;
     }
 
-    ui->lineEdit_8->setText(QString::fromStdString(statFound.getStr()));
-    std::string strOption = std::to_string(statFound.getPos() + 1) + '/'
-            + (statFound.size() > 99 ? "99+" : std::to_string(statFound.size())) + " = "
-            + std::to_string(statFound.getWordIdx()) + " - "
-            + WortDe::TypeWortToString(static_cast<WortDe::TypeWort>(statFound.getType()));
-    ui->label_OptionStat->setText(QString::fromStdString(strOption));
+    if (!statFound.empty())
+    {
+        ui->lineEdit_8->setText(QString::fromStdString(statFound.getStr()));
+        std::string strOption = std::to_string(statFound.getPos() + 1) + '/'
+                + (statFound.size() > 99 ? "99+" : std::to_string(statFound.size())) + " = "
+                + std::to_string(statFound.getWordIdx()) + " - "
+                + WortDe::TypeWortToString(static_cast<WortDe::TypeWort>(statFound.getType()));
+        ui->label_OptionStat->setText(QString::fromStdString(strOption));
 
-    const size_t idx = dicDe.findByWordIdx(statFound.getWordIdx(), 0);
-    statFound.setDicIndex(idx == dicDe.size() ? -1 : idx);
+        const size_t idx = dicDe.findByWordIdx(statFound.getWordIdx(), 0);
+        statFound.setDicIndex(idx == dicDe.size() ? -1 : idx);
 
-    ui->lineEdit_8->setStyleSheet(statFound.getDicIndex() < 0 ? "color: rgb(0, 0, 255)" : "color: rgb(50, 50, 50)");
+        ui->lineEdit_8->setStyleSheet(statFound.getDicIndex() < 0 ? "color: rgb(0, 0, 255)" : "color: rgb(50, 50, 50)");
 
-    if (ui->checkBox_AutoSearch->checkState() == Qt::Checked) {
-        if (statFound.getDicIndex() < 0)
-            clearCurrWord();
-        else
-            setNewIndex(statFound.getDicIndex());
+        if (ui->checkBox_AutoSearch->checkState() == Qt::Checked) {
+            if (statFound.getDicIndex() < 0)
+                clearCurrWord();
+            else
+                setNewIndex(statFound.getDicIndex());
+        }
+    } else {
+        ui->lineEdit_8->setText("");
+        ui->label_OptionStat->setText("");
+    }
+
+    if (!statFoundForm.empty())
+    {
+        std::string strOption = std::to_string(statFoundForm.getPos() + 1) + '/'
+                + (statFoundForm.size() > 99 ? "99+" : std::to_string(statFoundForm.size()))
+                + " - " + statFoundForm.getStr() + " = "
+                + std::to_string(statFoundForm.getWordIdx());
+        ui->label_OptionStat_2->setText(QString::fromStdString(strOption));
+    } else {
+        ui->label_OptionStat_2->setText("");
     }
 }
 
@@ -1048,6 +1080,22 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
                 nextFoundStatWord(-1);
             else if (delta.y() < 0)
                 nextFoundStatWord(+1);
+            else
+                return QMainWindow::eventFilter(target, event);
+            return true;
+        }
+        else if (target == ui->label_OptionStat_2)
+        {
+            if (delta.y() > 0)
+            {
+                --statFoundForm;
+                showFoundStatWord();
+            }
+            else if (delta.y() < 0)
+            {
+                ++statFoundForm;
+                showFoundStatWord();
+            }
             else
                 return QMainWindow::eventFilter(target, event);
             return true;

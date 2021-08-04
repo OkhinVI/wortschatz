@@ -108,6 +108,7 @@ public:
     size_t find(const std::string &str, size_t pos = 0);
     size_t findByWordIdx(const uint32_t wordIdx, size_t pos = 0);
     String255Iterator findStatDic(const std::string &str, size_t pos, uint8_t &option);
+    String255Iterator findStatForm(const std::string &str, size_t pos, uint8_t &option);
 
     std::string tema(const unsigned int blockNum);
     const Tema &getTemaByIndex(size_t idx) const;

@@ -96,6 +96,7 @@ public:
     FormWordIdx();
     void exportFromFileIdx(const std::string &fileName);
     bool load(const std::string &path);
+    String255Iterator findStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option);
 
 private:
     WordsStore formWortIdx;
@@ -108,6 +109,7 @@ public:
     StatWords();
     bool load(const std::string &path);
     String255Iterator findDicStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option);
+    String255Iterator findFormStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option);
 
 private:
     DicWordIdx dicWorts;

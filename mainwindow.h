@@ -156,6 +156,7 @@ private:
     WortDe currWd;
 
     FoundItemsIdx statFound;
+    FoundItemsIdx statFoundForm;
 
     WebTranslation webTr;
 
