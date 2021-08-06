@@ -569,10 +569,13 @@ void MainWindow::findStatWord(const std::string &str)
     for (int i = 0; i < 100; ++i)
     {
         uint8_t option = 0;
-        String255Iterator it = dicDe.findStatForm(str, lastPos, option);
+        uint32_t idxDic = 0;
+        String255Iterator it = dicDe.findStatForm(str, lastPos, option, idxDic);
         if (!it->valid())
             break;
-        statFoundForm.add(it.getIdx(), option, it->c_str());
+        uint8_t optionDic = 0;
+        std::string strDic = dicDe.atStatDic(idxDic, optionDic).c_str();
+        statFoundForm.add(it.getIdx(), option, it->c_str(), idxDic, optionDic, strDic);
         lastPos = it.getIdx() + 1;
     }
 
@@ -597,15 +600,15 @@ void MainWindow::showFoundStatWord()
         ui->label_OptionStat->setText(QString::fromStdString(strOption));
 
         const size_t idx = dicDe.findByWordIdx(statFound.getWordIdx(), 0);
-        statFound.setDicIndex(idx == dicDe.size() ? -1 : idx);
+        statFound.setGlossaryIndex(idx == dicDe.size() ? -1 : idx);
 
-        ui->lineEdit_8->setStyleSheet(statFound.getDicIndex() < 0 ? "color: rgb(0, 0, 255)" : "color: rgb(50, 50, 50)");
+        ui->lineEdit_8->setStyleSheet(statFound.getGlossaryIndex() < 0 ? "color: rgb(0, 0, 255)" : "color: rgb(50, 50, 50)");
 
         if (ui->checkBox_AutoSearch->checkState() == Qt::Checked) {
-            if (statFound.getDicIndex() < 0)
+            if (statFound.getGlossaryIndex() < 0)
                 clearCurrWord();
             else
-                setNewIndex(statFound.getDicIndex());
+                setNewIndex(statFound.getGlossaryIndex());
         }
     } else {
         ui->lineEdit_8->setText("");
@@ -617,7 +620,9 @@ void MainWindow::showFoundStatWord()
         std::string strOption = std::to_string(statFoundForm.getPos() + 1) + '/'
                 + (statFoundForm.size() > 99 ? "99+" : std::to_string(statFoundForm.size()))
                 + " - " + statFoundForm.getStr() + " = "
-                + std::to_string(statFoundForm.getWordIdx());
+                + std::to_string(statFoundForm.getWordIdx()) + " - "
+                + std::to_string(int(statFoundForm.getType())) + " ["
+                + statFoundForm.getDicStr() + "/" + std::to_string(statFoundForm.getDicWordIdx()) + "]";
         ui->label_OptionStat_2->setText(QString::fromStdString(strOption));
     } else {
         ui->label_OptionStat_2->setText("");
@@ -885,7 +890,7 @@ void MainWindow::on_pushButton_32_clicked()
     if (statFound.empty())
         return;
 
-    if (statFound.getDicIndex() >= 0)
+    if (statFound.getGlossaryIndex() >= 0)
     {
         QMessageBox::information(this, utilQt::strToQt(statFound.getStr()), "Already in the dictionary", QMessageBox::Yes);
         return;

@@ -11,7 +11,7 @@
 class FoundItemsIdx
 {
 public:
-    void clear() { wordIdxs.clear(); types.clear(); strings.clear(); pos = 0; dicIndex = -1; }
+    void clear() { wordIdxs.clear(); types.clear(); strings.clear(); pos = 0; glossaryIndex = -1; }
     void add(uint32_t wordIdx, uint8_t type, const std::string str)
     {
         wordIdxs.push_back(wordIdx);
@@ -21,22 +21,44 @@ public:
     size_t size() const { return wordIdxs.size(); }
     bool empty() const { return wordIdxs.empty(); }
 
-    const std::string &getStr() const { return strings[pos]; };
+    const std::string &getStr() const { return strings[pos]; }
     uint32_t getWordIdx() const { return wordIdxs[pos]; }
     uint8_t getType() const { return types[pos]; }
     size_t getPos() const { return pos; }
-    void setPos(size_t aPos) { pos = aPos < size() ? aPos : (!empty() ? size() - 1 : 0);  dicIndex = -1;}
-    FoundItemsIdx &operator++() { if (pos + 1 < size()) {++pos; dicIndex = -1;} return *this; }
-    FoundItemsIdx &operator--() { if (pos > 0) {--pos; dicIndex = -1;} return *this; }
-    void setDicIndex(int aDicIndex) { dicIndex = aDicIndex; }
-    int getDicIndex() const { return dicIndex; }
+    void setPos(size_t aPos) { pos = aPos < size() ? aPos : (!empty() ? size() - 1 : 0);  glossaryIndex = -1;}
+    FoundItemsIdx &operator++() { if (pos + 1 < size()) {++pos; glossaryIndex = -1;} return *this; }
+    FoundItemsIdx &operator--() { if (pos > 0) {--pos; glossaryIndex = -1;} return *this; }
+    void setGlossaryIndex(int aGlossaryIndex) { glossaryIndex = aGlossaryIndex; }
+    int getGlossaryIndex() const { return glossaryIndex; }
 
-private:
+protected:
     std::vector<uint32_t> wordIdxs;
     std::vector<uint8_t> types;
     std::vector<std::string> strings;
     size_t pos = 0;
-    int dicIndex = -1;
+    int glossaryIndex = -1;
+};
+
+class FoundFormDicIdx: public FoundItemsIdx
+{
+public:
+    void clear() { dicWordIdxs.clear(); dicTypes.clear(); dicStrings.clear(); FoundItemsIdx::clear(); }
+    void add(uint32_t wordIdx, uint8_t type, const std::string str,
+             uint32_t dicWordIdx, uint8_t dicType, const std::string dicStr)
+    {
+        FoundItemsIdx::add(wordIdx, type, str);
+        dicWordIdxs.push_back(dicWordIdx);
+        dicTypes.push_back(dicType);
+        dicStrings.push_back(dicStr);
+    }
+    const std::string &getDicStr() const { return dicStrings[pos]; }
+    uint32_t getDicWordIdx() const { return dicWordIdxs[pos]; }
+    uint8_t getDicType() const { return dicTypes[pos]; }
+
+protected:
+    std::vector<uint32_t> dicWordIdxs;
+    std::vector<uint8_t> dicTypes;
+    std::vector<std::string> dicStrings;
 };
 
 class GlossaryDe
@@ -108,7 +130,9 @@ public:
     size_t find(const std::string &str, size_t pos = 0);
     size_t findByWordIdx(const uint32_t wordIdx, size_t pos = 0);
     String255Iterator findStatDic(const std::string &str, size_t pos, uint8_t &option);
-    String255Iterator findStatForm(const std::string &str, size_t pos, uint8_t &option);
+    String255Iterator findStatForm(const std::string &str, size_t pos, uint8_t &option, uint32_t &idxDic);
+    String255 atStatDic(size_t idx, uint8_t &option) { return statWords.atDicStrIdx(idx, option); }
+    String255 atStatForm(size_t idx, uint8_t &option, uint32_t &idxDic) { return statWords.atFormStrIdx(idx, option, idxDic); }
 
     std::string tema(const unsigned int blockNum);
     const Tema &getTemaByIndex(size_t idx) const;

@@ -256,9 +256,9 @@ String255Iterator GlossaryDe::findStatDic(const std::string &str, size_t pos, ui
     return statWords.findDicStrIdx(str, pos, true, option);
 }
 
-String255Iterator GlossaryDe::findStatForm(const std::string &str, size_t pos, uint8_t &option)
+String255Iterator GlossaryDe::findStatForm(const std::string &str, size_t pos, uint8_t &option, uint32_t &idxDic)
 {
-    return statWords.findFormStrIdx(str, pos, true, option);
+    return statWords.findFormStrIdx(str, pos, true, option, idxDic);
 }
 
 size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)

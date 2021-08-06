@@ -72,11 +72,9 @@ uint32_t WordsStore::addString(const std::string &str, uint8_t option)
     return currIdx;
 }
 
-bool WordsStore::load(const std::string &fileName)
+bool WordsStore::load(std::istream &is)
 {
     clear();
-    std::ifstream is;
-    is.open(fileName, std::ios::binary);
     uint32_t countWord = 0;
     uint64_t stringStoreSize = 0;
     is.read(reinterpret_cast<char *>(&countWord), 4);
@@ -106,10 +104,8 @@ bool WordsStore::load(const std::string &fileName)
     return offset == stringStore.size();
 }
 
-void WordsStore::save(const std::string &fileName)
+void WordsStore::save(std::ofstream &os)
 {
-    std::ofstream os;
-    os.open(fileName, std::ios::binary);
     const uint32_t countWord = idxsStore.size();
     uint64_t stringStoreSize = 0;
     for (PosStringType offset : idxsStore)
@@ -174,6 +170,37 @@ String255Iterator WordsStore::getIterator(size_t idx) const
 }
 
 
+// class VectorUint24
+
+bool VectorUint24::save(std::ostream &os)
+{
+    const uint32_t countItem = size();
+    const size_t countByte = countItem * size_ofItem;
+    os.write(reinterpret_cast<const char *>(&countItem), 4);
+    os.write(reinterpret_cast<const char *>(&rawVector[0]), countByte);
+    return true;
+}
+
+bool VectorUint24::load(std::istream &is)
+{
+    rawVector.clear();
+    uint32_t countItem = 0;
+    is.read(reinterpret_cast<char *>(&countItem), 4);
+    if (countItem >= 0xffffff || countItem == 0)
+        return false;
+
+    const size_t countByte = countItem * size_ofItem;
+    rawVector.resize(countByte);
+    is.read(reinterpret_cast<char *>(&rawVector[0]), rawVector.size());
+    if (is.fail())
+    {
+        rawVector.clear();
+        return false;
+    }
+    return true;
+}
+
+
 // class DicWordIdx
 
 DicWordIdx::DicWordIdx()
@@ -183,11 +210,26 @@ DicWordIdx::DicWordIdx()
 bool DicWordIdx::load(const std::string &path)
 {
     changed = false;
-    const bool result = dicWortIdx.load(path + "dwi.dat");
+    fileName = path + "dwi.dat";
+    std::ifstream is;
+    is.open(fileName, std::ios::binary);
+    const bool result = dicWortIdx.load(is);
     if (!result)
         dicWortIdx.clear();
     return result;
 }
+
+bool DicWordIdx::save()
+{
+    if (!changed || fileName.empty())
+        return false;
+
+    std::ofstream os;
+    os.open(fileName, std::ios::binary);
+    dicWortIdx.save(os);
+    return true;
+}
+
 
 void DicWordIdx::exportFromFileIdx(const std::string &fileName)
 {
@@ -238,10 +280,29 @@ FormWordIdx::FormWordIdx()
 bool FormWordIdx::load(const std::string &path)
 {
     changed = false;
-    const bool result = formWortIdx.load(path + "fwi.dat");
-    if (!result)
+    fileName = path + "fwi.dat";
+    std::ifstream is;
+    is.open(fileName, std::ios::binary);
+    if (!formWortIdx.load(is) || !idx24Dics.load(is))
+    {
         formWortIdx.clear();
-    return result;
+        idx24Dics.clear();
+        return false;
+    }
+
+    return true;
+}
+
+bool FormWordIdx::save()
+{
+    if (!changed || fileName.empty())
+        return false;
+
+    std::ofstream os;
+    os.open(fileName, std::ios::binary);
+    formWortIdx.save(os);
+    idx24Dics.save(os);
+    return true;
 }
 
 void FormWordIdx::exportFromFileIdx(const std::string &fileName)
@@ -249,6 +310,8 @@ void FormWordIdx::exportFromFileIdx(const std::string &fileName)
     changed = false;
     formWortIdx.clear();
     formWortIdx.addString("", 0); // position from 1
+    idx24Dics.push_back(0);
+
     std::ifstream is;
     is.open(fileName);
     if (!is.good())
@@ -274,8 +337,14 @@ void FormWordIdx::exportFromFileIdx(const std::string &fileName)
         au8.getToken("\t");
 
         uint32_t newIdx = formWortIdx.addString(word, typeNum);
+        idx24Dics.push_back(dicWordIdx);
         if (newIdx != idxWord) {
             std::cout << "Error: " << newIdx << " != " << idxWord << ", word = "
+                << word << ", frenc = " << frenc << ", dicWordIdx = " << dicWordIdx
+                << ", sourWordIdx = " << sourWordIdx << std::endl;
+        }
+        if (idx24Dics.size() - 1 != idxWord) {
+            std::cout << "Error dicWordIdx: " << idxWord << " != " << idx24Dics.size() - 1 << ", word = "
                 << word << ", frenc = " << frenc << ", dicWordIdx = " << dicWordIdx
                 << ", sourWordIdx = " << sourWordIdx << std::endl;
         }
@@ -284,11 +353,13 @@ void FormWordIdx::exportFromFileIdx(const std::string &fileName)
         changed = true;
 }
 
-String255Iterator FormWordIdx::findStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option)
+String255Iterator FormWordIdx::findStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option, uint32_t &idxDic)
 {
     String255Iterator it = firstPart ? formWortIdx.findFirstPartStrIdx(str, pos) : formWortIdx.findIdx(str, pos);
-    if (it->valid())
+    if (it->valid()) {
         option = formWortIdx.getOption(it.getIdx());
+        idxDic = idx24Dics[it.getIdx()];
+    }
     return it;
 }
 
@@ -314,7 +385,7 @@ String255Iterator StatWords::findDicStrIdx(const std::string &str, size_t pos, b
     return dicWorts.findStrIdx(str, pos, firstPart, option);
 }
 
-String255Iterator StatWords::findFormStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option)
+String255Iterator StatWords::findFormStrIdx(const std::string &str, size_t pos, bool firstPart, uint8_t &option, uint32_t &idxDic)
 {
-    return formWords.findStrIdx(str, pos, firstPart, option);
+    return formWords.findStrIdx(str, pos, firstPart, option, idxDic);
 }
