@@ -129,6 +129,8 @@ private slots:
 
     void on_checkBox_AutoSearch_stateChanged(int arg1);
 
+    void on_checkBoxUseForm_stateChanged(int arg1);
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 

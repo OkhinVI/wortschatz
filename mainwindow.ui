@@ -780,6 +780,19 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QCheckBox" name="checkBoxUseForm">
+    <property name="geometry">
+     <rect>
+      <x>186</x>
+      <y>20</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;-Form</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

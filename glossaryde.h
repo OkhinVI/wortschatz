@@ -42,23 +42,23 @@ protected:
 class FoundFormDicIdx: public FoundItemsIdx
 {
 public:
-    void clear() { dicWordIdxs.clear(); dicTypes.clear(); dicStrings.clear(); FoundItemsIdx::clear(); }
+    void clear() { formWordIdxs.clear(); formTypes.clear(); formStrings.clear(); FoundItemsIdx::clear(); }
     void add(uint32_t wordIdx, uint8_t type, const std::string str,
-             uint32_t dicWordIdx, uint8_t dicType, const std::string dicStr)
+             uint32_t formWordIdx, uint8_t formType, const std::string formStr)
     {
         FoundItemsIdx::add(wordIdx, type, str);
-        dicWordIdxs.push_back(dicWordIdx);
-        dicTypes.push_back(dicType);
-        dicStrings.push_back(dicStr);
+        formWordIdxs.push_back(formWordIdx);
+        formTypes.push_back(formType);
+        formStrings.push_back(formStr);
     }
-    const std::string &getDicStr() const { return dicStrings[pos]; }
-    uint32_t getDicWordIdx() const { return dicWordIdxs[pos]; }
-    uint8_t getDicType() const { return dicTypes[pos]; }
+    const std::string &getFormStr() const { return formStrings[pos]; }
+    uint32_t getFormWordIdx() const { return formWordIdxs[pos]; }
+    uint8_t getFormType() const { return formTypes[pos]; }
 
 protected:
-    std::vector<uint32_t> dicWordIdxs;
-    std::vector<uint8_t> dicTypes;
-    std::vector<std::string> dicStrings;
+    std::vector<uint32_t> formWordIdxs;
+    std::vector<uint8_t> formTypes;
+    std::vector<std::string> formStrings;
 };
 
 class GlossaryDe

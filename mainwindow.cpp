@@ -68,6 +68,7 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
 
     ui->lineEdit_7->installEventFilter(this);
     ui->lineEdit_8->installEventFilter(this);
+    ui->label_OptionStat->installEventFilter(this);
     ui->label_OptionStat_2->installEventFilter(this);
     ui->listView->installEventFilter(this);
 }
@@ -568,14 +569,14 @@ void MainWindow::findStatWord(const std::string &str)
     lastPos = 0;
     for (int i = 0; i < 100; ++i)
     {
-        uint8_t option = 0;
+        uint8_t optionForm = 0;
         uint32_t idxDic = 0;
-        String255Iterator it = dicDe.findStatForm(str, lastPos, option, idxDic);
+        String255Iterator it = dicDe.findStatForm(str, lastPos, optionForm, idxDic);
         if (!it->valid())
             break;
         uint8_t optionDic = 0;
         std::string strDic = dicDe.atStatDic(idxDic, optionDic).c_str();
-        statFoundForm.add(it.getIdx(), option, it->c_str(), idxDic, optionDic, strDic);
+        statFoundForm.add(idxDic, optionDic, strDic, it.getIdx(), optionForm, it->c_str());
         lastPos = it.getIdx() + 1;
     }
 
@@ -590,25 +591,31 @@ void MainWindow::showFoundStatWord()
         return;
     }
 
-    if (!statFound.empty())
+    const bool useForm = ui->checkBoxUseForm->checkState() == Qt::Checked;
+    FoundItemsIdx &currStatFound = useForm ? statFoundForm : statFound;
+
+    if (!currStatFound.empty())
     {
-        ui->lineEdit_8->setText(QString::fromStdString(statFound.getStr()));
-        std::string strOption = std::to_string(statFound.getPos() + 1) + '/'
-                + (statFound.size() > 99 ? "99+" : std::to_string(statFound.size())) + " = "
-                + std::to_string(statFound.getWordIdx()) + " - "
-                + WortDe::TypeWortToString(static_cast<WortDe::TypeWort>(statFound.getType()));
+        ui->lineEdit_8->setText(QString::fromStdString(currStatFound.getStr()));
+        std::string strOption;
+        if (!useForm)
+            strOption = std::to_string(currStatFound.getPos() + 1) + '/'
+                    + (currStatFound.size() > 99 ? "99+" : std::to_string(currStatFound.size())) + " ";
+
+        strOption = strOption + "= " + std::to_string(currStatFound.getWordIdx()) + " - "
+                + WortDe::TypeWortToString(static_cast<WortDe::TypeWort>(currStatFound.getType()));
         ui->label_OptionStat->setText(QString::fromStdString(strOption));
 
-        const size_t idx = dicDe.findByWordIdx(statFound.getWordIdx(), 0);
-        statFound.setGlossaryIndex(idx == dicDe.size() ? -1 : idx);
+        const size_t idx = dicDe.findByWordIdx(currStatFound.getWordIdx(), 0);
+        currStatFound.setGlossaryIndex(idx == dicDe.size() ? -1 : idx);
 
-        ui->lineEdit_8->setStyleSheet(statFound.getGlossaryIndex() < 0 ? "color: rgb(0, 0, 255)" : "color: rgb(50, 50, 50)");
+        ui->lineEdit_8->setStyleSheet(currStatFound.getGlossaryIndex() < 0 ? "color: rgb(0, 0, 255)" : "color: rgb(50, 50, 50)");
 
         if (ui->checkBox_AutoSearch->checkState() == Qt::Checked) {
-            if (statFound.getGlossaryIndex() < 0)
+            if (currStatFound.getGlossaryIndex() < 0)
                 clearCurrWord();
             else
-                setNewIndex(statFound.getGlossaryIndex());
+                setNewIndex(currStatFound.getGlossaryIndex());
         }
     } else {
         ui->lineEdit_8->setText("");
@@ -617,13 +624,17 @@ void MainWindow::showFoundStatWord()
 
     if (!statFoundForm.empty())
     {
-        std::string strOption = std::to_string(statFoundForm.getPos() + 1) + '/'
+        std::string strFormOption = std::to_string(statFoundForm.getPos() + 1) + '/'
                 + (statFoundForm.size() > 99 ? "99+" : std::to_string(statFoundForm.size()))
-                + " - " + statFoundForm.getStr() + " = "
-                + std::to_string(statFoundForm.getWordIdx()) + " - "
-                + std::to_string(int(statFoundForm.getType())) + " ["
-                + statFoundForm.getDicStr() + "/" + std::to_string(statFoundForm.getDicWordIdx()) + "]";
-        ui->label_OptionStat_2->setText(QString::fromStdString(strOption));
+                + " - " + statFoundForm.getFormStr() + " = "
+                + std::to_string(statFoundForm.getFormWordIdx()) + " - "
+                + std::to_string(int(statFoundForm.getFormType()));
+        if (!useForm)
+        {
+            strFormOption = strFormOption + " ["
+                + statFoundForm.getStr() + "/" + std::to_string(statFoundForm.getWordIdx()) + "]";
+        }
+        ui->label_OptionStat_2->setText(QString::fromStdString(strFormOption));
     } else {
         ui->label_OptionStat_2->setText("");
     }
@@ -862,7 +873,8 @@ void MainWindow::addNewWortFromSearch()
 
 void MainWindow::addNewWortFromStatSearch()
 {
-    if (statFound.empty())
+    FoundItemsIdx &currStatFound = ui->checkBoxUseForm->checkState() == Qt::Checked ? statFoundForm : statFound;
+    if (currStatFound.empty())
         return;
 
     checkChangesCurrWd();
@@ -870,11 +882,11 @@ void MainWindow::addNewWortFromStatSearch()
     origWd = WortDe();
     currWd = origWd;
 
-    WortDe::TypeWort tw = statFound.getType() > uint8_t(WortDe::TypeWort::None)
-                       && statFound.getType() < uint8_t(WortDe::TypeWort::_last_one)
-                       ? WortDe::TypeWort(statFound.getType()) : WortDe::TypeWort::None;
-    currWd.parseRawLine(statFound.getStr(), "", dicDe.userBlockNum(), tw);
-    currWd.setNewFreqIdx(statFound.getWordIdx());
+    WortDe::TypeWort tw = currStatFound.getType() > uint8_t(WortDe::TypeWort::None)
+                       && currStatFound.getType() < uint8_t(WortDe::TypeWort::_last_one)
+                       ? WortDe::TypeWort(currStatFound.getType()) : WortDe::TypeWort::None;
+    currWd.parseRawLine(currStatFound.getStr(), "", dicDe.userBlockNum(), tw);
+    currWd.setNewFreqIdx(currStatFound.getWordIdx());
     setWortDe(currWd);
 }
 
@@ -887,12 +899,13 @@ void MainWindow::on_pushButton_31_clicked()
 
 void MainWindow::on_pushButton_32_clicked()
 {
-    if (statFound.empty())
+    FoundItemsIdx &currStatFound = ui->checkBoxUseForm->checkState() == Qt::Checked ? statFoundForm : statFound;
+    if (currStatFound.empty())
         return;
 
-    if (statFound.getGlossaryIndex() >= 0)
+    if (currStatFound.getGlossaryIndex() >= 0)
     {
-        QMessageBox::information(this, utilQt::strToQt(statFound.getStr()), "Already in the dictionary", QMessageBox::Yes);
+        QMessageBox::information(this, utilQt::strToQt(currStatFound.getStr()), "Already in the dictionary", QMessageBox::Yes);
         return;
     }
 
@@ -1009,13 +1022,15 @@ void MainWindow::on_actionImport_statistic_triggered()
 
 void MainWindow::nextFoundStatWord(int delta)
 {
-    if (statFound.empty())
+    FoundItemsIdx &currStatFound = ui->checkBoxUseForm->checkState() == Qt::Checked ? statFoundForm : statFound;
+
+    if (currStatFound.empty())
         return;
 
     if (delta < 0)
-        --statFound;
+        --currStatFound;
     else
-        ++statFound;
+        ++currStatFound;
     showFoundStatWord();
 }
 
@@ -1048,8 +1063,9 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
         {
             if (key == Qt::Key_Return || key == Qt::Key_Enter)
             {
-                if (!statFound.empty())
-                    ui->lineEdit_7->setText(QString::fromStdString(statFound.getStr()));
+                FoundItemsIdx &currStatFound = ui->checkBoxUseForm->checkState() == Qt::Checked ? statFoundForm : statFound;
+                if (!currStatFound.empty())
+                    ui->lineEdit_7->setText(QString::fromStdString(currStatFound.getStr()));
             }
             else if (key == Qt::Key_Up && (mod & maskCtrlAltShift) == Qt::NoModifier)
                 nextFoundStatWord(-1);
@@ -1079,7 +1095,7 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
         QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
         auto delta = wheelEvent->angleDelta() / 8;
 
-        if (target == ui->lineEdit_8)
+        if (target == ui->lineEdit_8 || target == ui->label_OptionStat)
         {
             if (delta.y() > 0)
                 nextFoundStatWord(-1);
@@ -1108,5 +1124,11 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
     }
 
     return QMainWindow::eventFilter(target, event);
+}
+
+
+void MainWindow::on_checkBoxUseForm_stateChanged(int)
+{
+    showFoundStatWord();
 }
 
