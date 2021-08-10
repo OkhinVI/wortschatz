@@ -4,6 +4,7 @@
 #include "testsettings.h"
 #include <vector>
 #include <ctime>
+#include <QKeyEvent>
 #include "utilQtTypes.h"
 
 static size_t RichteAntwort = 0;
@@ -26,6 +27,9 @@ TestWindow::TestWindow(GlossaryDe &aDicDe, MainWindow *mw, QWidget *parent) :
     vecButton.push_back(ui->pushButton_6);
     vecButton.push_back(ui->pushButton_9);
     vecButton.push_back(ui->pushButton_10);
+
+    for (size_t i = 0; i < vecButton.size(); ++i)
+        vecButton[i]->installEventFilter(this);
 
     ui->lineEdit->setStyleSheet("background-color: yellow; color: blue;");
 }
@@ -73,7 +77,7 @@ void TestWindow::setNewWort()
     }
 }
 
-void TestWindow::testSelectTr(size_t idx)
+void TestWindow::testSelectTr(size_t idx, bool ignoreResult)
 {
     ui->pushButton->setEnabled(true);
     if (idx >= vecButton.size())
@@ -90,19 +94,29 @@ void TestWindow::testSelectTr(size_t idx)
     if (int(idx) == currIdxCorrectTr)
     {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; background-color: yellow; color: blue;");
-        wd.addAnswer(true);
-        ++RichteAntwort;
+        if (!ignoreResult)
+        {
+            wd.addAnswer(true);
+            ++RichteAntwort;
+        }
     } else {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; color: red;");
         vecButton[idx]->setStyleSheet("text-align: left; color: gray ;");
-        wd.addAnswer(false);
-        ++FalscheAntwort;
+        if (!ignoreResult)
+        {
+            wd.addAnswer(false);
+            ++FalscheAntwort;
+        }
     }
     mainWindow->setNewIndex(currTestGlossaryIdx);
     currIdxCorrectTr = -1;
 
-    ui->label->setText("richtige: " + QString::number(RichteAntwort) + " / falsche: "  + QString::number(FalscheAntwort) +
-                       " = " + QString::number(RichteAntwort * 100 / (RichteAntwort + FalscheAntwort)) + "%");
+    if (!ignoreResult)
+    {
+        ui->label->setText("richtige: " + QString::number(RichteAntwort)
+            + " / falsche: " + QString::number(FalscheAntwort) + " = "
+            + QString::number(RichteAntwort * 100 / (RichteAntwort + FalscheAntwort)) + "%");
+    }
 }
 
 void TestWindow::on_pushButton_2_clicked()
@@ -158,4 +172,29 @@ void TestWindow::on_pushButton_11_clicked()
     {
 
     }
+}
+
+bool TestWindow::eventFilter(QObject *target, QEvent *event)
+{
+    if (event->type() == QEvent::MouseButtonPress)
+    {
+        QMouseEvent *mouseEvent = (QMouseEvent *)event;
+        const auto button = mouseEvent->button();
+        if (button == Qt::MiddleButton)
+        {
+            for (size_t i = 0; i < vecButton.size(); ++i)
+            {
+                if (target == vecButton[i])
+                {
+                    testSelectTr(i, true);
+                    return true;
+                }
+            }
+        }
+        else
+            return QMainWindow::eventFilter(target, event);
+        return true;
+    }
+
+    return QMainWindow::eventFilter(target, event);
 }

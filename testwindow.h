@@ -24,7 +24,7 @@ public:
     void setNewWort();
 
 private:
-    void testSelectTr(size_t idx);
+    void testSelectTr(size_t idx, bool ignoreResult = false);
 
 private slots:
     void on_pushButton_clicked();
@@ -48,6 +48,9 @@ private slots:
     void on_pushButton_10_clicked();
 
     void on_pushButton_11_clicked();
+
+private:
+    bool eventFilter(QObject *target, QEvent *event);
 
 private:
     GlossaryDe &dicDe;
