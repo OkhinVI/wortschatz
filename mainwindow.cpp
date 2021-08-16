@@ -230,6 +230,8 @@ void MainWindow::setWortDe(WortDe wd)
     if (wd.type() == WortDe::TypeWort::Noun || wd.type() == WortDe::TypeWort::Combination)
     {
         options = wd.wortPl();
+        ui->label_5->setText("plural:");
+        ui->lineEdit_5->setEnabled(true);
     }
     else if (wd.type() == WortDe::TypeWort::Verb)
     {
@@ -237,6 +239,11 @@ void MainWindow::setWortDe(WortDe wd)
             options = "";
         else
             options = wd.vPrasens3f() + " ; " + wd.vPrateritum() + " ; " + wd.vPerfect();
+        ui->label_5->setText("verb forms:");
+        ui->lineEdit_5->setEnabled(true);
+    } else {
+        ui->label_5->setText("");
+        ui->lineEdit_5->setEnabled(false);
     }
     utilQt::strToLineEdit(ui->lineEdit_5, options);
 
@@ -266,7 +273,7 @@ void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
                 return;
         } else {
             QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this, "Wortschatzkarte geändert", "Änderungen speichern?",
+            reply = QMessageBox::question(this, "Vocabulary card changed", "Save changes?",
             QMessageBox::Yes|QMessageBox::No);
             if (reply != QMessageBox::Yes)
                 return;
@@ -845,11 +852,13 @@ void MainWindow::on_actionTest_words_triggered()
 void MainWindow::on_pushButton_29_clicked()
 {
     setNewIndex(origIndex + 1);
+    ui->listView->setFocus();
 }
 
 void MainWindow::on_pushButton_30_clicked()
 {
     setNewIndex(origIndex - 1);
+    ui->listView->setFocus();
 }
 
 void MainWindow::clearCurrWord()
