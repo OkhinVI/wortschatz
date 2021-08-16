@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <ctime>
 #include "glossaryde.h"
 #include "linesramstream.h"
 #include "string_utf8.h"
@@ -81,21 +82,11 @@ void GlossaryDe::loadThemes(const std::string &fileName)
         themesVector.push_back(Tema(it->first, it->second));
 }
 
-void GlossaryDe::calcNextUserNumBlock()
+WortDe::BlockNumType GlossaryDe::userBlockNum()
 {
-    WortDe::BlockNumType maxUserNum = 0;
-    for (size_t i = 0; i < dictionary.size(); ++i)
-    {
-        if (dictionary[i].block() > maxUserNum)
-            maxUserNum = dictionary[i].block();
-    }
-
-    unsigned int h1, h2, h3, h4;
-    WortDe::blockToUint_4(maxUserNum, h1, h2, h3, h4);
-    if (h1 < uint32_t(WortDe::TypeLevel::User))
-        nextUserNumBlock = WortDe::creatBlock(uint32_t(WortDe::TypeLevel::User), 1, 1, 1);
-    else
-        nextUserNumBlock = WortDe::preIncrementBlock(maxUserNum);
+    time_t currTime = time(nullptr);
+    struct tm data = *localtime(&currTime);
+    return WortDe::creatBlock(uint32_t(WortDe::TypeLevel::User), data.tm_year - 100, data.tm_mon + 1, data.tm_mday);
 }
 
 void GlossaryDe::load(const bool saveDbg)
@@ -165,7 +156,6 @@ void GlossaryDe::load(const bool saveDbg)
         loadedBeginUserWort = size();
     }
     beginUserWort = loadedBeginUserWort;
-    calcNextUserNumBlock();
 
     loadThemes(filePath + "logTema.txt");
     statWords.load(filePath);
