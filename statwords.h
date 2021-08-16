@@ -183,9 +183,13 @@ public:
     String255 atDicStrIdx(size_t idx, uint8_t &option) { return dicWorts.at(idx, option); }
     String255 atFormStrIdx(size_t idx, uint8_t &option, uint32_t &idxDic) { return formWords.at(idx, option, idxDic); }
 
+    static const char *formTypeToCStr(uint8_t formType);
+
 private:
     DicWordIdx dicWorts;
     FormWordIdx formWords;
+
+    static const std::vector<const char *> TypeFormIdx;
 };
 
 #endif // STATWORDS_H

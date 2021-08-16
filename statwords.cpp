@@ -389,3 +389,68 @@ String255Iterator StatWords::findFormStrIdx(const std::string &str, size_t pos, 
 {
     return formWords.findStrIdx(str, pos, firstPart, option, idxDic);
 }
+
+const char *StatWords::formTypeToCStr(uint8_t formType)
+{
+    if (formType < TypeFormIdx.size())
+        return TypeFormIdx[formType];
+    return "";
+}
+
+const std::vector<const char *> StatWords::TypeFormIdx = {
+    "",
+    "NN",
+    "ART",
+    "APPR",
+    "$.",
+    "ADJA",
+    "ADV",
+    "$,",
+    "VVFIN",
+    "KON",
+    "ADJD",
+    "VAFIN",
+    "NE",
+    "PPER",
+    "VVPP",
+    "APPRART",
+    "VVINF",
+    "$(",
+    "CARD",
+    "VMFIN",
+    "PPOSAT",
+    "PIAT",
+    "KOUS",
+    "PRF",
+    "PRELS",
+    "PAV",
+    "PTKVZ",
+    "PIS",
+    "KOKOM",
+    "PTKZU",
+    "PTKNEG",
+    "PDAT",
+    "VAINF",
+    "PDS",
+    "VVIZU",
+    "PWS",
+    "KOUI",
+    "PWAV",
+    "VMINF",
+    "FM",
+    "VAPP",
+    "PTKA",
+    "VVIMP",
+    "PWAT",
+    "PRELAT",
+    "APZR",
+    "XY",
+    "APPO",
+    "PTKANT",
+    "ITJ",
+    "TRUNC",
+    "VAIMP",
+    "VMPP",
+    "PPOSS",
+    "ADJ"
+};

@@ -635,7 +635,7 @@ void MainWindow::showFoundStatWord()
                 + (statFoundForm.size() > 99 ? "99+" : std::to_string(statFoundForm.size()))
                 + " - " + statFoundForm.getFormStr() + " = "
                 + std::to_string(statFoundForm.getFormWordIdx()) + " - "
-                + std::to_string(int(statFoundForm.getFormType()));
+                + StatWords::formTypeToCStr(statFoundForm.getFormType());
         if (!useForm)
         {
             strFormOption = strFormOption + " ["
