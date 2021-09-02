@@ -137,7 +137,7 @@ public:
     std::string tema(const unsigned int blockNum);
     const Tema &getTemaByIndex(size_t idx) const;
     size_t themesSize() const { return themesVector.size(); }
-    static WortDe::BlockNumType userBlockNum();
+    WortDe::BlockNumType userBlockNum();
 
     template< typename Func >
     size_t selectIdxFilter(Func func, std::vector<size_t> &selectionIdxs, const SelectSettings &selSet);

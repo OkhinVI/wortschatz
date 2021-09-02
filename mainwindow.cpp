@@ -280,6 +280,9 @@ void MainWindow::checkChangesCurrWd(const bool saveWithoutAsk)
         }
     }
 
+    if (currWd.block() == 0 && origWd.translation().empty() && !currWd.translation().empty())
+        currWd.setNewBlock(dicDe.userBlockNum()); // TODO: refresh
+
     origWd = currWd;
     if (origIndex >= int(dicDe.size()))
     {
