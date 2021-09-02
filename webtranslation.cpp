@@ -84,7 +84,7 @@ bool WebTranslation::setLanguage(const std::string &lg)
          "https://www.lingvolive.com/en-us/translate/de-en/",
          "",
          "yandex",
-         "https://translate.yandex.ru/?lang=de-en&text=",
+         "https://translate.yandex.com/?lang=de-en&text=",
          "",
          "google",
          "https://translate.google.de/?sl=de&tl=en&text=",
