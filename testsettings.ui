@@ -71,7 +71,7 @@
     </rect>
    </property>
    <property name="text">
-    <string/>
+    <string>0 %</string>
    </property>
    <property name="readOnly">
     <bool>true</bool>

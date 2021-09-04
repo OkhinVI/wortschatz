@@ -189,9 +189,10 @@ void TestWindow::on_pushButton_10_clicked()
 
 void TestWindow::on_pushButton_11_clicked()
 {
+    settingsWin->resetVals();
     if (settingsWin->exec() == QDialog::Accepted)
     {
-
+        setNewWort();
     }
 }
 

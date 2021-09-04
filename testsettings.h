@@ -25,7 +25,13 @@ private slots:
 
     void on_pushButton_clicked();
 
-    void on_spinBoxStartFreq_editingFinished();
+    void on_comboBox_currentIndexChanged(int index);
+
+    void on_comboBox_2_currentIndexChanged(int index);
+
+    void on_spinBoxStartFreq_valueChanged(int arg1);
+
+    void on_spinBoxEndFreq_valueChanged(int arg1);
 
 private:
     Ui::TestSettings *ui;

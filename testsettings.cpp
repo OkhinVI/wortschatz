@@ -66,8 +66,26 @@ void TestSettings::on_pushButton_clicked()
 }
 
 
-void TestSettings::on_spinBoxStartFreq_editingFinished()
+void TestSettings::on_comboBox_currentIndexChanged(int)
 {
+    ui->checkBoxThemes->setCheckState(Qt::Checked);
+}
 
+
+void TestSettings::on_comboBox_2_currentIndexChanged(int)
+{
+    ui->checkBoxThemes->setCheckState(Qt::Checked);
+}
+
+
+void TestSettings::on_spinBoxStartFreq_valueChanged(int)
+{
+    ui->checkBoxFreqIdx->setCheckState(Qt::Checked);
+}
+
+
+void TestSettings::on_spinBoxEndFreq_valueChanged(int)
+{
+    ui->checkBoxFreqIdx->setCheckState(Qt::Checked);
 }
 

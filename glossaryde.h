@@ -95,7 +95,7 @@ public:
         uint32_t startFreqIdx = 0;
         uint32_t endFreqIdx = 100;
 
-        size_t posIgnoringStatistics = 10;
+        size_t posIgnoringStatistics = 0;
 
     private:
         const GlossaryDe &glDe;
