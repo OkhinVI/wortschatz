@@ -114,6 +114,7 @@ public:
     void clearAllStatistic();
     size_t calcTestWortIdx(const SelectSettings &selSet); // returns the index of the next word to learn
     int selectVariantsTr(std::vector<size_t> &vecIdxTr);
+    double calcProgress(const SelectSettings &selSet, size_t &count, size_t &countMinCorrectAnswers, uint32_t &minCorrectAnswers, size_t &allCorrectAnswers, size_t &allNotCorrectAnswers);
 
     void add(const WortDe &wd);
     void insert(size_t idx, const WortDe &wd);
@@ -141,6 +142,9 @@ public:
 
     template< typename Func >
     size_t selectIdxFilter(Func func, std::vector<size_t> &selectionIdxs, const SelectSettings &selSet);
+
+private:
+    bool calcSelectionIdxs(const SelectSettings &selSet, std::vector<size_t> &selectionIdxs);
 
 private:
     DictionaryDe dictionary;

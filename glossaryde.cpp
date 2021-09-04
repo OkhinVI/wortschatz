@@ -254,8 +254,7 @@ String255Iterator GlossaryDe::findStatForm(const std::string &str, size_t pos, u
 size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
 {
     std::vector<size_t> selectionIdxs;
-    selectIdxFilter([](const WortDe &de, size_t) { return !de.translation().empty(); }, selectionIdxs, selSet);
-    if (selectionIdxs.empty())
+    if (!calcSelectionIdxs(selSet, selectionIdxs))
     {
         currIdxLearnWordDe = dictionary.size();
         return dictionary.size();
@@ -295,6 +294,42 @@ size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
     size_t currTestIdxWithTr = (taktCPU + randNum) % selectionIdxs.size();
     currIdxLearnWordDe = selectionIdxs[currTestIdxWithTr];
     return currIdxLearnWordDe;
+}
+
+bool GlossaryDe::calcSelectionIdxs(const SelectSettings &selSet, std::vector<size_t> &selectionIdxs)
+{
+    selectIdxFilter([](const WortDe &de, size_t) { return !de.translation().empty(); }, selectionIdxs, selSet);
+    return !selectionIdxs.empty();
+}
+
+double GlossaryDe::calcProgress(const SelectSettings &selSet, size_t &count, size_t &countMinCorrectAnswers, uint32_t &minCorrectAnswers, size_t &allCorrectAnswers, size_t &allNotCorrectAnswers)
+{
+    count = 0;
+    countMinCorrectAnswers = 0;
+    minCorrectAnswers = 0;
+    allCorrectAnswers = 0;
+    allNotCorrectAnswers = 0;
+    std::vector<size_t> selectionIdxs;
+    if (!calcSelectionIdxs(selSet, selectionIdxs))
+        return 0.;
+
+    count = selectionIdxs.size();
+    minCorrectAnswers = std::numeric_limits<uint32_t>::max();
+    for (size_t i = 0; i < selectionIdxs.size(); ++i)
+    {
+        const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
+        allCorrectAnswers += lw.numberCorrectAnswers;
+        allNotCorrectAnswers += lw.numberWrongtAnswers;
+        if (minCorrectAnswers > lw.numberCorrectAnswers)
+        {
+            minCorrectAnswers = lw.numberCorrectAnswers;
+            countMinCorrectAnswers = 1;
+        } else if (minCorrectAnswers == lw.numberCorrectAnswers)
+        {
+            ++countMinCorrectAnswers;
+        }
+    }
+    return double(allCorrectAnswers) / selectionIdxs.size();
 }
 
 int GlossaryDe::selectVariantsTr(std::vector<size_t> &vecIdxTr)

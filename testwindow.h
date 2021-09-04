@@ -25,6 +25,7 @@ public:
 
 private:
     void testSelectTr(size_t idx, bool ignoreResult = false);
+    void showLevel();
 
 private slots:
     void on_pushButton_clicked();

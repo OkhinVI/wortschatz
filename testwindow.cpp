@@ -46,11 +46,15 @@ void TestWindow::on_pushButton_clicked()
 
 void TestWindow::setNewWort()
 {
+    showLevel();
     ui->pushButton->setEnabled(false);
     for (size_t i = 0; i < vecButton.size(); ++i)
         vecButton[i]->setStyleSheet("text-align: left;");
 
     currTestGlossaryIdx = dicDe.calcTestWortIdx(glSelSet);
+    if (currTestGlossaryIdx >= dicDe.size())
+        return;
+
     vecIdxTr.resize(vecButton.size());
     currIdxCorrectTr = dicDe.selectVariantsTr(vecIdxTr);
     if (currIdxCorrectTr < 0)
@@ -117,6 +121,23 @@ void TestWindow::testSelectTr(size_t idx, bool ignoreResult)
             + " / falsche: " + QString::number(FalscheAntwort) + " = "
             + QString::number(RichteAntwort * 100 / (RichteAntwort + FalscheAntwort)) + "%");
     }
+    showLevel();
+}
+
+void TestWindow::showLevel()
+{
+    size_t count = 0;
+    size_t countMinCorrectAnswers = 0;
+    uint32_t minCorrectAnswers = 0;
+    size_t allCorrectAnswers;
+    size_t allNotCorrectAnswers = 0;
+    const double k = dicDe.calcProgress(glSelSet, count, countMinCorrectAnswers, minCorrectAnswers, allCorrectAnswers, allNotCorrectAnswers);
+    ui->labelLevel->setText("k: " + QString::number(k) + " (l" + QString::number(minCorrectAnswers) + ": "
+        + QString::number(countMinCorrectAnswers) + "/+" + QString::number(count - countMinCorrectAnswers) + ")");
+    if (allCorrectAnswers + allNotCorrectAnswers > 0)
+        ui->labelLevelSum->setText("All r: " + QString::number(allCorrectAnswers) + " / f: " + QString::number(allNotCorrectAnswers));
+    else
+        ui->labelLevelSum->setText("0/0");
 }
 
 void TestWindow::on_pushButton_2_clicked()
