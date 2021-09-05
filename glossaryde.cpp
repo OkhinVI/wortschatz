@@ -136,6 +136,13 @@ void GlossaryDe::load(const bool saveDbg)
         WortDe wd;
         if (wd.load(ils, saveDbg ? &logError : nullptr))
         {
+            if (wd.getStatistic().lastSequenceNumberAnswer > 0x40000000) { // clear old time-val
+                wd.setSequenceNumber(0);
+            }
+
+            if (wd.getStatistic().lastSequenceNumberAnswer > maxSequenceNumber)
+                maxSequenceNumber = wd.getStatistic().lastSequenceNumberAnswer;
+
             // if (wd.wort().substr(0, 3) != "---") { // delete Wort with "---" prefix
             if(saveDbg) wd.debugPrint(logDebug);
             add(wd);
@@ -516,7 +523,7 @@ void GlossaryDe::importStat(const GlossaryDe &impGloss)
     for (size_t i = 0; i < impGloss.dictionary.size(); ++i)
     {
         const WortDe &impWd = impGloss.dictionary[i];
-        if (!impWd.translation().empty() && impWd.getStatistic().startLearning != 0)
+        if (!impWd.translation().empty() && impWd.getStatistic().timeStartLearning != 0)
             idxImpWort.push_back(i);
     }
 

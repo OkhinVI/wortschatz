@@ -115,6 +115,8 @@ public:
     size_t calcTestWortIdx(const SelectSettings &selSet); // returns the index of the next word to learn
     int selectVariantsTr(std::vector<size_t> &vecIdxTr);
     double calcProgress(const SelectSettings &selSet, size_t &count, size_t &countMinCorrectAnswers, uint32_t &minCorrectAnswers, size_t &allCorrectAnswers, size_t &allNotCorrectAnswers);
+    uint32_t calcNextSequenceNumber() { return ++maxSequenceNumber; }
+    uint32_t lastSequenceNumber() const { return maxSequenceNumber; }
 
     void add(const WortDe &wd);
     void insert(size_t idx, const WortDe &wd);
@@ -155,6 +157,7 @@ private:
     std::map<unsigned int, std::string> themes;
     std::vector<Tema> themesVector;
     size_t beginUserWort = 0;
+    uint32_t maxSequenceNumber = 0;
 
     size_t currIdxLearnWordDe = 0;
     std::mt19937 genRandom;

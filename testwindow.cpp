@@ -100,16 +100,20 @@ void TestWindow::testSelectTr(size_t idx, bool onlyFalsh , bool ignoreResult)
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; background-color: yellow; color: blue;");
         if (!ignoreResult && !onlyFalsh)
         {
-            wd.addAnswer(true);
+            wd.addAnswer(true, dicDe.calcNextSequenceNumber());
             ++RichteAntwort;
+        } else {
+            wd.setSequenceNumber(dicDe.calcNextSequenceNumber());
         }
     } else {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; color: red;");
         vecButton[idx]->setStyleSheet("text-align: left; color: gray ;");
         if (!ignoreResult)
         {
-            wd.addAnswer(false);
+            wd.addAnswer(false, dicDe.calcNextSequenceNumber());
             ++FalscheAntwort;
+        } else {
+            wd.setSequenceNumber(dicDe.calcNextSequenceNumber());
         }
     }
     mainWindow->setNewIndex(currTestGlossaryIdx);

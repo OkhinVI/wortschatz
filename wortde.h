@@ -14,9 +14,9 @@ public:
     void clear() { *this = LearningWort(); }
 
 public:
-    uint32_t startLearning = 0; // Начало изучения слова
-    uint32_t lastCorrectAnswer = 0; // Время в секундах последнего правильного ответа
-    uint32_t lastWrongtAnswer = 0; // Время в секундах последнего неправильного ответа
+    uint32_t timeStartLearning = 0; // Время в секундах начало изучения слова
+    uint32_t timeLastAnswer = 0; // Время в секундах последнего ответа
+    uint32_t lastSequenceNumberAnswer = 0; // Порядковый номер последнего ответа
     uint32_t numberCorrectAnswers = 0; // количество правильных ответов
     uint32_t numberWrongtAnswers = 0; // количество неправильных ответов
     uint32_t maskCorrectAndWrongtAnswers = 0; // битовая маска последних 32-х ответов (старший бит - последний ответ)
@@ -134,7 +134,8 @@ public:
     void setNewFreqIdx(uint32_t fIdx) { w_freqIdx = fIdx; }
     void setNewBlock(const BlockNumType aBlock) { w_block = aBlock; }
 
-    void addAnswer(const bool ans);
+    void addAnswer(const bool ans, uint32_t sequenceNumber);
+    void setSequenceNumber(uint32_t sequenceNumber) { l_statistic.lastSequenceNumberAnswer = sequenceNumber; }
     void clearStatistic() { l_statistic.clear(); }
     const LearningWort& getStatistic() const { return l_statistic; }
     void copyStatistic(const WortDe& wd2) { l_statistic = wd2.l_statistic; }

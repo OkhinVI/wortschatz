@@ -685,9 +685,9 @@ void WortDe::debugPrint(std::ostream &os)
 
 // Serialize LearningWort
 #define LearningWortSerialize \
-                   startLearning,\
-                   lastCorrectAnswer,\
-                   lastWrongtAnswer,\
+                   timeStartLearning,\
+                   timeLastAnswer,\
+                   lastSequenceNumberAnswer,\
                    numberCorrectAnswers,\
                    numberWrongtAnswers,\
                    maskCorrectAndWrongtAnswers
@@ -701,20 +701,21 @@ void LearningWort::deserialize(const std::string &_str)
     multiScanFromString(_str, LearningWortSerialize);
 }
 
-void WortDe::addAnswer(const bool ans)
+void WortDe::addAnswer(const bool ans, uint32_t sequenceNumber)
 {
     const auto currTie = time(nullptr);
+    l_statistic.timeLastAnswer = currTie;
+    l_statistic.lastSequenceNumberAnswer = sequenceNumber;
     if (ans)
     {
         ++l_statistic.numberCorrectAnswers;
-        l_statistic.lastCorrectAnswer = currTie;
-    } else {
+    } else if (l_statistic.numberWrongtAnswers < l_statistic.numberCorrectAnswers + 2)
+    {
         ++l_statistic.numberWrongtAnswers;
-        l_statistic.lastWrongtAnswer = currTie;
     }
 
-    if (l_statistic.startLearning == 0)
-        l_statistic.startLearning = currTie;
+    if (l_statistic.timeStartLearning == 0)
+        l_statistic.timeStartLearning = currTie;
 
      unsigned int mask = l_statistic.maskCorrectAndWrongtAnswers >> 1;
      if (ans)
