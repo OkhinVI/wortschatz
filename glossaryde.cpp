@@ -276,18 +276,24 @@ size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
 
     if (useStatistic)
     {
+        const uint32_t delta = std::min(selSet.minDeltaSequenceNumber, uint32_t(selectionIdxs.size() / 2));
+        const uint32_t maxUseSequenceNumber = maxSequenceNumber > delta ? maxSequenceNumber - delta : 0;
+
         // select words with minimum correct answers
         uint32_t minCorrectAnswers = std::numeric_limits<uint32_t>::max();
         uint32_t countMinCorrectAnswers = 0;
         for (size_t i = 0; i < selectionIdxs.size(); ++i)
         {
             const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
-            if (minCorrectAnswers > lw.numberCorrectAnswers)
+            if (lw.lastSequenceNumberAnswer > maxUseSequenceNumber)
+                continue;
+
+            if (minCorrectAnswers > lw.level())
             {
-                minCorrectAnswers = lw.numberCorrectAnswers;
+                minCorrectAnswers = lw.level();
                 selectionIdxs[0] = selectionIdxs[i];
                 countMinCorrectAnswers = 1;
-            } else if (minCorrectAnswers == lw.numberCorrectAnswers)
+            } else if (minCorrectAnswers == lw.level())
             {
                 selectionIdxs[countMinCorrectAnswers++] = selectionIdxs[i];
             }
@@ -327,11 +333,11 @@ double GlossaryDe::calcProgress(const SelectSettings &selSet, size_t &count, siz
         const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
         allCorrectAnswers += lw.numberCorrectAnswers;
         allNotCorrectAnswers += lw.numberWrongtAnswers;
-        if (minCorrectAnswers > lw.numberCorrectAnswers)
+        if (minCorrectAnswers > lw.level())
         {
-            minCorrectAnswers = lw.numberCorrectAnswers;
+            minCorrectAnswers = lw.level();
             countMinCorrectAnswers = 1;
-        } else if (minCorrectAnswers == lw.numberCorrectAnswers)
+        } else if (minCorrectAnswers == lw.level())
         {
             ++countMinCorrectAnswers;
         }

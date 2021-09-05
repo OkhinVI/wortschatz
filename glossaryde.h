@@ -96,6 +96,7 @@ public:
         uint32_t endFreqIdx = 100;
 
         size_t posIgnoringStatistics = 0;
+        uint32_t minDeltaSequenceNumber = 30;
 
     private:
         const GlossaryDe &glDe;

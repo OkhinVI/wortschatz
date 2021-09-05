@@ -12,6 +12,8 @@ public:
     std::string serialize() const;
     void deserialize(const std::string &_str);
     void clear() { *this = LearningWort(); }
+    void addAnswer(const bool ans, uint32_t sequenceNumber);
+    uint32_t level() const;
 
 public:
     uint32_t timeStartLearning = 0; // Время в секундах начало изучения слова

@@ -681,6 +681,12 @@ void WortDe::debugPrint(std::ostream &os)
     os << std::endl;
 }
 
+void WortDe::addAnswer(const bool ans, uint32_t sequenceNumber)
+{
+    l_statistic.addAnswer(ans, sequenceNumber);
+}
+
+
 // class LearningWort
 
 // Serialize LearningWort
@@ -701,24 +707,30 @@ void LearningWort::deserialize(const std::string &_str)
     multiScanFromString(_str, LearningWortSerialize);
 }
 
-void WortDe::addAnswer(const bool ans, uint32_t sequenceNumber)
+void LearningWort::addAnswer(const bool ans, uint32_t sequenceNumber)
 {
     const auto currTie = time(nullptr);
-    l_statistic.timeLastAnswer = currTie;
-    l_statistic.lastSequenceNumberAnswer = sequenceNumber;
+    timeLastAnswer = currTie;
+    lastSequenceNumberAnswer = sequenceNumber;
     if (ans)
     {
-        ++l_statistic.numberCorrectAnswers;
-    } else if (l_statistic.numberWrongtAnswers < l_statistic.numberCorrectAnswers + 2)
+        ++numberCorrectAnswers;
+    } else if (numberWrongtAnswers < numberCorrectAnswers + 2)
     {
-        ++l_statistic.numberWrongtAnswers;
+        ++numberWrongtAnswers;
     }
 
-    if (l_statistic.timeStartLearning == 0)
-        l_statistic.timeStartLearning = currTie;
+    if (timeStartLearning == 0)
+        timeStartLearning = currTie;
 
-     unsigned int mask = l_statistic.maskCorrectAndWrongtAnswers >> 1;
+     unsigned int mask = maskCorrectAndWrongtAnswers >> 1;
      if (ans)
          mask |= 0x80000000;
-     l_statistic.maskCorrectAndWrongtAnswers = mask;
+     maskCorrectAndWrongtAnswers = mask;
+}
+
+uint32_t LearningWort::level() const
+{
+    return numberCorrectAnswers > numberWrongtAnswers
+            ? numberCorrectAnswers - numberWrongtAnswers : 0;
 }
