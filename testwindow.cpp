@@ -81,7 +81,7 @@ void TestWindow::setNewWort()
     }
 }
 
-void TestWindow::testSelectTr(size_t idx, bool ignoreResult)
+void TestWindow::testSelectTr(size_t idx, bool onlyFalsh , bool ignoreResult)
 {
     ui->pushButton->setEnabled(true);
     if (idx >= vecButton.size())
@@ -98,7 +98,7 @@ void TestWindow::testSelectTr(size_t idx, bool ignoreResult)
     if (int(idx) == currIdxCorrectTr)
     {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; background-color: yellow; color: blue;");
-        if (!ignoreResult)
+        if (!ignoreResult && !onlyFalsh)
         {
             wd.addAnswer(true);
             ++RichteAntwort;
@@ -115,7 +115,7 @@ void TestWindow::testSelectTr(size_t idx, bool ignoreResult)
     mainWindow->setNewIndex(currTestGlossaryIdx);
     currIdxCorrectTr = -1;
 
-    if (!ignoreResult)
+    if (RichteAntwort + FalscheAntwort > 0)
     {
         ui->label->setText("richtige: " + QString::number(RichteAntwort)
             + " / falsche: " + QString::number(FalscheAntwort) + " = "
@@ -202,13 +202,13 @@ bool TestWindow::eventFilter(QObject *target, QEvent *event)
     {
         QMouseEvent *mouseEvent = (QMouseEvent *)event;
         const auto button = mouseEvent->button();
-        if (button == Qt::MiddleButton)
+        if (button == Qt::MiddleButton || button == Qt::RightButton)
         {
             for (size_t i = 0; i < vecButton.size(); ++i)
             {
                 if (target == vecButton[i])
                 {
-                    testSelectTr(i, true);
+                    testSelectTr(i, button == Qt::RightButton, button == Qt::MiddleButton);
                     return true;
                 }
             }
