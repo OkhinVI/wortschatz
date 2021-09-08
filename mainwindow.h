@@ -131,6 +131,8 @@ private slots:
 
     void on_checkBoxUseForm_stateChanged(int arg1);
 
+    void on_buttonAddWordToList_clicked();
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 
@@ -146,6 +148,7 @@ private:
     void showFoundStatWord();
     void statWordClear();
     void nextFoundStatWord(int delta);
+    void addWordToList();
 
 private:
     std::string accName;

@@ -71,6 +71,7 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     ui->label_OptionStat->installEventFilter(this);
     ui->label_OptionStat_2->installEventFilter(this);
     ui->listView->installEventFilter(this);
+    ui->textLog->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -1073,11 +1074,15 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
         const auto maskCtrlAltShift = Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier;
         if (target == ui->lineEdit_7)
         {
-            if (key == Qt::Key_Return || key == Qt::Key_Enter)
+            if ((key == Qt::Key_Return || key == Qt::Key_Enter) && (mod & maskCtrlAltShift) == Qt::NoModifier)
             {
                 FoundItemsIdx &currStatFound = ui->checkBoxUseForm->checkState() == Qt::Checked ? statFoundForm : statFound;
                 if (!currStatFound.empty())
                     ui->lineEdit_7->setText(QString::fromStdString(currStatFound.getStr()));
+            }
+            else if (key == Qt::Key_Space && (mod & maskCtrlAltShift) == Qt::ControlModifier)
+            {
+                addWordToList();
             }
             else if (key == Qt::Key_Up && (mod & maskCtrlAltShift) == Qt::NoModifier)
                 nextFoundStatWord(-1);
@@ -1107,7 +1112,8 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
         QWheelEvent *wheelEvent = static_cast<QWheelEvent *>(event);
         auto delta = wheelEvent->angleDelta() / 8;
 
-        if (target == ui->lineEdit_8 || target == ui->label_OptionStat)
+        if (target == ui->lineEdit_8 || target == ui->label_OptionStat
+                || (target == ui->lineEdit_7 && ui->checkBox_AutoSearch->checkState() == Qt::Checked))
         {
             if (delta.y() > 0)
                 nextFoundStatWord(-1);
@@ -1134,13 +1140,54 @@ bool MainWindow::eventFilter(QObject *target, QEvent *event)
             return true;
         }
     }
+    else if (event->type() == QEvent::MouseButtonPress)
+    {
+        QMouseEvent *mouseEvent = (QMouseEvent *)event;
+        const auto button = mouseEvent->button();
+        if (button == Qt::MiddleButton)
+        {
+            if (target == ui->textLog || target == ui->lineEdit_7)
+            {
+                addWordToList();
+                return true;
+            }
+        }
+        else
+            return QMainWindow::eventFilter(target, event);
+    }
 
     return QMainWindow::eventFilter(target, event);
 }
 
+void MainWindow::addWordToList()
+{
+    getWortDeToCurrWd();
+    if (!currWd.wort().empty() && !currWd.translation().empty())
+    {
+        // const std::string bold = "<span style=\" font-weight:600;\">";
+        // const std::string italic = "<span style=\" font-style:italic;\">";
+        const std::string blue = "<span style=\" color:#4000A0;\">";
+        const std::string endSpan = "</span>";
+        const std::string prefix = currWd.prefix();
+        QString value;
+        if (prefix.empty())
+        {
+            value = QString::fromStdString(blue + currWd.wort() + endSpan + " - " + currWd.translation());
+        } else {
+            value = QString::fromStdString(prefix + " " + blue + currWd.wort() + endSpan + " - " + currWd.translation());
+        }
+        ui->textLog->append(value);
+    }
+}
 
 void MainWindow::on_checkBoxUseForm_stateChanged(int)
 {
     showFoundStatWord();
+}
+
+
+void MainWindow::on_buttonAddWordToList_clicked()
+{
+    addWordToList();
 }
 
