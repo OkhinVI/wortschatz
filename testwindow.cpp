@@ -94,6 +94,7 @@ void TestWindow::testSelectTr(size_t idx, bool onlyFalsh , bool ignoreResult)
         return;
     }
 
+    bool needRecorder = false;
     WortDe &wd = dicDe.at(currTestGlossaryIdx);
     if (int(idx) == currIdxCorrectTr)
     {
@@ -112,11 +113,15 @@ void TestWindow::testSelectTr(size_t idx, bool onlyFalsh , bool ignoreResult)
         {
             wd.addAnswer(false, dicDe.calcNextSequenceNumber());
             ++FalscheAntwort;
+            needRecorder = true;
         } else {
             wd.setSequenceNumber(dicDe.calcNextSequenceNumber());
         }
     }
     mainWindow->setNewIndex(currTestGlossaryIdx);
+    if (needRecorder)
+        mainWindow->addWordToList();
+
     currIdxCorrectTr = -1;
 
     if (RichteAntwort + FalscheAntwort > 0)

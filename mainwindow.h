@@ -23,6 +23,7 @@ public:
     ~MainWindow();
 
     void setNewIndex(int idx);
+    void addWordToList();
 
 private slots:
     void on_actionRaw_Text_triggered();
@@ -148,7 +149,6 @@ private:
     void showFoundStatWord();
     void statWordClear();
     void nextFoundStatWord(int delta);
-    void addWordToList();
 
 private:
     std::string accName;
