@@ -17,9 +17,11 @@
 #include "SerializeString.h"
 #include "utilQtTypes.h"
 
-static const char *SettingsFirma = "OchinWassili";
-static const char *SettingsApp = "LernenDe";
-static const char *SettingsDictionaryPathSfx = "/dictionaryPath";
+static const char * const SettingsFirma = "OchinWassili";
+static const char * const SettingsApp = "LernenDe";
+static const char * const SettingsDictionaryPathSfx = "/dictionaryPath";
+
+static const char * const FileEditLog = "trLog.html";
 
 MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     : QMainWindow(parent)
@@ -33,7 +35,7 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     if (settings.contains(QString::fromStdString(settingsDictionaryPath)))
         pathDic = settings.value(QString::fromStdString(settingsDictionaryPath)).toString().toUtf8().toStdString();
     else
-        pathDic = "../Line1_B2";
+        pathDic = "../FrencDic";
     dicDe.setPath(pathDic);
     dicDe.load();
     this->setWindowTitle(QString::fromStdString(accName + " - " + pathDic + " - " + SettingsApp));
@@ -72,11 +74,26 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     ui->label_OptionStat_2->installEventFilter(this);
     ui->listView->installEventFilter(this);
     ui->textLog->installEventFilter(this);
+
+    QFile file(QString::fromStdString(pathDic + "/" + FileEditLog));
+    if (file.exists() && file.open(QIODevice::ReadOnly))
+    {
+        ui->textLog->setText(file.readAll());
+        file.close();
+    }
 }
 
 MainWindow::~MainWindow()
 {
     dicDe.save();
+
+    QFile file(QString::fromStdString(pathDic + "/" + FileEditLog));
+    if (file.open(QIODevice::WriteOnly))
+    {
+        file.write(ui->textLog->toHtml().toUtf8());
+        file.close();
+    }
+
     delete ui;
 }
 
