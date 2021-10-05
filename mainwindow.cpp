@@ -1221,7 +1221,19 @@ void MainWindow::on_checkBox_FullWord_stateChanged(int /* arg1 */)
 void MainWindow::on_textLog_selectionChanged()
 {
     const QString qstr = ui->textLog->textCursor().selectedText();
-    if (!qstr.isEmpty() && ui->checkBox_AutoTranslation->checkState() == Qt::Checked)
-        ui->lineEdit_7->setText(qstr);
+    if (!qstr.isEmpty() && qstr != ui->lineEdit_7->text())
+    {
+        if (ui->checkBox_AutoTranslation->checkState() == Qt::Checked)
+        {
+            static std::string oldWord;
+            ui->lineEdit_7->setText(qstr);
+            if (ui->checkBox_AutoWebTranslation->checkState() == Qt::Checked && !currWd.wort().empty() && currWd.wort() != oldWord)
+            {
+                oldWord = currWd.wort();
+                webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
+            }
+        } else if (ui->checkBox_AutoWebTranslation->checkState() == Qt::Checked)
+            webTr.wortTranslate(qstr.toStdString(), WebTranslation::WebSite::lingvo);
+    }
 }
 
