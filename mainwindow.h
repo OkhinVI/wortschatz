@@ -136,6 +136,8 @@ private slots:
 
     void on_checkBox_FullWord_stateChanged(int arg1);
 
+    void on_textLog_selectionChanged();
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 

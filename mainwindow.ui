@@ -827,6 +827,19 @@
      <string>full</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="checkBox_AutoTranslation">
+    <property name="geometry">
+     <rect>
+      <x>900</x>
+      <y>340</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>auto-translation</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

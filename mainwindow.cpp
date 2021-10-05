@@ -1217,3 +1217,11 @@ void MainWindow::on_checkBox_FullWord_stateChanged(int /* arg1 */)
     findStatWord(strFind);
 }
 
+
+void MainWindow::on_textLog_selectionChanged()
+{
+    const QString qstr = ui->textLog->textCursor().selectedText();
+    if (!qstr.isEmpty() && ui->checkBox_AutoTranslation->checkState() == Qt::Checked)
+        ui->lineEdit_7->setText(qstr);
+}
+
