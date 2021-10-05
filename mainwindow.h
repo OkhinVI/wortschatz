@@ -134,6 +134,8 @@ private slots:
 
     void on_buttonAddWordToList_clicked();
 
+    void on_checkBox_FullWord_stateChanged(int arg1);
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 

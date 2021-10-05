@@ -248,14 +248,14 @@ size_t GlossaryDe::findByWordIdx(const uint32_t wordIdx, size_t pos)
     return dictionary.size();
 }
 
-String255Iterator GlossaryDe::findStatDic(const std::string &str, size_t pos, uint8_t &option)
+String255Iterator GlossaryDe::findStatDic(const std::string &str, size_t pos, bool fullWord, uint8_t &option)
 {
-    return statWords.findDicStrIdx(str, pos, true, option);
+    return statWords.findDicStrIdx(str, pos, !fullWord, option);
 }
 
-String255Iterator GlossaryDe::findStatForm(const std::string &str, size_t pos, uint8_t &option, uint32_t &idxDic)
+String255Iterator GlossaryDe::findStatForm(const std::string &str, size_t pos, uint8_t &option, bool fullWord, uint32_t &idxDic)
 {
-    return statWords.findFormStrIdx(str, pos, true, option, idxDic);
+    return statWords.findFormStrIdx(str, pos, !fullWord, option, idxDic);
 }
 
 size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)

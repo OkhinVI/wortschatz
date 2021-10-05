@@ -133,8 +133,8 @@ public:
 
     size_t find(const std::string &str, size_t pos = 0);
     size_t findByWordIdx(const uint32_t wordIdx, size_t pos = 0);
-    String255Iterator findStatDic(const std::string &str, size_t pos, uint8_t &option);
-    String255Iterator findStatForm(const std::string &str, size_t pos, uint8_t &option, uint32_t &idxDic);
+    String255Iterator findStatDic(const std::string &str, size_t pos, bool fullWord, uint8_t &option);
+    String255Iterator findStatForm(const std::string &str, size_t pos, uint8_t &option, bool fullWord, uint32_t &idxDic);
     String255 atStatDic(size_t idx, uint8_t &option) { return statWords.atDicStrIdx(idx, option); }
     String255 atStatForm(size_t idx, uint8_t &option, uint32_t &idxDic) { return statWords.atFormStrIdx(idx, option, idxDic); }
 

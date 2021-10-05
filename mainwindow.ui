@@ -18,9 +18,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>99</y>
+      <y>119</y>
       <width>321</width>
-      <height>471</height>
+      <height>451</height>
      </rect>
     </property>
    </widget>
@@ -812,6 +812,19 @@
     </property>
     <property name="text">
      <string>add to list</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_FullWord">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>94</y>
+      <width>51</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>full</string>
     </property>
    </widget>
   </widget>

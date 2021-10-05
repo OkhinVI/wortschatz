@@ -581,12 +581,14 @@ void MainWindow::findStatWord(const std::string &str)
         return;
     }
 
+    const bool useFullWord = ui->checkBox_FullWord->checkState() == Qt::Checked;
+
     statFound.clear();
     uint32_t lastPos = 0;
     for (int i = 0; i < 100; ++i)
     {
         uint8_t option = 0;
-        String255Iterator it = dicDe.findStatDic(str, lastPos, option);
+        String255Iterator it = dicDe.findStatDic(str, lastPos, useFullWord, option);
         if (!it->valid())
             break;
         statFound.add(it.getIdx(), option, it->c_str());
@@ -599,7 +601,7 @@ void MainWindow::findStatWord(const std::string &str)
     {
         uint8_t optionForm = 0;
         uint32_t idxDic = 0;
-        String255Iterator it = dicDe.findStatForm(str, lastPos, optionForm, idxDic);
+        String255Iterator it = dicDe.findStatForm(str, lastPos, optionForm, useFullWord, idxDic);
         if (!it->valid())
             break;
         uint8_t optionDic = 0;
@@ -1206,5 +1208,12 @@ void MainWindow::on_checkBoxUseForm_stateChanged(int)
 void MainWindow::on_buttonAddWordToList_clicked()
 {
     addWordToList();
+}
+
+
+void MainWindow::on_checkBox_FullWord_stateChanged(int /* arg1 */)
+{
+    const std::string strFind = utilQt::lineEditToStdStr(ui->lineEdit_7);
+    findStatWord(strFind);
 }
 
