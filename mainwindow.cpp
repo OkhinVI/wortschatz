@@ -83,7 +83,7 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
         file.close();
     }
 
-    soundWords = new SoundOfWords(this);
+    soundWords = new SoundOfWords(pathDic, this);
 }
 
 MainWindow::~MainWindow()

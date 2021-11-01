@@ -292,6 +292,9 @@
     <property name="text">
      <string>AutoPlay</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

@@ -173,6 +173,20 @@ AreaUtf8::SymbolType AreaUtf8::tolowerU8(SymbolType sym)
     return sym;
 }
 
+bool AreaUtf8::islowerU8(SymbolType sym)
+{
+    if (sym <= 0x7F)
+        return ::islower(static_cast<char>(sym));
+    const int intSym = SymboToInt(sym);
+    return (intSym >= UTF8_STRING_TO_INT_SYMBOL("а")
+            && intSym <= UTF8_STRING_TO_INT_SYMBOL("я"))
+            || sym == UTF8_STRING_TO_SYMBOL("ü")
+            || sym == UTF8_STRING_TO_SYMBOL("ä")
+            || sym == UTF8_STRING_TO_SYMBOL("ö")
+            || sym == UTF8_STRING_TO_SYMBOL("ß")
+            || sym == UTF8_STRING_TO_SYMBOL("ё");
+}
+
 bool AreaUtf8::findCase(const std::string str)
 {
     if (str.empty())
