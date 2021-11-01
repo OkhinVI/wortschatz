@@ -9,6 +9,7 @@
 
 class QListViewGlossaryDeModel;
 class TestWindow;
+class SoundOfWords;
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -140,6 +141,8 @@ private slots:
 
     void on_pushButton_33_clicked();
 
+    void on_pushButton_34_clicked();
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 
@@ -170,6 +173,7 @@ private:
     FoundFormDicIdx statFoundForm;
 
     WebTranslation webTr;
+    SoundOfWords *soundWords;
 
 private:
     Ui::MainWindow *ui;

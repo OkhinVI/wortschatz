@@ -16,6 +16,7 @@
 #include <sstream>
 #include "SerializeString.h"
 #include "utilQtTypes.h"
+#include "soundofwords.h"
 
 static const char * const SettingsFirma = "OchinWassili";
 static const char * const SettingsApp = "LernenDe";
@@ -81,6 +82,8 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
         ui->textLog->setText(file.readAll());
         file.close();
     }
+
+    soundWords = new SoundOfWords(this);
 }
 
 MainWindow::~MainWindow()
@@ -1242,5 +1245,12 @@ void MainWindow::on_pushButton_33_clicked()
 {
     getWortDeToCurrWd();
     webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::woerter);
+}
+
+void MainWindow::on_pushButton_34_clicked()
+{
+    getWortDeToCurrWd();
+    if (!currWd.wort().empty())
+        soundWords->play(currWd.wort());
 }
 

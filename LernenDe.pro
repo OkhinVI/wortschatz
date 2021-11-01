@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui network multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,6 +16,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     qlistviewglossarydemodel.cpp \
+    soundofwords.cpp \
     statwords.cpp \
     string_utf8.cpp \
     testsettings.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     linesramstream.h \
     mainwindow.h \
     qlistviewglossarydemodel.h \
+    soundofwords.h \
     statwords.h \
     string_utf8.h \
     testsettings.h \
