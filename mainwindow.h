@@ -25,6 +25,7 @@ public:
 
     void setNewIndex(int idx);
     void addWordToList();
+    void PlayWord(const std::string &word);
 
 private slots:
     void on_actionRaw_Text_triggered();

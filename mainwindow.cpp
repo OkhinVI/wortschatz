@@ -375,6 +375,9 @@ void MainWindow::selectItem(const int idx)
     origWd = wd;
     currWd = wd;
     setWortDe(currWd);
+
+    if (ui->checkBox_AutoPlay->checkState() == Qt::Checked)
+        PlayWord(currWd.wort());
 }
 
 
@@ -1251,6 +1254,15 @@ void MainWindow::on_pushButton_34_clicked()
 {
     getWortDeToCurrWd();
     if (!currWd.wort().empty())
-        soundWords->play(currWd.wort());
+        PlayWord(currWd.wort());
 }
 
+void MainWindow::PlayWord(const std::string &word)
+{
+    AreaUtf8 au8(word);
+    au8.trim();
+    AreaUtf8 word1 = au8.getToken();
+    if (word1.empty())
+        return;
+    soundWords->play(word1.toString());
+}

@@ -879,6 +879,19 @@
      <string>Play</string>
     </property>
    </widget>
+   <widget class="QCheckBox" name="checkBox_AutoPlay">
+    <property name="geometry">
+     <rect>
+      <x>1072</x>
+      <y>60</y>
+      <width>51</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>auto</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

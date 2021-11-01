@@ -31,6 +31,8 @@ TestWindow::TestWindow(GlossaryDe &aDicDe, MainWindow *mw, QWidget *parent) :
     for (size_t i = 0; i < vecButton.size(); ++i)
         vecButton[i]->installEventFilter(this);
 
+    ui->lineEdit->installEventFilter(this);
+
     ui->lineEdit->setStyleSheet("background-color: yellow; color: blue;");
 }
 
@@ -60,10 +62,10 @@ void TestWindow::setNewWort()
     if (currIdxCorrectTr < 0)
         return;
 
+    currWord = dicDe.at(currTestGlossaryIdx);
     {
-        WortDe &wd = dicDe.at(currTestGlossaryIdx);
-        const std::string prfx = wd.prefix();
-        std::string wortStr = prfx.empty() ? wd.wort() : prfx + " " + wd.wort();
+        const std::string prfx = currWord.prefix();
+        std::string wortStr = prfx.empty() ? currWord.wort() : prfx + " " + currWord.wort();
         const auto posWortNotEqul = wortStr.find("(≠");
         if (posWortNotEqul != std::string::npos)
             wortStr = wortStr.substr(0, posWortNotEqul);
@@ -79,6 +81,9 @@ void TestWindow::setNewWort()
             wortTr = wortTr.substr(0, posWortNotEqul);
         vecButton[i]->setText(QString::fromStdString(wortTr));
     }
+
+    if (ui->checkBoxSound->checkState() == Qt::Checked)
+        mainWindow->PlayWord(currWord.wort());
 }
 
 void TestWindow::testSelectTr(size_t idx, bool onlyFalsh , bool ignoreResult)
@@ -221,6 +226,12 @@ bool TestWindow::eventFilter(QObject *target, QEvent *event)
                     return true;
                 }
             }
+            if (target == ui->lineEdit && button == Qt::MiddleButton)
+            {
+                mainWindow->PlayWord(currWord.wort());
+                return true;
+            }
+
         }
         else
             return QMainWindow::eventFilter(target, event);

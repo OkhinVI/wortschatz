@@ -60,6 +60,7 @@ private:
     std::vector<QPushButton *> vecButton;
     std::vector<size_t> vecIdxTr;
     GlossaryDe::SelectSettings glSelSet;
+    WortDe currWord;
 
 private:
     Ui::TestWindow *ui;
