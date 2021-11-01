@@ -74,6 +74,9 @@ bool WebTranslation::setLanguage(const std::string &lg)
          ".htm",
          "pons",
          "https://ru.pons.com/%D0%BF%D0%B5%D1%80%D0%B5%D0%B2%D0%BE%D0%B4/%D0%BD%D0%B5%D0%BC%D0%B5%D1%86%D0%BA%D0%B8%D0%B9-%D1%80%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9/",
+         "",
+         "woerter",
+         "https://www.woerter.ru/?w=",
          ""
          });
     }
@@ -94,6 +97,9 @@ bool WebTranslation::setLanguage(const std::string &lg)
          "",
          "pons",
          "https://en.pons.com/translate/german-english/",
+         "",
+         "woerter",
+         "https://www.woerter.net/?w=",
          ""
          });
     } else
@@ -123,6 +129,9 @@ void WebTranslation::setDeWebSites()
         "",
         "thefreeDic",
         "https://de.thefreedictionary.com/",
+        "",
+        "woerter",
+        "https://www.verben.de/?w=",
         ""
         };
 
@@ -205,6 +214,11 @@ const std::string& WebTranslation::nameAsString(WebSite ws)
     case WebSite::pons:
     {
         static std::string name("pons");
+        return name;
+    }
+    case WebSite::woerter:
+    {
+        static std::string name("woerter");
         return name;
     }
     case WebSite::_last_one:

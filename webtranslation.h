@@ -21,6 +21,7 @@ public:
         google,
         VerbF,
         pons,
+        woerter,
         _last_one
     };
 

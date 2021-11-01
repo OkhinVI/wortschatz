@@ -1237,3 +1237,10 @@ void MainWindow::on_textLog_selectionChanged()
     }
 }
 
+
+void MainWindow::on_pushButton_33_clicked()
+{
+    getWortDeToCurrWd();
+    webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::woerter);
+}
+

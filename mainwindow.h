@@ -138,6 +138,8 @@ private slots:
 
     void on_textLog_selectionChanged();
 
+    void on_pushButton_33_clicked();
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 
