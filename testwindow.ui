@@ -166,7 +166,7 @@
      <rect>
       <x>700</x>
       <y>550</y>
-      <width>121</width>
+      <width>161</width>
       <height>41</height>
      </rect>
     </property>
@@ -176,7 +176,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Close</string>
+     <string>don’t know</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_9">

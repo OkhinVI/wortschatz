@@ -86,7 +86,7 @@ void TestWindow::setNewWort()
         mainWindow->PlayWord(currWord.wort());
 }
 
-void TestWindow::testSelectTr(size_t idx, bool onlyFalsh , bool ignoreResult)
+void TestWindow::testSelectTr(size_t idx, bool setFalsh , bool ignoreResult)
 {
     ui->pushButton->setEnabled(true);
     if (idx >= vecButton.size())
@@ -104,10 +104,13 @@ void TestWindow::testSelectTr(size_t idx, bool onlyFalsh , bool ignoreResult)
     if (int(idx) == currIdxCorrectTr)
     {
         vecButton[currIdxCorrectTr]->setStyleSheet("text-align: left; background-color: yellow; color: blue;");
-        if (!ignoreResult && !onlyFalsh)
+        if (!ignoreResult)
         {
-            wd.addAnswer(true, dicDe.calcNextSequenceNumber());
-            ++RichteAntwort;
+            wd.addAnswer(!setFalsh, dicDe.calcNextSequenceNumber());
+            if (!setFalsh)
+                ++RichteAntwort;
+            else
+                ++FalscheAntwort;
         } else {
             wd.setSequenceNumber(dicDe.calcNextSequenceNumber());
         }
@@ -188,7 +191,7 @@ void TestWindow::on_pushButton_7_clicked()
 
 void TestWindow::on_pushButton_8_clicked()
 {
-    this->close();
+    testSelectTr(currIdxCorrectTr, true);
 }
 
 void TestWindow::on_pushButton_9_clicked()

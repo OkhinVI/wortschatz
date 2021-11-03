@@ -24,7 +24,7 @@ public:
     void setNewWort();
 
 private:
-    void testSelectTr(size_t idx, bool onlyFalsh = false, bool ignoreResult = false);
+    void testSelectTr(size_t idx, bool setFalsh = false, bool ignoreResult = false);
     void showLevel();
 
 private slots:
