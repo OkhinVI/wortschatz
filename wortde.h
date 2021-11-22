@@ -20,8 +20,10 @@ public:
     uint32_t timeLastAnswer = 0; // Время в секундах последнего ответа
     uint32_t lastSequenceNumberAnswer = 0; // Порядковый номер последнего ответа
     uint32_t numberCorrectAnswers = 0; // количество правильных ответов
-    uint32_t numberWrongtAnswers = 0; // количество неправильных ответов
+    uint32_t levelAnswers; // условный уровень изучения слова
     uint32_t maskCorrectAndWrongtAnswers = 0; // битовая маска последних 32-х ответов (старший бит - последний ответ)
+
+    static const uint32_t TrueAddLevel = 5;
 };
 
 class WortDe

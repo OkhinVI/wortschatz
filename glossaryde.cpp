@@ -258,6 +258,26 @@ String255Iterator GlossaryDe::findStatForm(const std::string &str, size_t pos, u
     return statWords.findFormStrIdx(str, pos, !fullWord, option, idxDic);
 }
 
+bool GlossaryDe::canBeRepeated(const LearningWort &lw, const SelectSettings &selSet, const std::vector<size_t> &selectionIdxs)
+{
+    const uint32_t delta = std::min(selSet.minDeltaSequenceNumber, uint32_t(selectionIdxs.size() / 2));
+    const uint32_t maxUseSequenceNumber = maxSequenceNumber > delta ? maxSequenceNumber - delta : 0;
+    return lw.lastSequenceNumberAnswer <= maxUseSequenceNumber;
+}
+
+// select words with minimum correct answers
+uint32_t GlossaryDe::calcMinLevelAnswers(const SelectSettings &selSet, const std::vector<size_t> &selectionIdxs)
+{
+    uint32_t minLevelAnswers = std::numeric_limits<uint32_t>::max();
+    for (size_t i = 0; i < selectionIdxs.size(); ++i)
+    {
+        const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
+        if (canBeRepeated(lw, selSet, selectionIdxs) && minLevelAnswers > lw.level())
+            minLevelAnswers = lw.level();
+    }
+    return minLevelAnswers;
+}
+
 size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
 {
     std::vector<size_t> selectionIdxs;
@@ -274,33 +294,26 @@ size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
     else if (selSet.posIgnoringStatistics > 0)
         useStatistic = (genRandom() % 100) >= selSet.posIgnoringStatistics;
 
-    if (useStatistic)
+    uint32_t minLevelAnswers = calcMinLevelAnswers(selSet, selectionIdxs);
+    uint32_t countMinLevelAnswers = 0;
+    for (size_t i = 0; i < selectionIdxs.size(); ++i)
     {
-        const uint32_t delta = std::min(selSet.minDeltaSequenceNumber, uint32_t(selectionIdxs.size() / 2));
-        const uint32_t maxUseSequenceNumber = maxSequenceNumber > delta ? maxSequenceNumber - delta : 0;
+        const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
+        if (!canBeRepeated(lw, selSet, selectionIdxs))
+            continue;
 
-        // select words with minimum correct answers
-        uint32_t minCorrectAnswers = std::numeric_limits<uint32_t>::max();
-        uint32_t countMinCorrectAnswers = 0;
-        for (size_t i = 0; i < selectionIdxs.size(); ++i)
-        {
-            const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
-            if (lw.lastSequenceNumberAnswer > maxUseSequenceNumber)
-                continue;
-
-            if (minCorrectAnswers > lw.level())
-            {
-                minCorrectAnswers = lw.level();
-                selectionIdxs[0] = selectionIdxs[i];
-                countMinCorrectAnswers = 1;
-            } else if (minCorrectAnswers == lw.level())
-            {
-                selectionIdxs[countMinCorrectAnswers++] = selectionIdxs[i];
-            }
-        }
-        if (countMinCorrectAnswers > 0)
-            selectionIdxs.resize(countMinCorrectAnswers);
+        const uint32_t deltaLevel = (genRandom() % LearningWort::TrueAddLevel) + 1;
+        if (!useStatistic || lw.level() < minLevelAnswers + deltaLevel)
+            selectionIdxs[countMinLevelAnswers++] = selectionIdxs[i];
     }
+
+    if (countMinLevelAnswers <= 0)
+    {
+        currIdxLearnWordDe = dictionary.size();
+        return dictionary.size();
+    }
+
+    selectionIdxs.resize(countMinLevelAnswers);
 
     uint64_t taktCPU = __rdtsc();
     uint64_t randNum = genRandom();
@@ -315,32 +328,26 @@ bool GlossaryDe::calcSelectionIdxs(const SelectSettings &selSet, std::vector<siz
     return !selectionIdxs.empty();
 }
 
-double GlossaryDe::calcProgress(const SelectSettings &selSet, size_t &count, size_t &countMinCorrectAnswers, uint32_t &minCorrectAnswers, size_t &allCorrectAnswers, size_t &allNotCorrectAnswers)
+double GlossaryDe::calcProgress(const SelectSettings &selSet, size_t &count, size_t &countMinLevelAnswers, uint32_t &minLevelAnswers, size_t &allCorrectAnswers, size_t &allLevelAnswers)
 {
     count = 0;
-    countMinCorrectAnswers = 0;
-    minCorrectAnswers = 0;
+    countMinLevelAnswers = 0;
+    minLevelAnswers = 0;
     allCorrectAnswers = 0;
-    allNotCorrectAnswers = 0;
+    allLevelAnswers = 0;
     std::vector<size_t> selectionIdxs;
     if (!calcSelectionIdxs(selSet, selectionIdxs))
         return 0.;
 
     count = selectionIdxs.size();
-    minCorrectAnswers = std::numeric_limits<uint32_t>::max();
+    minLevelAnswers = calcMinLevelAnswers(selSet, selectionIdxs);
     for (size_t i = 0; i < selectionIdxs.size(); ++i)
     {
         const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
         allCorrectAnswers += lw.numberCorrectAnswers;
-        allNotCorrectAnswers += lw.numberWrongtAnswers;
-        if (minCorrectAnswers > lw.level())
-        {
-            minCorrectAnswers = lw.level();
-            countMinCorrectAnswers = 1;
-        } else if (minCorrectAnswers == lw.level())
-        {
-            ++countMinCorrectAnswers;
-        }
+        allLevelAnswers += lw.levelAnswers;
+        if (lw.level() < minLevelAnswers + LearningWort::TrueAddLevel)
+            ++countMinLevelAnswers;
     }
     return double(allCorrectAnswers) / selectionIdxs.size();
 }

@@ -695,7 +695,7 @@ void WortDe::addAnswer(const bool ans, uint32_t sequenceNumber)
                    timeLastAnswer,\
                    lastSequenceNumberAnswer,\
                    numberCorrectAnswers,\
-                   numberWrongtAnswers,\
+                   levelAnswers,\
                    maskCorrectAndWrongtAnswers
 
 std::string LearningWort::serialize() const
@@ -715,9 +715,10 @@ void LearningWort::addAnswer(const bool ans, uint32_t sequenceNumber)
     if (ans)
     {
         ++numberCorrectAnswers;
-    } else if (numberWrongtAnswers < numberCorrectAnswers + 2)
+        levelAnswers += TrueAddLevel;
+    } else
     {
-        ++numberWrongtAnswers;
+        ++levelAnswers;
     }
 
     if (timeStartLearning == 0)
@@ -731,6 +732,5 @@ void LearningWort::addAnswer(const bool ans, uint32_t sequenceNumber)
 
 uint32_t LearningWort::level() const
 {
-    return numberCorrectAnswers > numberWrongtAnswers
-            ? numberCorrectAnswers - numberWrongtAnswers : 0;
+    return levelAnswers;
 }

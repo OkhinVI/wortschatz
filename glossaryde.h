@@ -115,7 +115,7 @@ public:
     void clearAllStatistic();
     size_t calcTestWortIdx(const SelectSettings &selSet); // returns the index of the next word to learn
     int selectVariantsTr(std::vector<size_t> &vecIdxTr);
-    double calcProgress(const SelectSettings &selSet, size_t &count, size_t &countMinCorrectAnswers, uint32_t &minCorrectAnswers, size_t &allCorrectAnswers, size_t &allNotCorrectAnswers);
+    double calcProgress(const SelectSettings &selSet, size_t &count, size_t &countMinLevelAnswers, uint32_t &minLevelAnswers, size_t &allCorrectAnswers, size_t &allNotCorrectAnswers);
     uint32_t calcNextSequenceNumber() { return ++maxSequenceNumber; }
     uint32_t lastSequenceNumber() const { return maxSequenceNumber; }
 
@@ -148,6 +148,8 @@ public:
 
 private:
     bool calcSelectionIdxs(const SelectSettings &selSet, std::vector<size_t> &selectionIdxs);
+    uint32_t calcMinLevelAnswers(const SelectSettings &selSet, const std::vector<size_t> &selectionIdxs);
+    bool canBeRepeated(const LearningWort &lw, const SelectSettings &selSet, const std::vector<size_t> &selectionIdxs);
 
 private:
     DictionaryDe dictionary;

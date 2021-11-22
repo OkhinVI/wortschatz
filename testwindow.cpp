@@ -144,15 +144,17 @@ void TestWindow::testSelectTr(size_t idx, bool setFalsh , bool ignoreResult)
 void TestWindow::showLevel()
 {
     size_t count = 0;
-    size_t countMinCorrectAnswers = 0;
-    uint32_t minCorrectAnswers = 0;
+    size_t countMinLevelAnswers = 0;
+    uint32_t minLevelAnswers = 0;
     size_t allCorrectAnswers;
-    size_t allNotCorrectAnswers = 0;
-    const double k = dicDe.calcProgress(glSelSet, count, countMinCorrectAnswers, minCorrectAnswers, allCorrectAnswers, allNotCorrectAnswers);
-    ui->labelLevel->setText("k: " + QString::number(k) + " (l" + QString::number(minCorrectAnswers) + ": "
-        + QString::number(countMinCorrectAnswers) + "/+" + QString::number(count - countMinCorrectAnswers) + ")");
-    if (allCorrectAnswers + allNotCorrectAnswers > 0)
-        ui->labelLevelSum->setText("All r: " + QString::number(allCorrectAnswers) + " / f: " + QString::number(allNotCorrectAnswers));
+    size_t allLevelAnswers = 0;
+    const double k = dicDe.calcProgress(glSelSet, count, countMinLevelAnswers, minLevelAnswers, allCorrectAnswers, allLevelAnswers);
+    ui->labelLevel->setText("k: " + QString::number(k) + " (l" + QString::number(minLevelAnswers) + ": "
+        + QString::number(countMinLevelAnswers) + "/+" + QString::number(count - countMinLevelAnswers) + ")");
+    if (allCorrectAnswers + allLevelAnswers > 0)
+        ui->labelLevelSum->setText("All r: " + QString::number(allCorrectAnswers)
+                                   + " / l: " + QString::number(allLevelAnswers / LearningWort::TrueAddLevel)
+                                   + "(" + QString::number(allLevelAnswers % LearningWort::TrueAddLevel) + ")");
     else
         ui->labelLevelSum->setText("0/0");
 }
