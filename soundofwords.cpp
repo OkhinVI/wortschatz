@@ -109,7 +109,7 @@ void SoundOfWords::slotFinished(QNetworkReply* pnr)
 
     if (pnr->error() != QNetworkReply::NoError) {
         // emit error();
-        debPrint("Error (" << int(typeRep) << "): " << pnr->url().toString().toStdString());
+        debPrint("Error (" << int(typeRep) << "): " << pnr->url().toString().toStdString() << ", err = " << pnr->error());
         pnr->deleteLater();
         return;
     }
@@ -138,21 +138,27 @@ void SoundOfWords::slotFinished(QNetworkReply* pnr)
 
 static std::string getHtmlTag(const std::string &str, const std::string &beginStr, const std::string &endStr, size_t numer = 0)
 {
-    auto pos1 = str.find(beginStr);
-    while (numer > 0 && pos1 != std::string::npos)
+    size_t pos1 = 0;
+    if (!beginStr.empty())
     {
-        pos1 = str.find(beginStr, pos1 + beginStr.size());
-        --numer;
+        pos1 = str.find(beginStr);
+        while (numer > 0 && pos1 != std::string::npos)
+        {
+            pos1 = str.find(beginStr, pos1 + beginStr.size());
+            --numer;
+        }
+        if (pos1 == std::string::npos)
+            return std::string();
+
+        pos1+= beginStr.size();
+        if (beginStr[beginStr.size() - 1] != '>')
+        {
+            pos1 = str.find(">", pos1);
+            if (pos1 == std::string::npos)
+                return std::string();
+            pos1 += 1;
+        }
     }
-    if (pos1 == std::string::npos)
-        return std::string();
-
-    pos1+= beginStr.size();
-    pos1 = str.find(">", pos1);
-    if (pos1 == std::string::npos)
-        return std::string();
-
-    pos1 += 1;
     auto pos2 = !endStr.empty() ? str.find(endStr, pos1) : str.size();
     if (pos2 == std::string::npos)
         return std::string();
@@ -234,7 +240,7 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
         return;
     }
 
-    paragraf = getHtmlTag(body, "<span class=\"rInf\"", "<p class=");
+    paragraf = getHtmlTag(body, "<span class=\"rInf\">", "<p class=");
     std::string plural;
     if (tw == WortDe::TypeWort::Noun)
     {
@@ -254,11 +260,12 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
     const std::string nbsp = "&nbsp;";
     if (translation.substr(0, nbsp.size()) == nbsp)
         translation = translation.substr(nbsp.size());
-    std::string opt0 = getHtmlTag(body, "<p class=\"rInf r1Zeile rU3px rO0px\"", "</p>", 0);
-    opt0 = getHtmlTag(opt0, "<i", "</i>");
-    std::string opt1 = getHtmlTag(body, "<p class=\"rInf r1Zeile rU3px rO0px\"", "</p>", 1);
-    if (opt1.size() < 2 || opt1[0] != '(' || opt1[opt1.size() - 1] != ')')
-        opt1.clear();
+    std::string opt0 = getHtmlTag(body, "<p class=\"rInf r1Zeile rU3px rO0px\">", "</p>", 0);
+    std::string opt1 = getHtmlTag(body, "<p class=\"rInf r1Zeile rU3px rO0px\">", "</p>", 1);
+    std::string opt0i = getHtmlTag(opt0, "<i", "</i>");
+    if (!opt0.empty() && opt0i.empty() && opt1.empty())
+        opt1 = opt0;
+    opt0 = opt0i;
     std::string opt2 = getHtmlTag(body, "<p class=\"rInf r1Zeile rU3px rO0px\" onclick=", "</p>");
 
     std::string result;
