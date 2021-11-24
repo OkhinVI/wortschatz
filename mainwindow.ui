@@ -770,7 +770,7 @@
      <string>+Tr</string>
     </property>
     <property name="checked">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBoxUseForm">
@@ -785,14 +785,17 @@
     <property name="text">
      <string>&lt;-Form</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QTextEdit" name="textLog">
     <property name="geometry">
      <rect>
       <x>420</x>
-      <y>380</y>
+      <y>370</y>
       <width>701</width>
-      <height>191</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="font">
@@ -830,27 +833,27 @@
    <widget class="QCheckBox" name="checkBox_AutoTranslation">
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>327</y>
-      <width>121</width>
+      <x>940</x>
+      <y>340</y>
+      <width>81</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>auto-translation</string>
+     <string>auto-find</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_AutoWebTranslation">
     <property name="geometry">
      <rect>
-      <x>900</x>
-      <y>350</y>
-      <width>121</width>
+      <x>340</x>
+      <y>410</y>
+      <width>71</width>
       <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>auto-web-tr.</string>
+     <string>AutoTr.</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_33">
@@ -891,6 +894,102 @@
     <property name="text">
      <string>auto</string>
     </property>
+   </widget>
+   <widget class="QTextEdit" name="textInfo">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>480</y>
+      <width>701</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+     </font>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_35">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>430</y>
+      <width>71</width>
+      <height>28</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>WebTr.</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>335</x>
+      <y>459</y>
+      <width>81</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>TransWin</string>
+    </property>
+    <widget class="QRadioButton" name="radioButtonAllFeld">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>AllFeld</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButtonTop">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Top</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButtonBottom">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Bottom</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="radioButtonNone">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>71</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>None</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

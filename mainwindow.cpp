@@ -84,6 +84,14 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     }
 
     soundWords = new SoundOfWords(pathDic, this);
+
+    connect(soundWords, SIGNAL(doneWoerterInfo(const std::string &, const std::string &)),
+            this,  SLOT(slotWoerterInfo(const std::string &, const std::string &))
+           );
+
+    geoTextLog = ui->textLog->geometry();
+    geoTextInfo = ui->textInfo->geometry();
+    setWebInfoWindow();
 }
 
 MainWindow::~MainWindow()
@@ -376,10 +384,21 @@ void MainWindow::selectItem(const int idx)
     currWd = wd;
     setWortDe(currWd);
 
-    if (ui->checkBox_AutoPlay->checkState() == Qt::Checked)
-        PlayWord(currWd.wort());
+    checkWebAutoInfo();
 }
 
+void MainWindow::checkWebAutoInfo(const bool ignogeWortType)
+{
+    if (ui->checkBox_AutoPlay->checkState() == Qt::Checked)
+        PlayWord(currWd.wort());
+
+    if (ui->checkBox_AutoWebTranslation->checkState() == Qt::Checked && !currWd.wort().empty())
+    {
+        ui->textInfo->document()->setHtml("");
+        if (currWd.type() == WortDe::TypeWort::Noun || currWd.type() == WortDe::TypeWort::Verb || ignogeWortType)
+            soundWords->infoWoerter(currWd.wort());
+    }
+}
 
 void MainWindow::on_listView_activated(const QModelIndex &index)
 {
@@ -907,6 +926,8 @@ void MainWindow::addNewWortFromSearch()
     currWd = origWd;
     currWd.parseRawLine(utilQt::lineEditToStdStr(ui->lineEdit_7), "", dicDe.userBlockNum());
     setWortDe(currWd);
+
+    checkWebAutoInfo();
 }
 
 void MainWindow::addNewWortFromStatSearch()
@@ -926,6 +947,8 @@ void MainWindow::addNewWortFromStatSearch()
     currWd.parseRawLine(currStatFound.getStr(), "", dicDe.userBlockNum(), tw);
     currWd.setNewFreqIdx(currStatFound.getWordIdx());
     setWortDe(currWd);
+
+    checkWebAutoInfo();
 }
 
 void MainWindow::on_pushButton_31_clicked()
@@ -1233,13 +1256,7 @@ void MainWindow::on_textLog_selectionChanged()
         {
             static std::string oldWord;
             ui->lineEdit_7->setText(qstr);
-            if (ui->checkBox_AutoWebTranslation->checkState() == Qt::Checked && !currWd.wort().empty() && currWd.wort() != oldWord)
-            {
-                oldWord = currWd.wort();
-                webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
-            }
-        } else if (ui->checkBox_AutoWebTranslation->checkState() == Qt::Checked)
-            webTr.wortTranslate(qstr.toStdString(), WebTranslation::WebSite::lingvo);
+        }
     }
 }
 
@@ -1266,3 +1283,69 @@ void MainWindow::PlayWord(const std::string &word)
         return;
     soundWords->play(word1.toString());
 }
+
+void MainWindow::slotWoerterInfo(const std::string &, const std::string &info)
+{
+    // word
+    ui->textInfo->document()->setHtml(QString::fromStdString(info));
+}
+
+void MainWindow::on_radioButtonAllFeld_clicked()
+{
+    setWebInfoWindow();
+}
+
+
+void MainWindow::on_radioButtonTop_clicked()
+{
+    setWebInfoWindow();
+}
+
+
+void MainWindow::on_radioButtonBottom_clicked()
+{
+    setWebInfoWindow();
+}
+
+
+void MainWindow::on_radioButtonNone_clicked()
+{
+    setWebInfoWindow();
+}
+
+void MainWindow::setWebInfoWindow()
+{
+    if (ui->radioButtonAllFeld->isChecked())
+    {
+        ui->textInfo->setGeometry(geoTextLog.x(), geoTextLog.y(), geoTextLog.width(), geoTextInfo.height() + geoTextInfo.y() - geoTextLog.y());
+        ui->textInfo->setVisible(true);
+        ui->textLog->setVisible(false);
+    } else if (ui->radioButtonTop->isChecked())
+    {
+        ui->textLog->setGeometry(geoTextInfo);
+        ui->textInfo->setGeometry(geoTextLog);
+        ui->textInfo->setVisible(true);
+        ui->textLog->setVisible(true);
+    } else if (ui->radioButtonBottom->isChecked())
+    {
+        ui->textLog->setGeometry(geoTextLog);
+        ui->textInfo->setGeometry(geoTextInfo);
+        ui->textInfo->setVisible(true);
+        ui->textLog->setVisible(true);
+    } else
+    {
+        ui->textLog->setGeometry(geoTextLog.x(), geoTextLog.y(), geoTextLog.width(), geoTextInfo.height() + geoTextInfo.y() - geoTextLog.y());
+        ui->textLog->setVisible(true);
+        ui->textInfo->setVisible(false);
+    }
+}
+
+void MainWindow::on_pushButton_35_clicked()
+{
+    if (!currWd.wort().empty())
+    {
+        ui->textInfo->document()->setHtml("");
+        soundWords->infoWoerter(currWd.wort());
+    }
+}
+

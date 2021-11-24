@@ -121,7 +121,7 @@ void TestWindow::testSelectTr(size_t idx, bool setFalsh , bool ignoreResult)
         {
             wd.addAnswer(false, dicDe.calcNextSequenceNumber());
             ++FalscheAntwort;
-            needRecorder = true;
+            // needRecorder = true;
         } else {
             wd.setSequenceNumber(dicDe.calcNextSequenceNumber());
         }

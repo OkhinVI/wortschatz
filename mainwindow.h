@@ -55,6 +55,8 @@ private slots:
     void slotShortcutAltV();
     void slotShortcutAltA();
     void slotShortcutAltL();
+    void slotWoerterInfo(const std::string &word, const std::string &info);
+
 
     void on_pushButton_8_clicked();
 
@@ -144,6 +146,16 @@ private slots:
 
     void on_pushButton_34_clicked();
 
+    void on_radioButtonAllFeld_clicked();
+
+    void on_radioButtonTop_clicked();
+
+    void on_radioButtonBottom_clicked();
+
+    void on_radioButtonNone_clicked();
+
+    void on_pushButton_35_clicked();
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 
@@ -159,6 +171,8 @@ private:
     void showFoundStatWord();
     void statWordClear();
     void nextFoundStatWord(int delta);
+    void checkWebAutoInfo(const bool ignogeWortType = false);
+    void setWebInfoWindow();
 
 private:
     std::string accName;
@@ -175,6 +189,9 @@ private:
 
     WebTranslation webTr;
     SoundOfWords *soundWords;
+
+    QRect geoTextLog;
+    QRect geoTextInfo;
 
 private:
     Ui::MainWindow *ui;
