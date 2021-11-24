@@ -14,7 +14,8 @@
 // #define debPrint(a) debStream << a << std::endl
 
 #define debPrint(a) std::cout << a << std::endl
-//#define debPrint(a)
+// #define debPrint(a)
+
 
 SoundOfWords::SoundOfWords(const std::string &aPathDic, QObject* pobj) : QObject(pobj), pathDic(aPathDic)
 {
@@ -35,7 +36,6 @@ void SoundOfWords::play(const std::string &word)
     QFile file(QString::fromStdString(fileName));
     if (file.exists())
     {
-        debPrint("play local file: " << fileName);
         vokalWort->setMedia(QUrl(QString::fromStdString(fileName)));
         vokalWort->play();
     }
@@ -52,11 +52,6 @@ void SoundOfWords::startSoundReq(const std::string &word)
     QNetworkRequest request(url);
     freedictionaryReq = m_pnam->get(request);
     freedictionaryWord = word;
-    debPrint("Start sound request: " << urlRaw);
-
-//    connect(pnr, SIGNAL(downloadProgress(qint64, qint64)),
-//            this, SIGNAL(downloadProgress(qint64, qint64))
-//           );
 }
 
 void SoundOfWords::infoWoerter(const std::string &word)
@@ -69,7 +64,6 @@ void SoundOfWords::infoWoerter(const std::string &word)
     QFile file(QString::fromStdString(fileName));
     if (file.exists())
     {
-        debPrint("info local file: " << fileName);
         if (file.open(QIODevice::ReadOnly))
         {
             QByteArray data = file.readAll();
@@ -84,7 +78,6 @@ void SoundOfWords::infoWoerter(const std::string &word)
         QNetworkRequest request(url);
         woerterReq = m_pnam->get(request);
         woerterReqWord = wordAr.toString();
-        debPrint("Start Woerter request: " << urlRaw);
     }
 }
 
@@ -196,7 +189,6 @@ void SoundOfWords::parseFreeDic(QString &url, QByteArray &bodyAr)
         auto pos2 = body.find("\"", pos1);
         const std::string urlMp3 = "https://img2.tfd.com/pron/mp3/" + body.substr(pos1, pos2 - pos1) + ".mp3";
 
-        debPrint("download: " << urlMp3);
         QUrl url(QString::fromStdString(urlMp3));
         QNetworkRequest request(url);
         freedictionaryReqMp3 = m_pnam->get(request);
@@ -206,7 +198,6 @@ void SoundOfWords::parseFreeDic(QString &url, QByteArray &bodyAr)
 
 void SoundOfWords::parseFreeDicMp3(QString &, QByteArray &bodyAr)
 {
-    debPrint("save file: " << freedictionaryMp3FileName);
     QFile file(QString::fromStdString(freedictionaryMp3FileName));
     if (file.open(QIODevice::WriteOnly))
     {
@@ -219,16 +210,6 @@ void SoundOfWords::parseFreeDicMp3(QString &, QByteArray &bodyAr)
 
 void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
 {
-    {
-        QFile file(QString::fromStdString("D://Temp/WoerterCache/" + woerterReqWord + ".html"));
-        debPrint("getted: " << url.toStdString());
-        if (file.open(QIODevice::WriteOnly))
-        {
-            file.write(bodyAr);
-            file.close();
-        }
-    }
-
     std::string body = bodyAr.toStdString();
 
     WortDe::TypeWort tw = WortDe::TypeWort::None;
@@ -239,12 +220,18 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
     else if (!(typeWord = getHtmlTag(paragraf, "<a href=\"/sushhestvitelnye/", "</a>")).empty())
         tw = WortDe::TypeWort::Noun;
     AreaUtf8 typeWordAr(typeWord);
-    typeWordAr.getToken();typeWordAr.getToken();
-    typeWordAr.getToken();typeWordAr.getToken();
+    typeWordAr.getToken(); typeWordAr.getToken();
+    typeWordAr.getToken(); typeWordAr.getToken();
     AreaUtf8 webWord = typeWordAr.getToken();
     if (webWord.toString() != woerterReqWord)
     {
-        return; // Falsches Wort
+        if (webWord.empty())
+        {
+            debPrint("not find wort: " << webWord.toString() << " / " << url.toStdString());
+        } else {
+            debPrint("Falsches Wort: " << webWord.toString() << " / " << url.toStdString());
+        }
+        return;
     }
 
     paragraf = getHtmlTag(body, "<span class=\"rInf\"", "<p class=");
@@ -307,19 +294,7 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
                 + startP + opt1  + endP + '\n'
                 + startP + "<i>" + opt0 + "</i>"  + endP;
     } else {
-        debPrint("Level: '" << level << "'");
-        debPrint("Type: '"<< (tw == WortDe::TypeWort::Verb ? "Verb: " : tw == WortDe::TypeWort::Noun ? "Noun: " : "????: ") << typeWord << "'");
-        debPrint("wort: '" << wort << "'");
-        debPrint("art: '" << art << "'");
-        debPrint("plural: '" << plural << "'");
-        debPrint("translation: '" << translation << "'");
-        debPrint("opt0: '" << opt0 << "'");
-        debPrint("opt1: '" << opt1 << "'");
-        debPrint("opt2: '" << opt2 << "'");
-    }
-
-    if (tw == WortDe::TypeWort::None)
-    {
+        debPrint("Error type word: '" << typeWord << "'");
         return; // Error parsing
     }
 
@@ -343,7 +318,6 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
     }
 
     printWoerter(woerterReqWord, resData);
-    debPrint(result);
 }
 
 void SoundOfWords::printWoerter(const std::string &parseWort, const std::string &data)
@@ -391,6 +365,7 @@ void SoundOfWords::printWoerter(const std::string &parseWort, const std::string 
                 + startP + opt1  + endP + '\n'
                 + startP + "<i>" + opt0 + "</i>"  + endP;
     } else {
+        debPrint("Error loaded type word: '" << twStr << "' - " << parseWort);
         return;
     }
     emit doneWoerterInfo(parseWort, result);
