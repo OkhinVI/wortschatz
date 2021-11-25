@@ -56,6 +56,7 @@ private slots:
     void slotShortcutAltA();
     void slotShortcutAltL();
     void slotWoerterInfo(const std::string &word, const std::string &info);
+    void slotWoerterError(const std::string &word, const std::string &error);
 
 
     void on_pushButton_8_clicked();

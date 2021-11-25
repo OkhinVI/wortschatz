@@ -54,11 +54,11 @@ void SoundOfWords::startSoundReq(const std::string &word)
     freedictionaryWord = word;
 }
 
-void SoundOfWords::infoWoerter(const std::string &word)
+bool SoundOfWords::infoWoerter(const std::string &word)
 {
     AreaUtf8 wordAr = AreaUtf8(word).getToken();
     if (wordAr.empty())
-        return;
+        return true;
 
     const std::string fileName = getFileNameWoerter(wordAr.toString());
     QFile file(QString::fromStdString(fileName));
@@ -78,7 +78,9 @@ void SoundOfWords::infoWoerter(const std::string &word)
         QNetworkRequest request(url);
         woerterReq = m_pnam->get(request);
         woerterReqWord = wordAr.toString();
+        return false;
     }
+    return true;
 }
 
 SoundOfWords::TypeReply SoundOfWords::calcNetworkReply(QNetworkReply* pnr)
@@ -108,7 +110,19 @@ void SoundOfWords::slotFinished(QNetworkReply* pnr)
     const TypeReply typeRep = calcNetworkReply(pnr);
 
     if (pnr->error() != QNetworkReply::NoError) {
-        // emit error();
+        if (typeRep == TypeReply::Woerter)
+        {
+            const int NoAccess = QNetworkReply::UnknownContentError;
+            const int NoConnection = QNetworkReply::UnknownNetworkError;
+            std::string err;
+            if (pnr->error() == NoAccess)
+                err = "No access: " + woerterReqWord;
+            else if (pnr->error() == NoConnection)
+                err = "No connection: " + woerterReqWord;
+            else
+                err = "Error connection: " + woerterReqWord;
+            emit doneWoerterError(woerterReqWord, err);
+        }
         debPrint("Error (" << int(typeRep) << "): " << pnr->url().toString().toStdString() << ", err = " << pnr->error());
         pnr->deleteLater();
         return;
@@ -233,8 +247,12 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
     {
         if (webWord.empty())
         {
-            debPrint("not find wort: " << webWord.toString() << " / " << url.toStdString());
+            const std::string err = "Word not found: " + woerterReqWord;
+            emit doneWoerterError(woerterReqWord, err);
+            debPrint("Word not found: " << webWord.toString() << " / " << url.toStdString());
         } else {
+            const std::string err = "Word not found: " + woerterReqWord + " (found only another word: " + webWord.toString() + ")";
+            emit doneWoerterError(woerterReqWord, err);
             debPrint("Falsches Wort: " << webWord.toString() << " / " << url.toStdString());
         }
         return;
@@ -301,6 +319,8 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
                 + startP + opt1  + endP + '\n'
                 + startP + "<i>" + opt0 + "</i>"  + endP;
     } else {
+        const std::string err = "Error parsing word: " + woerterReqWord;
+        emit doneWoerterError(woerterReqWord, err);
         debPrint("Error type word: '" << typeWord << "'");
         return; // Error parsing
     }
@@ -372,7 +392,9 @@ void SoundOfWords::printWoerter(const std::string &parseWort, const std::string 
                 + startP + opt1  + endP + '\n'
                 + startP + "<i>" + opt0 + "</i>"  + endP;
     } else {
-        debPrint("Error loaded type word: '" << twStr << "' - " << parseWort);
+        const std::string err = "Error loaded type word: '" + twStr + "' - " + parseWort;
+        emit doneWoerterError(parseWort, err);
+        debPrint(err);
         return;
     }
     emit doneWoerterInfo(parseWort, result);

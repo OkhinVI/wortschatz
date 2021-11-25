@@ -86,8 +86,9 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
     soundWords = new SoundOfWords(pathDic, this);
 
     connect(soundWords, SIGNAL(doneWoerterInfo(const std::string &, const std::string &)),
-            this,  SLOT(slotWoerterInfo(const std::string &, const std::string &))
-           );
+            this,  SLOT(slotWoerterInfo(const std::string &, const std::string &)));
+    connect(soundWords, SIGNAL(doneWoerterError(const std::string &, const std::string &)),
+            this,  SLOT(slotWoerterError(const std::string &, const std::string &)));
 
     geoTextLog = ui->textLog->geometry();
     geoTextInfo = ui->textInfo->geometry();
@@ -396,7 +397,10 @@ void MainWindow::checkWebAutoInfo(const bool ignogeWortType)
     {
         ui->textInfo->document()->setHtml("");
         if (currWd.type() == WortDe::TypeWort::Noun || currWd.type() == WortDe::TypeWort::Verb || ignogeWortType)
-            soundWords->infoWoerter(currWd.wort());
+        {
+            if (!soundWords->infoWoerter(currWd.wort()))
+                ui->textInfo->document()->setHtml("<span style=\" color:#E0E0E0;\">...</span>");
+        }
     }
 }
 
@@ -1284,10 +1288,22 @@ void MainWindow::PlayWord(const std::string &word)
     soundWords->play(word1.toString());
 }
 
-void MainWindow::slotWoerterInfo(const std::string &, const std::string &info)
+void MainWindow::slotWoerterInfo(const std::string &word, const std::string &info)
 {
-    // word
-    ui->textInfo->document()->setHtml(QString::fromStdString(info));
+    AreaUtf8 au8(currWd.wort());
+    au8.trim();
+    std::string wordCurr = au8.getToken().toString();
+    if (wordCurr == word)
+        ui->textInfo->document()->setHtml(QString::fromStdString(info));
+}
+
+void MainWindow::slotWoerterError(const std::string &word, const std::string &error)
+{
+    AreaUtf8 au8(currWd.wort());
+    au8.trim();
+    std::string wordCurr = au8.getToken().toString();
+    if (wordCurr == word)
+        ui->textInfo->document()->setHtml(QString::fromStdString("<span style=\" color:#808080;\">" + error + "</span>"));
 }
 
 void MainWindow::on_radioButtonAllFeld_clicked()
@@ -1345,7 +1361,8 @@ void MainWindow::on_pushButton_35_clicked()
     if (!currWd.wort().empty())
     {
         ui->textInfo->document()->setHtml("");
-        soundWords->infoWoerter(currWd.wort());
+        if (!soundWords->infoWoerter(currWd.wort()))
+            ui->textInfo->document()->setHtml("<span style=\" color:#E0E0E0;\">...</span>");
     }
 }
 
