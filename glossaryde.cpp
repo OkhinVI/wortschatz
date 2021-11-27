@@ -302,7 +302,7 @@ size_t GlossaryDe::calcTestWortIdx(const SelectSettings &selSet)
         if (!canBeRepeated(lw, selSet, selectionIdxs))
             continue;
 
-        const uint32_t deltaLevel = (genRandom() % LearningWort::TrueAddLevel) + 1;
+        const uint32_t deltaLevel = selSet.maxAddLevel > 1 ? (genRandom() % selSet.maxAddLevel) + 1 : 1;
         if (!useStatistic || lw.level() < minLevelAnswers + deltaLevel)
             selectionIdxs[countMinLevelAnswers++] = selectionIdxs[i];
     }
@@ -346,7 +346,7 @@ double GlossaryDe::calcProgress(const SelectSettings &selSet, size_t &count, siz
         const LearningWort &lw = dictionary[selectionIdxs[i]].getStatistic();
         allCorrectAnswers += lw.numberCorrectAnswers;
         allLevelAnswers += lw.levelAnswers;
-        if (lw.level() < minLevelAnswers + LearningWort::TrueAddLevel)
+        if (lw.level() < minLevelAnswers + selSet.maxAddLevel)
             ++countMinLevelAnswers;
     }
     return double(allCorrectAnswers) / selectionIdxs.size();

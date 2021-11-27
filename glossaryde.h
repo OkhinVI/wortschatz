@@ -98,6 +98,8 @@ public:
         size_t posIgnoringStatistics = 0;
         uint32_t minDeltaSequenceNumber = 30;
 
+        uint32_t maxAddLevel = 5;
+
     private:
         const GlossaryDe &glDe;
     };

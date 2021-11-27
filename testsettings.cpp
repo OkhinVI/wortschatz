@@ -28,6 +28,7 @@ void TestSettings::resetVals()
     ui->spinBoxEndFreq->setValue(glSelSet.endFreqIdx);
 
     ui->horizontalSlider->setValue(glSelSet.posIgnoringStatistics);
+    ui->spinBoxDelataLevel->setValue(glSelSet.maxAddLevel);
 }
 
 TestSettings::~TestSettings()
@@ -46,6 +47,7 @@ void TestSettings::on_buttonBox_accepted()
     glSelSet.endFreqIdx = ui->spinBoxEndFreq->value();
 
     glSelSet.posIgnoringStatistics = ui->horizontalSlider->value();
+    glSelSet.maxAddLevel = ui->spinBoxDelataLevel->value();
 }
 
 
