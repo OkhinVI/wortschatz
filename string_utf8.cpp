@@ -187,6 +187,54 @@ bool AreaUtf8::islowerU8(SymbolType sym)
             || sym == UTF8_STRING_TO_SYMBOL("ё");
 }
 
+bool AreaUtf8::isupperU8(SymbolType sym)
+{
+    if (sym <= 0x7F)
+        return ::isupper(static_cast<char>(sym));
+    const int intSym = SymboToInt(sym);
+    return (intSym >= UTF8_STRING_TO_INT_SYMBOL("А")
+            && intSym <= UTF8_STRING_TO_INT_SYMBOL("Я"))
+            || sym == UTF8_STRING_TO_SYMBOL("Ü")
+            || sym == UTF8_STRING_TO_SYMBOL("Ä")
+            || sym == UTF8_STRING_TO_SYMBOL("Ö")
+            || sym == UTF8_STRING_TO_SYMBOL("Ё");
+}
+
+bool AreaUtf8::islowerDe(SymbolType sym)
+{
+    if (sym <= 0x7F)
+        return ::islower(static_cast<char>(sym));
+    return sym == UTF8_STRING_TO_SYMBOL("ü")
+            || sym == UTF8_STRING_TO_SYMBOL("ä")
+            || sym == UTF8_STRING_TO_SYMBOL("ö")
+            || sym == UTF8_STRING_TO_SYMBOL("ß");
+}
+
+bool AreaUtf8::isupperDe(SymbolType sym)
+{
+    if (sym <= 0x7F)
+        return ::isupper(static_cast<char>(sym));
+    return sym == UTF8_STRING_TO_SYMBOL("Ü")
+            || sym == UTF8_STRING_TO_SYMBOL("Ä")
+            || sym == UTF8_STRING_TO_SYMBOL("Ö");
+}
+
+bool AreaUtf8::islowerRu(SymbolType sym)
+{
+    const int intSym = SymboToInt(sym);
+    return (intSym >= UTF8_STRING_TO_INT_SYMBOL("а")
+            && intSym <= UTF8_STRING_TO_INT_SYMBOL("я"))
+            || sym == UTF8_STRING_TO_SYMBOL("ё");
+}
+
+bool AreaUtf8::isupperRu(SymbolType sym)
+{
+    const int intSym = SymboToInt(sym);
+    return (intSym >= UTF8_STRING_TO_INT_SYMBOL("А")
+            && intSym <= UTF8_STRING_TO_INT_SYMBOL("Я"))
+            || sym == UTF8_STRING_TO_SYMBOL("Ё");
+}
+
 bool AreaUtf8::findCase(const std::string str)
 {
     if (str.empty())

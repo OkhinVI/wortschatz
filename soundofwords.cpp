@@ -73,7 +73,10 @@ bool SoundOfWords::infoWoerter(const std::string &word)
     }
     else
     {
-        const std::string urlRaw = "https://www.woerter.ru/?w=" + wordAr.toString();
+        static const std::string urlOnlyNoun = "https://www.woerter.ru/sushhestvitelnye/?w=";
+        static const std::string urlForAll = "https://www.woerter.ru/?w=";
+        const std::string urlRaw = (AreaUtf8::isupperDe(wordAr.peek()) ? urlOnlyNoun : urlForAll)
+                + wordAr.toString();
         QUrl url(QString::fromStdString(urlRaw));
         QNetworkRequest request(url);
         woerterReq = m_pnam->get(request);
@@ -182,14 +185,14 @@ static std::string getHtmlTag(const std::string &str, const std::string &beginSt
     return newStr;
 }
 
-void addNameTag(std::string &str, const std::string &name, const std::string data)
+static void addNameTag(std::string &str, const std::string &name, const std::string data)
 {
     static const std::string startStr = "<p class=\"";
     static const std::string endStr = "</p>";
     str = str + startStr + name + "\"\t>" + data + endStr + '\n';
 }
 
-std::string getNameTag(const std::string &str, const std::string &name)
+static std::string getNameTag(const std::string &str, const std::string &name)
 {
     static const std::string startStr = "<p class=\"";
     static const std::string endStr = "</p>";
@@ -286,39 +289,8 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
     opt0 = opt0i;
     std::string opt2 = getHtmlTag(body, "<p class=\"rInf r1Zeile rU3px rO0px\" onclick=", "</p>");
 
-    std::string result;
-    static const std::string colorDer = "<span style=\" color:#0000A0;\">";
-    static const std::string colorDie = "<span style=\" color:#A00000;\">";
-    static const std::string colorDas = "<span style=\" color:#00A000;\">";
-    static const std::string colorDef = "<span style=\" color:#000000;\">";
-    static const std::string colorGray = "<span style=\" color:#808080;\">";
-    static const std::string endColor = "</span>";
-    static const std::string startP = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
-    static const std::string endP = "</p>";
-    if (tw == WortDe::TypeWort::Noun)
+    if (tw != WortDe::TypeWort::Noun && tw != WortDe::TypeWort::Verb)
     {
-        std::string colorArt;
-        if (art == "der")
-            colorArt = colorDer;
-        else if (art == "die")
-            colorArt = colorDie;
-        else if (art == "das")
-            colorArt = colorDas;
-        else
-            colorArt = colorDef;
-
-        result = startP + colorGray + level + ": " + endColor + colorArt + art + endColor + " " + wort + " <i>[" + plural + "]</i>" + endP + '\n'
-            + startP + "<b>" + translation + "</b>" + endP + '\n'
-            + startP + colorGray + "Gen,Pl: " + endColor + opt2 + endP + '\n'
-            + startP + "<i>" + opt0 + "</i>" + endP;
-    } else if (tw == WortDe::TypeWort::Verb)
-    {
-        result = startP + colorGray + level + ": " + endColor + wort + endP + '\n'
-                + startP + "<b>" + translation + "</b>" + endP + '\n'
-                + startP + opt2  + endP + '\n'
-                + startP + opt1  + endP + '\n'
-                + startP + "<i>" + opt0 + "</i>"  + endP;
-    } else {
         const std::string err = "Error parsing word: " + woerterReqWord;
         emit doneWoerterError(woerterReqWord, err);
         debPrint("Error type word: '" << typeWord << "'");
@@ -353,7 +325,12 @@ void SoundOfWords::printWoerter(const std::string &parseWort, const std::string 
     static const std::string colorDie = "<span style=\" color:#A00000;\">";
     static const std::string colorDas = "<span style=\" color:#00A000;\">";
     static const std::string colorDef = "<span style=\" color:#000000;\">";
+    static const std::string colorVebForm = "<span style=\" color:#0000D0;\">";
+    static const std::string colorVebUse = "<span style=\" color:#8000B0;\">";
+    static const std::string colorDeBedeutung = "<span style=\" color:#505050;\">";
     static const std::string colorGray = "<span style=\" color:#808080;\">";
+    static const std::string colorBlue = "<span style=\" color:#0000D0;\">";
+    static const std::string colorGreen = "<span style=\" color:#00B000;\">";
     static const std::string endColor = "</span>";
     static const std::string startP = "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">";
     static const std::string endP = "</p>";
@@ -381,16 +358,16 @@ void SoundOfWords::printWoerter(const std::string &parseWort, const std::string 
 
         result = startP + colorGray + level + ": " + endColor + colorArt + art + endColor + " " + wort + " <i>[" + plural + "]</i>" + endP + '\n'
             + startP + "<b>" + translation + "</b>" + endP + '\n'
-            + startP + colorGray + "Gen,Pl: " + endColor + opt2 + endP + '\n'
-            + startP + "<i>" + opt0 + "</i>" + endP;
+            + startP + colorGreen + "<i>" + "Gen·Pl: " + "</i>" + endColor + colorBlue + opt2 + endColor + endP + '\n'
+            + startP + colorDeBedeutung + opt0 + endColor + endP;
     } else if (twStr == "Verb")
     {
         const std::string opt1 = getNameTag(data, "opt1");
         result = startP + colorGray + level + ": " + endColor + wort + endP + '\n'
                 + startP + "<b>" + translation + "</b>" + endP + '\n'
-                + startP + opt2  + endP + '\n'
-                + startP + opt1  + endP + '\n'
-                + startP + "<i>" + opt0 + "</i>"  + endP;
+                + startP + colorVebForm + opt2 + endColor + endP + '\n'
+                + startP + colorVebUse + opt1 + endColor  + endP + '\n'
+                + startP + colorDeBedeutung + opt0 + endColor  + endP;
     } else {
         const std::string err = "Error loaded type word: '" + twStr + "' - " + parseWort;
         emit doneWoerterError(parseWort, err);

@@ -55,6 +55,11 @@ public:
     static bool isSymbolDe(SymbolType sym);
     static bool isSymbolRu(SymbolType sym);
     static bool islowerU8(SymbolType sym);
+    static bool isupperU8(SymbolType sym);
+    static bool islowerDe(SymbolType sym);
+    static bool isupperDe(SymbolType sym);
+    static bool islowerRu(SymbolType sym);
+    static bool isupperRu(SymbolType sym);
     static bool isSymbolAnyWord(SymbolType sym) { return isSymbolDe(sym) || isSymbolRu(sym) || sym == '-'; }
     static char symbolDeUmlaut(SymbolType sym); // Umlaut or Eszett
     static SymbolType tolowerU8(SymbolType sym);
