@@ -6,6 +6,7 @@
 class QNetworkAccessManager;
 class QNetworkReply;
 class QMediaPlayer;
+class WortDe;
 
 class SoundOfWords : public QObject
 {
@@ -26,7 +27,7 @@ public:
     bool infoWoerter(const std::string &word); // true - is in the cache / false - waiting for server response
 
 signals:
-    void doneWoerterInfo(const std::string &word, const std::string &info);
+    void doneWoerterInfo(const std::string &word, const std::string &info, const WortDe &de);
     void doneWoerterError(const std::string &word, const std::string &error);
 
 private slots:

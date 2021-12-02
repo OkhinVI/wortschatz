@@ -319,6 +319,70 @@ void SoundOfWords::parseWoerter(QString &url, QByteArray &bodyAr)
     printWoerter(woerterReqWord, resData);
 }
 
+static std::string ParsePlural(const std::string &pl, const std::string &word)
+{
+    AreaUtf8 plAll(pl);
+    plAll.getToken(","); plAll.getToken(",");
+    std::string plStr = plAll.getToken(",").trim().toString();
+    if (plStr.size() > 1 && plStr[plStr.size() - 1] == '-')
+        plStr = plStr.substr(0, plStr.size() - 1);
+
+    if (!word.empty() && word[word.size() - 1] == 'e')
+    {
+        if (plStr == "-en")
+            plStr = "-n";
+        else if (plStr == "¨-en")
+            plStr = "¨-n";
+        else if (plStr == "-er")
+            plStr = "¨-r";
+        else if (plStr == "¨-er")
+            plStr = "¨-r";
+    }
+    return plStr;
+}
+
+static std::string ParseTrans(const std::string &trans)
+{
+    AreaUtf8 trAll(trans);
+    std::vector<std::string> vecStr;
+    while (!trAll.eof())
+    {
+        AreaUtf8 token = trAll.getToken(",").trim(); trAll.getToken(",");
+        std::string tokenStr;
+        while (!token.eof())
+        {
+            AreaUtf8::SymbolType sym = token.getSymbol();
+            if (sym != UTF8_STRING_TO_SYMBOL("́"))
+                AreaUtf8::StringAddSym(tokenStr, sym);
+        }
+
+        vecStr.push_back(tokenStr);
+    }
+
+    std::string result;
+    for (size_t i = 0; i < vecStr.size(); ++i)
+    {
+        const std::string &tokenStr = vecStr[i];
+        bool overlapping = false;
+        for (size_t j = 0; j < i; ++j)
+        {
+            if (tokenStr == vecStr[j])
+            {
+                overlapping = true;
+                break;
+            }
+        }
+        if (overlapping)
+            continue;
+
+        if (result.empty())
+            result = tokenStr;
+        else
+            result = result + ", " + tokenStr;
+    }
+    return result;
+}
+
 void SoundOfWords::printWoerter(const std::string &parseWort, const std::string &data)
 {
     static const std::string colorDer = "<span style=\" color:#0000A0;\">";
@@ -342,19 +406,35 @@ void SoundOfWords::printWoerter(const std::string &parseWort, const std::string 
     const std::string wort = getNameTag(data, "wort");
     const std::string opt0 = getNameTag(data, "opt0");
     const std::string opt2 = getNameTag(data, "opt2");
+    WortDe de;
+    const std::string translationNew = ParseTrans(translation);
     if (twStr == "Noun")
     {
         const std::string art = getNameTag(data, "art");
         const std::string plural = getNameTag(data, "plural");
+
+        de.parseRawLine(parseWort, translationNew, 0, WortDe::TypeWort::Noun);
+        de.setNewPlural(ParsePlural(plural, parseWort));
         std::string colorArt;
         if (art == "der")
+        {
             colorArt = colorDer;
+            de.setNewArtikel(WortDe::TypeArtikel::Der);
+        }
         else if (art == "die")
+        {
             colorArt = colorDie;
+            de.setNewArtikel(WortDe::TypeArtikel::Die);
+        }
         else if (art == "das")
+        {
             colorArt = colorDas;
+            de.setNewArtikel(WortDe::TypeArtikel::Das);
+        }
         else
+        {
             colorArt = colorDef;
+        }
 
         result = startP + colorGray + level + ": " + endColor + colorArt + art + endColor + " " + wort + " <i>[" + plural + "]</i>" + endP + '\n'
             + startP + "<b>" + translation + "</b>" + endP + '\n'
@@ -363,6 +443,8 @@ void SoundOfWords::printWoerter(const std::string &parseWort, const std::string 
     } else if (twStr == "Verb")
     {
         const std::string opt1 = getNameTag(data, "opt1");
+        de.parseRawLine(parseWort, translationNew, 0, WortDe::TypeWort::Verb);
+
         result = startP + colorGray + level + ": " + endColor + wort + endP + '\n'
                 + startP + "<b>" + translation + "</b>" + endP + '\n'
                 + startP + colorVebForm + opt2 + endColor + endP + '\n'
@@ -374,7 +456,8 @@ void SoundOfWords::printWoerter(const std::string &parseWort, const std::string 
         debPrint(err);
         return;
     }
-    emit doneWoerterInfo(parseWort, result);
+
+    emit doneWoerterInfo(parseWort, result, de);
 }
 
 std::string SoundOfWords::getFileNameMp3(const std::string &word)

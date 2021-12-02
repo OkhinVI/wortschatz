@@ -108,6 +108,15 @@ AreaUtf8::SymbolType AreaUtf8::IntToSymbo(int sym)
     return UTF8_INT_TO_2BYTE_SYMBOL(sym);
 }
 
+std::string &AreaUtf8::StringAddSym(std::string &str, SymbolType sym)
+{
+    if ((sym & ~0xFF) != 0)
+        str = str + char((unsigned char)(sym >> 8)) + char((unsigned char)(sym & 0xFF));
+    else
+        str = str + char((unsigned char)(sym & 0xFF));
+    return str;
+}
+
 bool AreaUtf8::isSymbolEn(SymbolType sym)
 {
     return (sym >= 'A' && sym <= 'Z') || (sym >= 'a' && sym <= 'z');

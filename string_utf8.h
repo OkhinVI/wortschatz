@@ -65,6 +65,7 @@ public:
     static SymbolType tolowerU8(SymbolType sym);
     static int SymboToInt(SymbolType sym);
     static SymbolType IntToSymbo(int sym);
+    static std::string &StringAddSym(std::string &str, SymbolType sym);
 
     SymbolType peek() const;
     SymbolType getSymbol();

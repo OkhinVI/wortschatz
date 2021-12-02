@@ -55,7 +55,7 @@ private slots:
     void slotShortcutAltV();
     void slotShortcutAltA();
     void slotShortcutAltL();
-    void slotWoerterInfo(const std::string &word, const std::string &info);
+    void slotWoerterInfo(const std::string &word, const std::string &info, const WortDe &de);
     void slotWoerterError(const std::string &word, const std::string &error);
 
 
@@ -157,6 +157,10 @@ private slots:
 
     void on_pushButton_35_clicked();
 
+    void on_pushButton_SetAttr_clicked();
+
+    void on_pushButton_SetTrans_clicked();
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 
@@ -174,6 +178,7 @@ private:
     void nextFoundStatWord(int delta);
     void checkWebAutoInfo(const bool ignogeWortType = false);
     void setWebInfoWindow();
+    bool SetAttrTrans(const bool onlyAttr = false);
 
 private:
     std::string accName;
@@ -184,6 +189,7 @@ private:
     int origIndex = -1;
     WortDe origWd;
     WortDe currWd;
+    WortDe currWebWd;
 
     FoundItemsIdx statFound;
     FoundFormDicIdx statFoundForm;

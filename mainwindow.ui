@@ -129,7 +129,7 @@
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>680</x>
       <y>337</y>
       <width>75</width>
       <height>23</height>
@@ -142,7 +142,7 @@
    <widget class="QPushButton" name="pushButton_3">
     <property name="geometry">
      <rect>
-      <x>710</x>
+      <x>770</x>
       <y>337</y>
       <width>75</width>
       <height>23</height>
@@ -155,7 +155,7 @@
    <widget class="QCheckBox" name="checkBox">
     <property name="geometry">
      <rect>
-      <x>520</x>
+      <x>580</x>
       <y>340</y>
       <width>81</width>
       <height>17</height>
@@ -599,7 +599,7 @@
     <property name="geometry">
      <rect>
       <x>340</x>
-      <y>350</y>
+      <y>307</y>
       <width>61</width>
       <height>31</height>
      </rect>
@@ -612,7 +612,7 @@
     <property name="geometry">
      <rect>
       <x>340</x>
-      <y>310</y>
+      <y>267</y>
       <width>61</width>
       <height>31</height>
      </rect>
@@ -990,6 +990,32 @@
       <string>None</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="pushButton_SetAttr">
+    <property name="geometry">
+     <rect>
+      <x>419</x>
+      <y>340</y>
+      <width>91</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>get only attr</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_SetTrans">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>369</y>
+      <width>71</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>get All</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

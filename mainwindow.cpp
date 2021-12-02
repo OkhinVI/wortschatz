@@ -85,8 +85,8 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
 
     soundWords = new SoundOfWords(pathDic, this);
 
-    connect(soundWords, SIGNAL(doneWoerterInfo(const std::string &, const std::string &)),
-            this,  SLOT(slotWoerterInfo(const std::string &, const std::string &)));
+    connect(soundWords, SIGNAL(doneWoerterInfo(const std::string &, const std::string &, const WortDe &)),
+            this,  SLOT(slotWoerterInfo(const std::string &, const std::string &, const WortDe &)));
     connect(soundWords, SIGNAL(doneWoerterError(const std::string &, const std::string &)),
             this,  SLOT(slotWoerterError(const std::string &, const std::string &)));
 
@@ -1288,13 +1288,16 @@ void MainWindow::PlayWord(const std::string &word)
     soundWords->play(word1.toString());
 }
 
-void MainWindow::slotWoerterInfo(const std::string &word, const std::string &info)
+void MainWindow::slotWoerterInfo(const std::string &word, const std::string &info, const WortDe &de)
 {
     AreaUtf8 au8(currWd.wort());
     au8.trim();
     std::string wordCurr = au8.getToken().toString();
-    if (wordCurr == word)
+    if (wordCurr == word) {
         ui->textInfo->document()->setHtml(QString::fromStdString(info));
+        currWebWd = de;
+        currWebWd.setNewWort(currWd.wort());
+    }
 }
 
 void MainWindow::slotWoerterError(const std::string &word, const std::string &error)
@@ -1366,3 +1369,35 @@ void MainWindow::on_pushButton_35_clicked()
     }
 }
 
+
+void MainWindow::on_pushButton_SetAttr_clicked()
+{
+    SetAttrTrans(true);
+}
+
+
+void MainWindow::on_pushButton_SetTrans_clicked()
+{
+    SetAttrTrans();
+}
+
+bool MainWindow::SetAttrTrans(const bool onlyAttr)
+{
+    getWortDeToCurrWd();
+    if (currWd.wort() == currWebWd.wort() && currWd.type() == currWebWd.type())
+    {
+        if (currWd.type() == WortDe::TypeWort::Noun)
+        {
+            if (currWd.artikel() == WortDe::TypeArtikel::None)
+                currWd.setNewArtikel(currWebWd.artikel());
+            if (currWd.wortPl().empty())
+                currWd.setNewPlural(currWebWd.wortPl());
+        }
+
+        if (!onlyAttr && currWd.translation().empty())
+            currWd.setNewTranslation(currWebWd.translation());
+        setWortDe(currWd);
+        return true;
+    }
+    return false;
+}
