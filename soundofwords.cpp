@@ -324,7 +324,7 @@ static std::string ParsePlural(const std::string &pl, const std::string &word)
     AreaUtf8 plAll(pl);
     plAll.getToken(","); plAll.getToken(",");
     std::string plStr = plAll.getToken(",").trim().toString();
-    if (plStr.size() > 1 && plStr[plStr.size() - 1] == '-')
+    if (plStr.size() > 1 && plStr[plStr.size() - 1] == '-' && plStr != "¨-")
         plStr = plStr.substr(0, plStr.size() - 1);
 
     if (!word.empty() && word[word.size() - 1] == 'e')
