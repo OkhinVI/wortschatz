@@ -81,6 +81,7 @@ public:
     AreaUtf8 subArea(size_t pos = 0, size_t len = std::numeric_limits<size_t>::max()) const { return AreaUtf8(AreaString::subArea(pos, len)); }
     AreaUtf8 getToken(const char *delimiters = defaulDelimiters);
     void getAllTokens(std::vector<AreaUtf8> &tokens, const char *delimiters = defaulDelimiters);
+    AreaUtf8 &trim() { AreaString::trim(); return *this; }
 
     bool findCase(const std::string str);
 

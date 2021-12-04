@@ -24,7 +24,7 @@ public:
 public:
     SoundOfWords(const std::string &aPathDic, QObject* pobj = 0);
     void play(const std::string &word);
-    bool infoWoerter(const std::string &word); // true - is in the cache / false - waiting for server response
+    bool infoWoerter(const std::string &aWord); // true - is in the cache / false - waiting for server response
 
 signals:
     void doneWoerterInfo(const std::string &word, const std::string &info, const WortDe &de);

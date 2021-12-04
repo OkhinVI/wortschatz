@@ -11,6 +11,8 @@
 #include <QMessageBox>
 #include <QKeyEvent>
 #include <QWheelEvent>
+#include <QApplication>
+#include <QClipboard>
 #include "qlistviewglossarydemodel.h"
 #include "string_utf8.h"
 #include <sstream>
@@ -89,6 +91,9 @@ MainWindow::MainWindow(const char *aAccName, QWidget *parent)
             this,  SLOT(slotWoerterInfo(const std::string &, const std::string &, const WortDe &)));
     connect(soundWords, SIGNAL(doneWoerterError(const std::string &, const std::string &)),
             this,  SLOT(slotWoerterError(const std::string &, const std::string &)));
+
+    connect(QApplication::clipboard(), SIGNAL(dataChanged()),
+            this,  SLOT(slotClipboardMonitor()));
 
     geoTextLog = ui->textLog->geometry();
     geoTextInfo = ui->textInfo->geometry();
@@ -394,13 +399,16 @@ void MainWindow::checkWebAutoInfo(const bool ignogeWortType)
         PlayWord(currWd.wort());
 
     if (ui->checkBox_AutoWebTranslation->checkState() == Qt::Checked && !currWd.wort().empty())
+        translationRequest(currWd.wort(), currWd.type(), ignogeWortType);
+}
+
+void MainWindow::translationRequest(const std::string &word, const WortDe::TypeWort tw, const bool ignogeWortType)
+{
+    ui->textInfo->document()->setHtml("");
+    if (tw == WortDe::TypeWort::Noun || tw == WortDe::TypeWort::Verb || ignogeWortType)
     {
-        ui->textInfo->document()->setHtml("");
-        if (currWd.type() == WortDe::TypeWort::Noun || currWd.type() == WortDe::TypeWort::Verb || ignogeWortType)
-        {
-            if (!soundWords->infoWoerter(currWd.wort()))
-                ui->textInfo->document()->setHtml("<span style=\" color:#E0E0E0;\">...</span>");
-        }
+        if (!soundWords->infoWoerter(word))
+            ui->textInfo->document()->setHtml("<span style=\" color:#E0E0E0;\">...</span>");
     }
 }
 
@@ -672,9 +680,18 @@ void MainWindow::showFoundStatWord()
 
         if (ui->checkBox_AutoSearch->checkState() == Qt::Checked) {
             if (currStatFound.getGlossaryIndex() < 0)
+            {
                 clearCurrWord();
-            else
+                if (canTranslateAnyWord())
+                {
+                    WortDe::TypeWort tw = currStatFound.getType() > uint8_t(WortDe::TypeWort::None)
+                                       && currStatFound.getType() < uint8_t(WortDe::TypeWort::_last_one)
+                                       ? WortDe::TypeWort(currStatFound.getType()) : WortDe::TypeWort::None;
+                    translationRequest(currStatFound.getStr(), tw);
+                }
+            } else {
                 setNewIndex(currStatFound.getGlossaryIndex());
+            }
         }
     } else {
         ui->lineEdit_8->setText("");
@@ -957,6 +974,7 @@ void MainWindow::addNewWortFromStatSearch()
 
 void MainWindow::on_pushButton_31_clicked()
 {
+    ui->checkBox_ClipboardMonitor->setChecked(false);
     addNewWortFromSearch();
     if (ui->checkBox_NeedTr->checkState() == Qt::Checked)
         webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
@@ -974,6 +992,7 @@ void MainWindow::on_pushButton_32_clicked()
         return;
     }
 
+    ui->checkBox_ClipboardMonitor->setChecked(false);
     addNewWortFromStatSearch();
     if (ui->checkBox_NeedTr->checkState() == Qt::Checked)
         webTr.wortTranslate(currWd.wort(), WebTranslation::WebSite::lingvo);
@@ -1290,22 +1309,22 @@ void MainWindow::PlayWord(const std::string &word)
 
 void MainWindow::slotWoerterInfo(const std::string &word, const std::string &info, const WortDe &de)
 {
-    AreaUtf8 au8(currWd.wort());
-    au8.trim();
-    std::string wordCurr = au8.getToken().toString();
+    const std::string wordCurr = AreaUtf8(currWd.wort()).trim().getToken().toString();
     if (wordCurr == word) {
         ui->textInfo->document()->setHtml(QString::fromStdString(info));
         currWebWd = de;
         currWebWd.setNewWort(currWd.wort());
+    } else if (canTranslateAnyWord())
+    {
+        ui->textInfo->document()->setHtml(QString::fromStdString(info));
+        currWebWd = de;
     }
 }
 
 void MainWindow::slotWoerterError(const std::string &word, const std::string &error)
 {
-    AreaUtf8 au8(currWd.wort());
-    au8.trim();
-    std::string wordCurr = au8.getToken().toString();
-    if (wordCurr == word)
+    const std::string wordCurr = AreaUtf8(currWd.wort()).trim().getToken().toString();
+    if (wordCurr == word || canTranslateAnyWord())
         ui->textInfo->document()->setHtml(QString::fromStdString("<span style=\" color:#808080;\">" + error + "</span>"));
 }
 
@@ -1400,4 +1419,34 @@ bool MainWindow::SetAttrTrans(const bool onlyAttr)
         return true;
     }
     return false;
+}
+
+void MainWindow::slotClipboardMonitor()
+{
+    if (ui->checkBox_ClipboardMonitor->checkState() == Qt::Checked)
+    {
+        QClipboard *cl = QApplication::clipboard();
+        QString strBuf = cl->text();
+        if (strBuf.isEmpty())
+            return;
+        std::string strStd = strBuf.toUtf8().toStdString();
+        std::string word = AreaUtf8(strStd).trim().getToken().toString();
+        if (word.empty() || !AreaUtf8(word).hasSymbolDe())
+            return;
+        ui->lineEdit_7->setText(QString::fromStdString(word));
+    }
+}
+
+void MainWindow::on_checkBox_ClipboardMonitor_stateChanged(int arg1)
+{
+    if (arg1  == Qt::Checked)
+        ui->checkBox_FullWord->setChecked(true);
+}
+
+bool MainWindow::canTranslateAnyWord()
+{
+    return ui->checkBox_ClipboardMonitor->checkState() == Qt::Checked
+            && ui->checkBox_FullWord->checkState() == Qt::Checked
+            && ui->checkBox_AutoWebTranslation->checkState() == Qt::Checked
+            && currWd.wort().empty();
 }

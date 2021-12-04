@@ -57,6 +57,7 @@ private slots:
     void slotShortcutAltL();
     void slotWoerterInfo(const std::string &word, const std::string &info, const WortDe &de);
     void slotWoerterError(const std::string &word, const std::string &error);
+    void slotClipboardMonitor();
 
 
     void on_pushButton_8_clicked();
@@ -161,6 +162,8 @@ private slots:
 
     void on_pushButton_SetTrans_clicked();
 
+    void on_checkBox_ClipboardMonitor_stateChanged(int arg1);
+
 private:
     bool eventFilter(QObject *target, QEvent *event);
 
@@ -177,8 +180,10 @@ private:
     void statWordClear();
     void nextFoundStatWord(int delta);
     void checkWebAutoInfo(const bool ignogeWortType = false);
+    void translationRequest(const std::string &word, const WortDe::TypeWort tw, const bool ignogeWortType = false);
     void setWebInfoWindow();
     bool SetAttrTrans(const bool onlyAttr = false);
+    bool canTranslateAnyWord();
 
 private:
     std::string accName;

@@ -54,20 +54,20 @@ void SoundOfWords::startSoundReq(const std::string &word)
     freedictionaryWord = word;
 }
 
-bool SoundOfWords::infoWoerter(const std::string &word)
+bool SoundOfWords::infoWoerter(const std::string &aWord)
 {
-    AreaUtf8 wordAr = AreaUtf8(word).getToken();
-    if (wordAr.empty())
+    const std::string word = AreaUtf8(aWord).trim().getToken().toString();
+    if (word.empty())
         return true;
 
-    const std::string fileName = getFileNameWoerter(wordAr.toString());
+    const std::string fileName = getFileNameWoerter(word);
     QFile file(QString::fromStdString(fileName));
     if (file.exists())
     {
         if (file.open(QIODevice::ReadOnly))
         {
             QByteArray data = file.readAll();
-            printWoerter(wordAr.toString(), data.toStdString());
+            printWoerter(word, data.toStdString());
             file.close();
         }
     }
@@ -75,12 +75,12 @@ bool SoundOfWords::infoWoerter(const std::string &word)
     {
         static const std::string urlOnlyNoun = "https://www.woerter.ru/sushhestvitelnye/?w=";
         static const std::string urlForAll = "https://www.woerter.ru/?w=";
-        const std::string urlRaw = (AreaUtf8::isupperDe(wordAr.peek()) ? urlOnlyNoun : urlForAll)
-                + wordAr.toString();
+        const std::string urlRaw = (AreaUtf8::isupperDe(AreaUtf8(word).peek()) ? urlOnlyNoun : urlForAll)
+                + word;
         QUrl url(QString::fromStdString(urlRaw));
         QNetworkRequest request(url);
         woerterReq = m_pnam->get(request);
-        woerterReqWord = wordAr.toString();
+        woerterReqWord = word;
         return false;
     }
     return true;
